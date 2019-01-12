@@ -1,0 +1,7 @@
+server:
+  address: "127.0.0.1:5000"
+  test_address: "127.0.0.1:5001"
+
+database:
+  conn_str : "user=task_tracker dbname=task_tracker sslmode=disable"
+  test_conn_str : "user=task_tracker dbname=task_tracker_test sslmode=disable"
