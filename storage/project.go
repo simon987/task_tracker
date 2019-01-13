@@ -6,10 +6,11 @@ import (
 )
 
 type Project struct {
-	Id int64 `json:"id"`
-	Name string `json:"name"`
-	GitUrl string `json:"git_url"`
-	Version string `json:"version"`
+	Id       int64  `json:"id"`
+	Priority int64  `json:"priority"`
+	Name     string `json:"name"`
+	GitUrl   string `json:"git_url"`
+	Version  string `json:"version"`
 }
 
 func (database *Database) SaveProject(project *Project) (int64, error) {
@@ -23,8 +24,8 @@ func (database *Database) SaveProject(project *Project) (int64, error) {
 
 func saveProject(project *Project, db *sql.DB) (int64, error) {
 
-	row := db.QueryRow("INSERT INTO project (name, git_url, version) VALUES ($1,$2,$3) RETURNING id",
-		project.Name, project.GitUrl, project.Version)
+	row := db.QueryRow("INSERT INTO project (name, git_url, version, priority) VALUES ($1,$2,$3, $4) RETURNING id",
+		project.Name, project.GitUrl, project.Version, project.Priority)
 
 	var id int64
 	err := row.Scan(&id)
@@ -37,7 +38,7 @@ func saveProject(project *Project, db *sql.DB) (int64, error) {
 	}
 
 	logrus.WithFields(logrus.Fields{
-		"id": id,
+		"id":      id,
 		"project": project,
 	}).Trace("Database.saveProject INSERT project")
 
@@ -57,10 +58,10 @@ func getProject(id int64, db *sql.DB) *Project {
 
 	project := &Project{}
 
-	row := db.QueryRow("SELECT id, name, git_url, version FROM project WHERE id=$1",
+	row := db.QueryRow("SELECT id, name, git_url, version, priority FROM project WHERE id=$1",
 		id)
 
-	err := row.Scan(&project.Id, &project.Name, &project.GitUrl, &project.Version)
+	err := row.Scan(&project.Id, &project.Name, &project.GitUrl, &project.Version, &project.Priority)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"id": id,
@@ -69,7 +70,7 @@ func getProject(id int64, db *sql.DB) *Project {
 	}
 
 	logrus.WithFields(logrus.Fields{
-		"id": id,
+		"id":      id,
 		"project": project,
 	}).Trace("Database.saveProject SELECT project")
 

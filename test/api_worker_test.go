@@ -3,6 +3,7 @@ package test
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/google/uuid"
 	"io/ioutil"
 	"net/http"
 	"src/task_tracker/api"
@@ -21,13 +22,13 @@ func TestCreateGetWorker(t *testing.T) {
 		t.Fail()
 	}
 
-	getResp, r := getWorker(resp.WorkerId)
+	getResp, r := getWorker(resp.WorkerId.String())
 
 	if r.StatusCode != 200 {
 		t.Fail()
 	}
 
-	if resp.WorkerId != getResp.Worker.Id.String() {
+	if resp.WorkerId != getResp.Worker.Id {
 		t.Fail()
 	}
 }
@@ -80,4 +81,10 @@ func getWorker(id string) (*api.GetWorkerResponse, *http.Response) {
 	handleErr(err)
 
 	return resp, r
+}
+
+func genWid() *uuid.UUID {
+
+	resp, _ := createWorker(api.CreateWorkerRequest{})
+	return &resp.WorkerId
 }

@@ -19,25 +19,28 @@ CREATE TABLE worker
 (
   id       TEXT PRIMARY KEY,
   created  INTEGER,
-  identity INTEGER REFERENCES workerIdentity(id)
+  identity INTEGER REFERENCES workerIdentity (id)
 );
 
 CREATE TABLE project
 (
-  id      SERIAL PRIMARY KEY,
-  name    TEXT UNIQUE,
-  git_url TEXT,
-  version TEXT
+  id       SERIAL PRIMARY KEY,
+  priority INTEGER DEFAULT 0,
+  name     TEXT UNIQUE,
+  git_url  TEXT,
+  version  TEXT
 );
 
 CREATE TABLE task
 (
-  id          TEXT PRIMARY KEY,
+  id          SERIAL PRIMARY KEY,
+  priority    INTEGER DEFAULT 0,
   project     INTEGER REFERENCES project (id),
   assignee    TEXT REFERENCES worker (id),
   retries     INTEGER DEFAULT 0,
   max_retries INTEGER,
-  status      Status  DEFAULT 'new'
+  status      Status  DEFAULT 'new',
+  recipe      TEXT
 );
 
 

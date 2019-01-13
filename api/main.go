@@ -9,18 +9,18 @@ import (
 )
 
 type WebAPI struct {
-	server *fasthttp.Server
-	router *fasthttprouter.Router
+	server   *fasthttp.Server
+	router   *fasthttprouter.Router
 	Database *storage.Database
 }
 
 type Info struct {
-	Name string `json:"name"`
+	Name    string `json:"name"`
 	Version string `json:"version"`
 }
 
-var info = Info {
-	Name: "task_tracker",
+var info = Info{
+	Name:    "task_tracker",
 	Version: "1.0",
 }
 
@@ -38,7 +38,7 @@ func New() *WebAPI {
 
 	api.server = &fasthttp.Server{
 		Handler: api.router.Handler,
-		Name: info.Name,
+		Name:    info.Name,
 	}
 
 	api.router.GET("/", LogRequest(Index))
@@ -55,7 +55,8 @@ func New() *WebAPI {
 	api.router.GET("/project/get/:id", LogRequest(api.ProjectGet))
 
 	api.router.POST("/task/create", LogRequest(api.TaskCreate))
-	api.router.GET("/task/get/", LogRequest(api.TaskGet))
+	api.router.GET("/task/get/:project", LogRequest(api.TaskGetFromProject))
+	api.router.GET("/task/get", LogRequest(api.TaskGet))
 
 	return api
 }

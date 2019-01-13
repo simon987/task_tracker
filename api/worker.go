@@ -11,15 +11,15 @@ type CreateWorkerRequest struct {
 }
 
 type CreateWorkerResponse struct {
-	Ok      bool   `json:"ok"`
-	Message string `json:"message,omitempty"`
-	WorkerId string `json:"id,omitempty"`
+	Ok       bool      `json:"ok"`
+	Message  string    `json:"message,omitempty"`
+	WorkerId uuid.UUID `json:"id,omitempty"`
 }
 
 type GetWorkerResponse struct {
-	Ok      bool   `json:"ok"`
-	Message string `json:"message,omitempty"`
-	Worker *storage.Worker `json:"worker,omitempty"`
+	Ok      bool            `json:"ok"`
+	Message string          `json:"message,omitempty"`
+	Worker  *storage.Worker `json:"worker,omitempty"`
 }
 
 func (api *WebAPI) WorkerCreate(r *Request) {
@@ -35,8 +35,8 @@ func (api *WebAPI) WorkerCreate(r *Request) {
 				handleErr(err, r)
 			} else {
 				r.OkJson(CreateWorkerResponse{
-					Ok: true,
-					WorkerId: id.String(),
+					Ok:       true,
+					WorkerId: id,
 				})
 			}
 
@@ -58,8 +58,8 @@ func (api *WebAPI) WorkerGet(r *Request) {
 		}).Warn("Invalid UUID")
 
 		r.Json(GetWorkerResponse{
-			Ok: false,
-			Message:err.Error(),
+			Ok:      false,
+			Message: err.Error(),
 		}, 400)
 		return
 	}
@@ -68,13 +68,13 @@ func (api *WebAPI) WorkerGet(r *Request) {
 
 	if worker != nil {
 		r.OkJson(GetWorkerResponse{
-			Ok: true,
-			Worker:worker,
+			Ok:     true,
+			Worker: worker,
 		})
 	} else {
 		r.Json(GetWorkerResponse{
-			Ok: false,
-			Message:"Worker not found",
+			Ok:      false,
+			Message: "Worker not found",
 		}, 404)
 	}
 }
@@ -83,7 +83,7 @@ func (api *WebAPI) workerCreate(request *CreateWorkerRequest, identity *storage.
 
 	worker := storage.Worker{
 		Id:       uuid.New(),
-		Created: time.Now().Unix(),
+		Created:  time.Now().Unix(),
 		Identity: identity,
 	}
 

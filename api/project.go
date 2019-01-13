@@ -7,20 +7,21 @@ import (
 )
 
 type CreateProjectRequest struct {
-	Name string	`json:"name"`
-	GitUrl string `json:"git_url"`
-	Version string `json:"version"`
+	Name     string `json:"name"`
+	GitUrl   string `json:"git_url"`
+	Version  string `json:"version"`
+	Priority int64  `json:"priority"`
 }
 
 type CreateProjectResponse struct {
-	Ok bool `json:"ok"`
-	Id int64 `json:"id,omitempty"`
+	Ok      bool   `json:"ok"`
+	Id      int64  `json:"id,omitempty"`
 	Message string `json:"message,omitempty"`
 }
 
 type GetProjectResponse struct {
-	Ok bool `json:"ok"`
-	Message string `json:"message,omitempty"`
+	Ok      bool             `json:"ok"`
+	Message string           `json:"message,omitempty"`
 	Project *storage.Project `json:"project,omitempty"`
 }
 
@@ -30,9 +31,10 @@ func (api *WebAPI) ProjectCreate(r *Request) {
 	if r.GetJson(createReq) {
 
 		project := &storage.Project{
-			Name: createReq.Name,
-			Version: createReq.Version,
-			GitUrl: createReq.GitUrl,
+			Name:     createReq.Name,
+			Version:  createReq.Version,
+			GitUrl:   createReq.GitUrl,
+			Priority: createReq.Priority,
 		}
 
 		if isValidProject(project) {
@@ -40,8 +42,8 @@ func (api *WebAPI) ProjectCreate(r *Request) {
 
 			if err != nil {
 				r.Json(CreateProjectResponse{
-					Ok: false,
-					Message:err.Error(),
+					Ok:      false,
+					Message: err.Error(),
 				}, 500)
 			} else {
 				r.OkJson(CreateProjectResponse{
@@ -55,7 +57,7 @@ func (api *WebAPI) ProjectCreate(r *Request) {
 			}).Warn("Invalid project")
 
 			r.Json(CreateProjectResponse{
-				Ok: false,
+				Ok:      false,
 				Message: "Invalid project",
 			}, 400)
 		}
@@ -80,12 +82,12 @@ func (api *WebAPI) ProjectGet(r *Request) {
 
 	if project != nil {
 		r.OkJson(GetProjectResponse{
-			Ok: true,
-			Project:project,
+			Ok:      true,
+			Project: project,
 		})
 	} else {
 		r.Json(GetProjectResponse{
-			Ok: false,
+			Ok:      false,
 			Message: "Project not found",
 		}, 404)
 	}

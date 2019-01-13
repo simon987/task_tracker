@@ -12,9 +12,10 @@ import (
 func TestCreateGetProject(t *testing.T) {
 
 	resp := createProject(api.CreateProjectRequest{
-		Name: "Test name",
-		GitUrl: "http://github.com/test/test",
-		Version: "Test Version",
+		Name:     "Test name",
+		GitUrl:   "http://github.com/test/test",
+		Version:  "Test Version",
+		Priority: 123,
 	})
 
 	id := resp.Id
@@ -29,26 +30,27 @@ func TestCreateGetProject(t *testing.T) {
 	getResp, _ := getProject(id)
 
 	if getResp.Project.Id != id {
-		t.Fail()
+		t.Error()
 	}
 
 	if getResp.Project.Name != "Test name" {
-		t.Fail()
+		t.Error()
 	}
 
 	if getResp.Project.Version != "Test Version" {
-		t.Fail()
+		t.Error()
 	}
 
 	if getResp.Project.GitUrl != "http://github.com/test/test" {
-		t.Fail()
+		t.Error()
+	}
+	if getResp.Project.Priority != 123 {
+		t.Error()
 	}
 }
 
 func TestCreateProjectInvalid(t *testing.T) {
-	resp := createProject(api.CreateProjectRequest{
-
-	})
+	resp := createProject(api.CreateProjectRequest{})
 
 	if resp.Ok != false {
 		t.Fail()
