@@ -165,7 +165,7 @@ func scanTask(row *sql.Row) *Task {
 
 	err := row.Scan(&task.Id, &task.Priority, &project.Id, &task.Assignee,
 		&task.Retries, &task.MaxRetries, &task.Status, &task.Recipe, &project.Id,
-		&project.Priority, &project.Name, &project.GitUrl, &project.Version)
+		&project.Priority, &project.Name, &project.CloneUrl, &project.GitRepo, &project.Version)
 	handleErr(err)
 
 	return task

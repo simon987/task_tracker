@@ -15,21 +15,27 @@ func TestCreateGetWorker(t *testing.T) {
 	resp, r := createWorker(api.CreateWorkerRequest{})
 
 	if r.StatusCode != 200 {
-		t.Fail()
+		t.Error()
 	}
 
 	if resp.Ok != true {
-		t.Fail()
+		t.Error()
 	}
 
 	getResp, r := getWorker(resp.WorkerId.String())
 
 	if r.StatusCode != 200 {
-		t.Fail()
+		t.Error()
+	}
+	if resp.WorkerId != getResp.Worker.Id {
+		t.Error()
 	}
 
-	if resp.WorkerId != getResp.Worker.Id {
-		t.Fail()
+	if len(getResp.Worker.Identity.RemoteAddr) <= 0 {
+		t.Error()
+	}
+	if len(getResp.Worker.Identity.UserAgent) <= 0 {
+		t.Error()
 	}
 }
 
@@ -38,10 +44,10 @@ func TestGetWorkerNotFound(t *testing.T) {
 	resp, r := getWorker("8bfc0ccd-d5ce-4dc5-a235-3a7ae760d9c6")
 
 	if r.StatusCode != 404 {
-		t.Fail()
+		t.Error()
 	}
 	if resp.Ok != false {
-		t.Fail()
+		t.Error()
 	}
 }
 
@@ -50,13 +56,13 @@ func TestGetWorkerInvalid(t *testing.T) {
 	resp, r := getWorker("invalid-uuid")
 
 	if r.StatusCode != 400 {
-		t.Fail()
+		t.Error()
 	}
 	if resp.Ok != false {
-		t.Fail()
+		t.Error()
 	}
 	if len(resp.Message) <= 0 {
-		t.Fail()
+		t.Error()
 	}
 }
 

@@ -8,12 +8,13 @@ import (
 )
 
 type Identity struct {
-	RemoteAddr string
+	RemoteAddr string `json:"remote_addr"`
+	UserAgent  string `json:"user_agent"`
 }
 
 type Worker struct {
-	Id uuid.UUID `json:"id"`
-	Created int64 `json:"created"`
+	Id       uuid.UUID `json:"id"`
+	Created  int64     `json:"created"`
 	Identity *Identity `json:"identity"`
 }
 
@@ -76,8 +77,8 @@ func getIdentity(id int64, db *sql.DB) (*Identity, error) {
 
 	identity := &Identity{}
 
-	row := db.QueryRow("SELECT (remote_addr) FROM workeridentity WHERE id=$1", id)
-	err := row.Scan(&identity.RemoteAddr)
+	row := db.QueryRow("SELECT remote_addr, user_agent FROM workeridentity WHERE id=$1", id)
+	err := row.Scan(&identity.RemoteAddr, &identity.UserAgent)
 
 	if err != nil {
 		return nil, errors.New("identity not found")
@@ -92,8 +93,8 @@ func getIdentity(id int64, db *sql.DB) (*Identity, error) {
 
 func getOrCreateIdentity(identity *Identity, db *sql.DB) int64 {
 
-	res, err := db.Exec("INSERT INTO workeridentity (remote_addr) VALUES ($1) ON CONFLICT DO NOTHING",
-		identity.RemoteAddr)
+	res, err := db.Exec("INSERT INTO workeridentity (remote_addr, user_agent) VALUES ($1,$2) ON CONFLICT DO NOTHING",
+		identity.RemoteAddr, identity.UserAgent)
 	handleErr(err)
 
 	rowsAffected, err := res.RowsAffected()
@@ -113,4 +114,3 @@ func getOrCreateIdentity(identity *Identity, db *sql.DB) int64 {
 
 	return rowId
 }
-

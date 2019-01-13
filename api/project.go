@@ -8,7 +8,8 @@ import (
 
 type CreateProjectRequest struct {
 	Name     string `json:"name"`
-	GitUrl   string `json:"git_url"`
+	CloneUrl string `json:"clone_url"`
+	GitRepo  string `json:"git_repo"`
 	Version  string `json:"version"`
 	Priority int64  `json:"priority"`
 }
@@ -33,7 +34,8 @@ func (api *WebAPI) ProjectCreate(r *Request) {
 		project := &storage.Project{
 			Name:     createReq.Name,
 			Version:  createReq.Version,
-			GitUrl:   createReq.GitUrl,
+			CloneUrl: createReq.CloneUrl,
+			GitRepo:  createReq.GitRepo,
 			Priority: createReq.Priority,
 		}
 

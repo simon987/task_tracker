@@ -58,6 +58,8 @@ func New() *WebAPI {
 	api.router.GET("/task/get/:project", LogRequest(api.TaskGetFromProject))
 	api.router.GET("/task/get", LogRequest(api.TaskGet))
 
+	api.router.POST("/git/receivehook", LogRequest(api.ReceiveGitWebHook))
+
 	return api
 }
 

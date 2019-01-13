@@ -25,27 +25,34 @@ type GetWorkerResponse struct {
 func (api *WebAPI) WorkerCreate(r *Request) {
 
 	workerReq := &CreateWorkerRequest{}
-	if r.GetJson(workerReq) {
-		identity := getIdentity(r)
+	if !r.GetJson(workerReq) {
+		return
+	}
 
-		if canCreateWorker(r, workerReq, identity) {
+	identity := getIdentity(r)
 
-			id, err := api.workerCreate(workerReq, getIdentity(r))
-			if err != nil {
-				handleErr(err, r)
-			} else {
-				r.OkJson(CreateWorkerResponse{
-					Ok:       true,
-					WorkerId: id,
-				})
-			}
+	if !canCreateWorker(r, workerReq, identity) {
 
-		} else {
-			r.Json(CreateWorkerResponse{
-				Ok:      false,
-				Message: "You are now allowed to create a worker",
-			}, 403)
-		}
+		logrus.WithFields(logrus.Fields{
+			"identity":            identity,
+			"createWorkerRequest": workerReq,
+		}).Warn("Failed CreateWorkerRequest")
+
+		r.Json(CreateWorkerResponse{
+			Ok:      false,
+			Message: "You are now allowed to create a worker",
+		}, 403)
+		return
+	}
+
+	id, err := api.workerCreate(workerReq, getIdentity(r))
+	if err != nil {
+		handleErr(err, r)
+	} else {
+		r.OkJson(CreateWorkerResponse{
+			Ok:       true,
+			WorkerId: id,
+		})
 	}
 }
 
@@ -99,6 +106,7 @@ func getIdentity(r *Request) *storage.Identity {
 
 	identity := storage.Identity{
 		RemoteAddr: r.Ctx.RemoteAddr().String(),
+		UserAgent:  string(r.Ctx.UserAgent()),
 	}
 
 	return &identity

@@ -11,6 +11,7 @@ CREATE TABLE workerIdentity
 (
   id          SERIAL PRIMARY KEY,
   remote_addr TEXT,
+  user_agent  TEXT,
 
   UNIQUE (remote_addr)
 );
@@ -24,11 +25,12 @@ CREATE TABLE worker
 
 CREATE TABLE project
 (
-  id       SERIAL PRIMARY KEY,
-  priority INTEGER DEFAULT 0,
-  name     TEXT UNIQUE,
-  git_url  TEXT,
-  version  TEXT
+  id        SERIAL PRIMARY KEY,
+  priority  INTEGER DEFAULT 0,
+  name      TEXT UNIQUE,
+  clone_url TEXT,
+  git_repo  TEXT UNIQUE,
+  version   TEXT
 );
 
 CREATE TABLE task

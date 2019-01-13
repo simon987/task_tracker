@@ -13,7 +13,8 @@ func TestCreateGetProject(t *testing.T) {
 
 	resp := createProject(api.CreateProjectRequest{
 		Name:     "Test name",
-		GitUrl:   "http://github.com/test/test",
+		CloneUrl: "http://github.com/test/test",
+		GitRepo:  "drone/webhooktest",
 		Version:  "Test Version",
 		Priority: 123,
 	})
@@ -41,7 +42,10 @@ func TestCreateGetProject(t *testing.T) {
 		t.Error()
 	}
 
-	if getResp.Project.GitUrl != "http://github.com/test/test" {
+	if getResp.Project.CloneUrl != "http://github.com/test/test" {
+		t.Error()
+	}
+	if getResp.Project.GitRepo != "drone/webhooktest" {
 		t.Error()
 	}
 	if getResp.Project.Priority != 123 {
@@ -57,7 +61,7 @@ func TestCreateProjectInvalid(t *testing.T) {
 	}
 }
 
-func TestCreateDuplicateProject(t *testing.T) {
+func TestCreateDuplicateProjectName(t *testing.T) {
 	createProject(api.CreateProjectRequest{
 		Name: "duplicate name",
 	})
@@ -71,6 +75,25 @@ func TestCreateDuplicateProject(t *testing.T) {
 
 	if len(resp.Message) <= 0 {
 		t.Fail()
+	}
+}
+
+func TestCreateDuplicateProjectRepo(t *testing.T) {
+	createProject(api.CreateProjectRequest{
+		Name:    "different name",
+		GitRepo: "user/same",
+	})
+	resp := createProject(api.CreateProjectRequest{
+		Name:    "but same repo",
+		GitRepo: "user/same",
+	})
+
+	if resp.Ok != false {
+		t.Error()
+	}
+
+	if len(resp.Message) <= 0 {
+		t.Error()
 	}
 }
 

@@ -5,8 +5,11 @@ import (
 )
 
 var Cfg struct {
-	ServerAddr string
-	DbConnStr string
+	ServerAddr       string
+	DbConnStr        string
+	WebHookSecret    []byte
+	WebHookHash      string
+	WebHookSigHeader string
 }
 
 func SetupConfig() {
@@ -21,4 +24,7 @@ func SetupConfig() {
 
 	Cfg.ServerAddr = viper.GetString("server.address")
 	Cfg.DbConnStr = viper.GetString("database.conn_str")
+	Cfg.WebHookSecret = []byte(viper.GetString("git.webhook_secret"))
+	Cfg.WebHookHash = viper.GetString("git.webhook_hash")
+	Cfg.WebHookSigHeader = viper.GetString("git.webhook_sig_header")
 }

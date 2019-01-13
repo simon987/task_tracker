@@ -13,9 +13,9 @@ func TestCreateTaskValid(t *testing.T) {
 
 	//Make sure there is always a project for id:1
 	createProject(api.CreateProjectRequest{
-		Name:    "Some Test name",
-		Version: "Test Version",
-		GitUrl:  "http://github.com/test/test",
+		Name:     "Some Test name",
+		Version:  "Test Version",
+		CloneUrl: "http://github.com/test/test",
 	})
 
 	resp := createTask(api.CreateTaskRequest{
@@ -68,7 +68,8 @@ func TestCreateGetTask(t *testing.T) {
 	resp := createProject(api.CreateProjectRequest{
 		Name:     "My project",
 		Version:  "1.0",
-		GitUrl:   "http://github.com/test/test",
+		CloneUrl: "http://github.com/test/test",
+		GitRepo:  "myrepo",
 		Priority: 999,
 	})
 
@@ -108,7 +109,7 @@ func TestCreateGetTask(t *testing.T) {
 	if taskResp.Task.Project.Version != "1.0" {
 		t.Error()
 	}
-	if taskResp.Task.Project.GitUrl != "http://github.com/test/test" {
+	if taskResp.Task.Project.CloneUrl != "http://github.com/test/test" {
 		t.Error()
 	}
 }
@@ -118,13 +119,15 @@ func createTasks(prefix string) (int64, int64) {
 	lowP := createProject(api.CreateProjectRequest{
 		Name:     prefix + "low",
 		Version:  "1.0",
-		GitUrl:   "http://github.com/test/test",
+		CloneUrl: "http://github.com/test/test",
+		GitRepo:  prefix + "low1",
 		Priority: 1,
 	})
 	highP := createProject(api.CreateProjectRequest{
 		Name:     prefix + "high",
 		Version:  "1.0",
-		GitUrl:   "http://github.com/test/test",
+		CloneUrl: "http://github.com/test/test",
+		GitRepo:  prefix + "high1",
 		Priority: 999,
 	})
 	createTask(api.CreateTaskRequest{
