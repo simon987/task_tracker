@@ -3,7 +3,6 @@ package test
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -15,7 +14,7 @@ func Post(path string, x interface{}) *http.Response {
 	body, err := json.Marshal(x)
 	buf := bytes.NewBuffer(body)
 
-	r, err := http.Post("http://" + config.Cfg.ServerAddr + path, "application/json", buf)
+	r, err := http.Post("http://"+config.Cfg.ServerAddr+path, "application/json", buf)
 	handleErr(err)
 
 	return r
@@ -28,16 +27,10 @@ func Get(path string) *http.Response {
 	return r
 }
 
-
 func handleErr(err error) {
 	if err != nil {
 		panic(err)
 	}
-}
-
-func Print(body io.ReadCloser) {
-	rawBody, _ := ioutil.ReadAll(body)
-	fmt.Println(string(rawBody))
 }
 
 func GenericJson(body io.ReadCloser) map[string]interface{} {

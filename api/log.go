@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/Sirupsen/logrus"
 	"github.com/valyala/fasthttp"
+	"src/task_tracker/config"
 	"time"
 )
 
@@ -33,7 +34,7 @@ func LogRequest(h RequestHandler) fasthttp.RequestHandler {
 }
 
 func SetupLogger() {
-	logrus.SetLevel(logrus.TraceLevel) //todo: from conf
+	logrus.SetLevel(config.Cfg.LogLevel)
 }
 
 func parseLogEntry(r *Request) *LogEntry {
@@ -88,4 +89,3 @@ func LogError(r *Request) {
 		"scope": entry.Scope,
 	}).WithTime(entry.Time()).Error(entry.Message)
 }
-

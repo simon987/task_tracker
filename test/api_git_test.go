@@ -5,7 +5,6 @@ import (
 	"crypto"
 	"crypto/hmac"
 	"encoding/hex"
-	"fmt"
 	"net/http"
 	"src/task_tracker/api"
 	"src/task_tracker/config"
@@ -15,8 +14,6 @@ import (
 func TestWebHookNoSignature(t *testing.T) {
 
 	r := Post("/git/receivehook", api.GitPayload{})
-
-	fmt.Println(r.StatusCode)
 
 	if r.StatusCode != 403 {
 		t.Error()
@@ -30,8 +27,6 @@ func TestWebHookInvalidSignature(t *testing.T) {
 
 	client := http.Client{}
 	r, _ := client.Do(req)
-
-	fmt.Println(r.StatusCode)
 
 	if r.StatusCode != 403 {
 		t.Error()

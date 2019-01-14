@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/Sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
@@ -10,6 +11,7 @@ var Cfg struct {
 	WebHookSecret    []byte
 	WebHookHash      string
 	WebHookSigHeader string
+	LogLevel         logrus.Level
 }
 
 func SetupConfig() {
@@ -27,4 +29,5 @@ func SetupConfig() {
 	Cfg.WebHookSecret = []byte(viper.GetString("git.webhook_secret"))
 	Cfg.WebHookHash = viper.GetString("git.webhook_hash")
 	Cfg.WebHookSigHeader = viper.GetString("git.webhook_sig_header")
+	Cfg.LogLevel, _ = logrus.ParseLevel(viper.GetString("log.level"))
 }
