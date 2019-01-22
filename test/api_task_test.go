@@ -38,11 +38,52 @@ func TestCreateTaskInvalidProject(t *testing.T) {
 	})
 
 	if resp.Ok != false {
-		t.Fail()
+		t.Error()
 	}
 
 	if len(resp.Message) <= 0 {
-		t.Fail()
+		t.Error()
+	}
+}
+
+func TestGetTaskInvalidWid(t *testing.T) {
+
+	resp := getTask(nil)
+
+	if resp.Ok != false {
+		t.Error()
+	}
+
+	if len(resp.Message) <= 0 {
+		t.Error()
+	}
+}
+
+func TestGetTaskInvalidWorker(t *testing.T) {
+
+	id := uuid.New()
+	resp := getTask(&id)
+
+	if resp.Ok != false {
+		t.Error()
+	}
+
+	if len(resp.Message) <= 0 {
+		t.Error()
+	}
+}
+
+func TestGetTaskFromProjectInvalidWorker(t *testing.T) {
+
+	id := uuid.New()
+	resp := getTaskFromProject(1, &id)
+
+	if resp.Ok != false {
+		t.Error()
+	}
+
+	if len(resp.Message) <= 0 {
+		t.Error()
 	}
 }
 
@@ -54,11 +95,28 @@ func TestCreateTaskInvalidRetries(t *testing.T) {
 	})
 
 	if resp.Ok != false {
-		t.Fail()
+		t.Error()
 	}
 
 	if len(resp.Message) <= 0 {
-		t.Fail()
+		t.Error()
+	}
+}
+
+func TestCreateTaskInvalidRecipe(t *testing.T) {
+
+	resp := createTask(api.CreateTaskRequest{
+		Project:    1,
+		Recipe:     "",
+		MaxRetries: 3,
+	})
+
+	if resp.Ok != false {
+		t.Error()
+	}
+
+	if len(resp.Message) <= 0 {
+		t.Error()
 	}
 }
 
@@ -212,9 +270,31 @@ func TestNoMoreTasks(t *testing.T) {
 
 	wid := genWid()
 
-	for i := 0; i < 30; i++ {
+	for i := 0; i < 15; i++ {
 		getTask(wid)
 	}
+}
+
+func TestReleaseTaskSuccess(t *testing.T) {
+
+	//wid := genWid()
+
+	pid := createProject(api.CreateProjectRequest{
+		Priority: 0,
+		GitRepo:  "testreleasetask",
+		CloneUrl: "lllllllll",
+		Version:  "11111111111111111",
+		Name:     "testreleasetask",
+		Motd:     "",
+	}).Id
+
+	createTask(api.CreateTaskRequest{
+		Priority:   0,
+		Project:    pid,
+		Recipe:     "{}",
+		MaxRetries: 3,
+	})
+
 }
 
 func createTask(request api.CreateTaskRequest) *api.CreateTaskResponse {

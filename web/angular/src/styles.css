@@ -1,0 +1,36 @@
+/* You can add global styles to this file, and also import other style files */
+@import "~@angular/material/prebuilt-themes/indigo-pink.css";
+
+.line-new {
+    fill: none;
+    stroke: #31a6a2;
+    stroke-width: 3;
+}
+
+.line-failed {
+    fill: none;
+    stroke: #8c2627;
+    stroke-width: 3;
+}
+
+.line-closed {
+    fill: none;
+    stroke: #62f24b;
+    stroke-width: 3;
+}
+
+.overlay {
+    fill: none;
+    pointer-events: all;
+}
+
+/* Style the dots by assigning a fill and stroke */
+.dot {
+    fill: #ffab00;
+    stroke: #fff;
+}
+
+.focus circle {
+    fill: none;
+    stroke: steelblue;
+}

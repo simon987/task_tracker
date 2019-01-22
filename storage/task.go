@@ -21,8 +21,6 @@ func (database *Database) SaveTask(task *Task, project int64) error {
 
 	db := database.getDB()
 	taskErr := saveTask(task, project, db)
-	err := db.Close()
-	handleErr(err)
 
 	return taskErr
 }
@@ -55,8 +53,6 @@ func (database *Database) GetTask(worker *Worker) *Task {
 
 	db := database.getDB()
 	task := getTask(worker, db)
-	err := db.Close()
-	handleErr(err)
 
 	return task
 }
@@ -112,12 +108,41 @@ func getTaskById(id int64, db *sql.DB) *Task {
 	return task
 }
 
+func (database Database) ReleaseTask(id int64, workerId *uuid.UUID, success bool) bool {
+
+	db := database.getDB()
+	res := releaseTask(workerId, id, success, db)
+
+	return res
+}
+
+func releaseTask(workerId *uuid.UUID, id int64, success bool, db *sql.DB) bool {
+
+	var res sql.Result
+	var err error
+	if success {
+		res, err = db.Exec(`UPDATE task SET (status, assignee) = ('closed', NULL)
+		WHERE id=$2 AND task.assignee=$2`, id, workerId)
+	} else {
+		res, err = db.Exec(`UPDATE task SET (status, assignee, retries) = 
+  		(CASE WHEN retries+1 >= max_retries THEN 'failed' ELSE 'new' END, NULL, retries+1)
+		WHERE id=$2 AND assignee=$2`, id, workerId)
+	}
+	handleErr(err)
+
+	rowsAffected, _ := res.RowsAffected()
+
+	logrus.WithFields(logrus.Fields{
+		"rowsAffected": rowsAffected,
+	})
+
+	return rowsAffected == 1
+}
+
 func (database *Database) GetTaskFromProject(worker *Worker, project int64) *Task {
 
 	db := database.getDB()
 	task := getTaskFromProject(worker, project, db)
-	err := db.Close()
-	handleErr(err)
 
 	return task
 }
@@ -165,7 +190,7 @@ func scanTask(row *sql.Row) *Task {
 
 	err := row.Scan(&task.Id, &task.Priority, &project.Id, &task.Assignee,
 		&task.Retries, &task.MaxRetries, &task.Status, &task.Recipe, &project.Id,
-		&project.Priority, &project.Name, &project.CloneUrl, &project.GitRepo, &project.Version)
+		&project.Priority, &project.Motd, &project.Name, &project.CloneUrl, &project.GitRepo, &project.Version)
 	handleErr(err)
 
 	return task

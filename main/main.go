@@ -17,8 +17,8 @@ func main() {
 
 	config.SetupConfig()
 
-	tmpDebugSetup()
-
 	webApi := api.New()
+	webApi.SetupLogger()
+	tmpDebugSetup()
 	webApi.Run()
 }

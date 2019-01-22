@@ -12,6 +12,7 @@ func TestMain(m *testing.M) {
 	config.SetupConfig()
 
 	testApi := api.New()
+	testApi.SetupLogger()
 	testApi.Database.Reset()
 	go testApi.Run()
 

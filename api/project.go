@@ -12,6 +12,7 @@ type CreateProjectRequest struct {
 	GitRepo  string `json:"git_repo"`
 	Version  string `json:"version"`
 	Priority int64  `json:"priority"`
+	Motd     string `json:"motd"`
 }
 
 type CreateProjectResponse struct {
@@ -26,6 +27,12 @@ type GetProjectResponse struct {
 	Project *storage.Project `json:"project,omitempty"`
 }
 
+type GetProjectStatsResponse struct {
+	Ok      bool                  `json:"ok"`
+	Message string                `json:"message,omitempty"`
+	Stats   *storage.ProjectStats `json:"stats,omitempty"`
+}
+
 func (api *WebAPI) ProjectCreate(r *Request) {
 
 	createReq := &CreateProjectRequest{}
@@ -37,6 +44,7 @@ func (api *WebAPI) ProjectCreate(r *Request) {
 			CloneUrl: createReq.CloneUrl,
 			GitRepo:  createReq.GitRepo,
 			Priority: createReq.Priority,
+			Motd:     createReq.Motd,
 		}
 
 		if isValidProject(project) {
@@ -52,6 +60,9 @@ func (api *WebAPI) ProjectCreate(r *Request) {
 					Ok: true,
 					Id: id,
 				})
+				logrus.WithFields(logrus.Fields{
+					"project": project,
+				}).Debug("Created project")
 			}
 		} else {
 			logrus.WithFields(logrus.Fields{
@@ -89,6 +100,26 @@ func (api *WebAPI) ProjectGet(r *Request) {
 		})
 	} else {
 		r.Json(GetProjectResponse{
+			Ok:      false,
+			Message: "Project not found",
+		}, 404)
+	}
+}
+
+func (api *WebAPI) ProjectGetStats(r *Request) {
+
+	id, err := strconv.ParseInt(r.Ctx.UserValue("id").(string), 10, 64)
+	handleErr(err, r)
+
+	stats := api.Database.GetProjectStats(id)
+
+	if stats != nil && stats.Project != nil {
+		r.OkJson(GetProjectStatsResponse{
+			Ok:    true,
+			Stats: stats,
+		})
+	} else {
+		r.Json(GetProjectStatsResponse{
 			Ok:      false,
 			Message: "Project not found",
 		}, 404)

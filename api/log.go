@@ -5,41 +5,56 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/valyala/fasthttp"
 	"src/task_tracker/config"
+	"src/task_tracker/storage"
 	"time"
 )
 
 type RequestHandler func(*Request)
 
-type LogEntry struct {
+type GetLogRequest struct {
+	Level logrus.Level `json:"level"`
+	Since int64        `json:"since"`
+}
+
+type LogRequest struct {
 	Scope     string `json:"scope"`
 	Message   string `json:"Message"`
 	TimeStamp int64  `json:"timestamp"`
 }
 
-func (e *LogEntry) Time() time.Time {
+type GetLogResponse struct {
+	Ok      bool                `json:"ok"`
+	Message string              `json:"message"`
+	Logs    *[]storage.LogEntry `json:"logs"`
+}
+
+func (e *LogRequest) Time() time.Time {
 
 	t := time.Unix(e.TimeStamp, 0)
 	return t
 }
 
-func LogRequest(h RequestHandler) fasthttp.RequestHandler {
+func LogRequestMiddleware(h RequestHandler) fasthttp.RequestHandler {
 	return fasthttp.RequestHandler(func(ctx *fasthttp.RequestCtx) {
 
 		logrus.WithFields(logrus.Fields{
-			"path": string(ctx.Path()),
-		}).Info(string(ctx.Method()))
+			"path":   string(ctx.Path()),
+			"header": ctx.Request.Header.String(),
+		}).Trace(string(ctx.Method()))
 
 		h(&Request{Ctx: ctx})
 	})
 }
 
-func SetupLogger() {
+func (api *WebAPI) SetupLogger() {
 	logrus.SetLevel(config.Cfg.LogLevel)
+
+	api.Database.SetupLoggerHook()
 }
 
-func parseLogEntry(r *Request) *LogEntry {
+func parseLogEntry(r *Request) *LogRequest {
 
-	entry := LogEntry{}
+	entry := LogRequest{}
 
 	if r.GetJson(&entry) {
 		if len(entry.Message) == 0 {
@@ -88,4 +103,43 @@ func LogError(r *Request) {
 	logrus.WithFields(logrus.Fields{
 		"scope": entry.Scope,
 	}).WithTime(entry.Time()).Error(entry.Message)
+}
+
+func (api *WebAPI) GetLog(r *Request) {
+
+	req := &GetLogRequest{}
+	if r.GetJson(req) {
+		if req.isValid() {
+
+			logs := api.Database.GetLogs(req.Since, req.Level)
+
+			logrus.WithFields(logrus.Fields{
+				"getLogRequest": req,
+				"logCount":      len(*logs),
+			}).Trace("Get log request")
+
+			r.OkJson(GetLogResponse{
+				Ok:   true,
+				Logs: logs,
+			})
+		} else {
+			logrus.WithFields(logrus.Fields{
+				"getLogRequest": req,
+			}).Warn("Invalid log request")
+
+			r.Json(GetLogResponse{
+				Ok:      false,
+				Message: "Invalid log request",
+			}, 400)
+		}
+	}
+}
+
+func (r GetLogRequest) isValid() bool {
+
+	if r.Since <= 0 {
+		return false
+	}
+
+	return true
 }

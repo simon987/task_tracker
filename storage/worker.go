@@ -22,16 +22,12 @@ func (database *Database) SaveWorker(worker *Worker) {
 
 	db := database.getDB()
 	saveWorker(worker, db)
-	err := db.Close()
-	handleErr(err)
 }
 
 func (database *Database) GetWorker(id uuid.UUID) *Worker {
 
 	db := database.getDB()
 	worker := getWorker(id, db)
-	err := db.Close()
-	handleErr(err)
 	return worker
 }
 

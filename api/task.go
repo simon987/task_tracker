@@ -15,6 +15,17 @@ type CreateTaskRequest struct {
 	Priority   int64  `json:"priority"`
 }
 
+type ReleaseTaskRequest struct {
+	TaskId   int64      `json:"task_id"`
+	Success  bool       `json:"success"`
+	WorkerId *uuid.UUID `json:"worker_id"`
+}
+
+type ReleaseTaskResponse struct {
+	Ok      bool   `json:"ok"`
+	Message string `json:"message,omitempty"`
+}
+
 type CreateTaskResponse struct {
 	Ok      bool   `json:"ok"`
 	Message string `json:"message,omitempty"`
@@ -136,4 +147,34 @@ func (api WebAPI) workerFromQueryArgs(r *Request) (*storage.Worker, error) {
 	}
 
 	return worker, nil
+}
+
+func (api *WebAPI) TaskRelease(r *Request) {
+
+	req := ReleaseTaskRequest{}
+	if r.GetJson(req) {
+
+		res := api.Database.ReleaseTask(req.TaskId, req.WorkerId, req.Success)
+
+		response := ReleaseTaskResponse{
+			Ok: res,
+		}
+
+		if !res {
+			response.Message = "Could not find a task with the specified Id assigned to this workerId"
+
+			logrus.WithFields(logrus.Fields{
+				"releaseTaskRequest": req,
+				"taskUpdated":        res,
+			}).Warn("Release task: NOT FOUND")
+		} else {
+
+			logrus.WithFields(logrus.Fields{
+				"releaseTaskRequest": req,
+				"taskUpdated":        res,
+			}).Trace("Release task")
+		}
+
+		r.OkJson(response)
+	}
 }

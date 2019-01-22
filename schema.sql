@@ -1,10 +1,15 @@
-DROP TABLE IF EXISTS workerIdentity, Worker, Project, Task;
-DROP TYPE IF EXISTS Status;
+DROP TABLE IF EXISTS workeridentity, Worker, Project, Task, log_entry;
+DROP TYPE IF EXISTS status;
+DROP TYPE IF EXISTS loglevel;
 
 CREATE TYPE status as ENUM (
   'new',
   'failed',
   'closed'
+  );
+
+CREATE TYPE loglevel as ENUM (
+  'fatal', 'panic', 'error', 'warning', 'info', 'debug', 'trace'
   );
 
 CREATE TABLE workerIdentity
@@ -43,6 +48,14 @@ CREATE TABLE task
   max_retries INTEGER,
   status      Status  DEFAULT 'new',
   recipe      TEXT
+);
+
+CREATE TABLE log_entry
+(
+  level        loglevel,
+  message      TEXT,
+  message_data TEXT,
+  timestamp    INT
 );
 
 

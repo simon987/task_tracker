@@ -30,9 +30,8 @@ func Index(r *Request) {
 
 func New() *WebAPI {
 
-	SetupLogger()
-
 	api := new(WebAPI)
+	api.Database = &storage.Database{}
 
 	api.router = &fasthttprouter.Router{}
 
@@ -41,24 +40,28 @@ func New() *WebAPI {
 		Name:    info.Name,
 	}
 
-	api.router.GET("/", LogRequest(Index))
+	api.router.GET("/", LogRequestMiddleware(Index))
 
-	api.router.POST("/log/trace", LogRequest(LogTrace))
-	api.router.POST("/log/info", LogRequest(LogInfo))
-	api.router.POST("/log/warn", LogRequest(LogWarn))
-	api.router.POST("/log/error", LogRequest(LogError))
+	api.router.POST("/log/trace", LogRequestMiddleware(LogTrace))
+	api.router.POST("/log/info", LogRequestMiddleware(LogInfo))
+	api.router.POST("/log/warn", LogRequestMiddleware(LogWarn))
+	api.router.POST("/log/error", LogRequestMiddleware(LogError))
 
-	api.router.POST("/worker/create", LogRequest(api.WorkerCreate))
-	api.router.GET("/worker/get/:id", LogRequest(api.WorkerGet))
+	api.router.POST("/worker/create", LogRequestMiddleware(api.WorkerCreate))
+	api.router.GET("/worker/get/:id", LogRequestMiddleware(api.WorkerGet))
 
-	api.router.POST("/project/create", LogRequest(api.ProjectCreate))
-	api.router.GET("/project/get/:id", LogRequest(api.ProjectGet))
+	api.router.POST("/project/create", LogRequestMiddleware(api.ProjectCreate))
+	api.router.GET("/project/get/:id", LogRequestMiddleware(api.ProjectGet))
+	api.router.GET("/project/stats/:id", LogRequestMiddleware(api.ProjectGetStats))
 
-	api.router.POST("/task/create", LogRequest(api.TaskCreate))
-	api.router.GET("/task/get/:project", LogRequest(api.TaskGetFromProject))
-	api.router.GET("/task/get", LogRequest(api.TaskGet))
+	api.router.POST("/task/create", LogRequestMiddleware(api.TaskCreate))
+	api.router.GET("/task/get/:project", LogRequestMiddleware(api.TaskGetFromProject))
+	api.router.GET("/task/get", LogRequestMiddleware(api.TaskGet))
+	api.router.POST("/task/release", LogRequestMiddleware(api.TaskRelease))
 
-	api.router.POST("/git/receivehook", LogRequest(api.ReceiveGitWebHook))
+	api.router.POST("/git/receivehook", LogRequestMiddleware(api.ReceiveGitWebHook))
+
+	api.router.POST("/logs", LogRequestMiddleware(api.GetLog))
 
 	return api
 }

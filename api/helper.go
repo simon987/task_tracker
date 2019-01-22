@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/Sirupsen/logrus"
 	"github.com/valyala/fasthttp"
 )
@@ -10,7 +9,6 @@ import (
 type Request struct {
 	Ctx *fasthttp.RequestCtx
 }
-
 
 func (r *Request) OkJson(object interface{}) {
 
@@ -26,8 +24,9 @@ func (r *Request) Json(object interface{}, code int) {
 
 	resp, err := json.Marshal(object)
 	if err != nil {
-		fmt.Fprint(r.Ctx,"Error during json encoding of error")
-		logrus.Error("Error during json encoding of error")
+		logrus.WithError(err).WithFields(logrus.Fields{
+			"code": code,
+		}).Error("Error during json encoding of object")
 	}
 
 	r.Ctx.Response.SetStatusCode(code)

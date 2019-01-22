@@ -3,6 +3,7 @@ server:
 
 database:
   conn_str: "user=task_tracker dbname=task_tracker_test sslmode=disable"
+  log_levels: ["debug", "error"]
 
 git:
   webhook_secret: "very_secret_secret"

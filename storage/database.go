@@ -2,7 +2,6 @@ package storage
 
 import (
 	"database/sql"
-	"fmt"
 	"github.com/Sirupsen/logrus"
 	_ "github.com/lib/pq"
 	"io/ioutil"
@@ -11,6 +10,7 @@ import (
 )
 
 type Database struct {
+	db *sql.DB
 }
 
 func (database *Database) Reset() {
@@ -25,29 +25,24 @@ func (database *Database) Reset() {
 	_, err = db.Exec(string(buffer))
 	handleErr(err)
 
-	db.Close()
 	file.Close()
 
 	logrus.Info("Database has been reset")
 }
 
-func (database *Database) getDB () *sql.DB {
-	db, err := sql.Open("postgres", config.Cfg.DbConnStr)
-	if err != nil {
-		logrus.Fatal(err)
+func (database *Database) getDB() *sql.DB {
+
+	if database.db == nil {
+		db, err := sql.Open("postgres", config.Cfg.DbConnStr)
+		if err != nil {
+			logrus.Fatal(err)
+		}
+
+		database.db = db
+	} else {
+		err := database.db.Ping()
+		handleErr(err)
 	}
 
-	return db
-}
-
-func (database *Database) Test() {
-
-	db := database.getDB()
-
-	rows, err := db.Query("SELECT name FROM Task")
-	if err != nil {
-		logrus.Fatal(err)
-	}
-	fmt.Println(rows)
-
+	return database.db
 }
