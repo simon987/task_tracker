@@ -10,7 +10,6 @@ func BenchmarkCreateTask(b *testing.B) {
 
 	resp := createProject(api.CreateProjectRequest{
 		Name:     "BenchmarkCreateTask" + strconv.Itoa(b.N),
-		Priority: 1,
 		GitRepo:  "benchmark_test" + strconv.Itoa(b.N),
 		Version:  "f09e8c9r0w839x0c43",
 		CloneUrl: "http://localhost",

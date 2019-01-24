@@ -40,7 +40,7 @@ export class LogsComponent implements OnInit {
     private getLogs() {
         this.apiService.getLogs().subscribe(
             data => {
-                this.data.data = _.map(data, (entry) => {
+                this.data.data = _.map(data["logs"], (entry) => {
                     return <LogEntry>{
                         message: entry.message,
                         timestamp: moment.unix(entry.timestamp).toISOString(),

@@ -33,6 +33,12 @@ type GetProjectStatsResponse struct {
 	Stats   *storage.ProjectStats `json:"stats,omitempty"`
 }
 
+type GetAllProjectsStatsResponse struct {
+	Ok      bool                    `json:"ok"`
+	Message string                  `json:"message,omitempty"`
+	Stats   *[]storage.ProjectStats `json:"stats,omitempty"`
+}
+
 func (api *WebAPI) ProjectCreate(r *Request) {
 
 	createReq := &CreateProjectRequest{}
@@ -124,4 +130,14 @@ func (api *WebAPI) ProjectGetStats(r *Request) {
 			Message: "Project not found",
 		}, 404)
 	}
+}
+
+func (api *WebAPI) ProjectGetAllStats(r *Request) {
+
+	stats := api.Database.GetAllProjectsStats()
+
+	r.OkJson(GetAllProjectsStatsResponse{
+		Ok:    true,
+		Stats: stats,
+	})
 }

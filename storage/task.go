@@ -20,12 +20,6 @@ type Task struct {
 func (database *Database) SaveTask(task *Task, project int64) error {
 
 	db := database.getDB()
-	taskErr := saveTask(task, project, db)
-
-	return taskErr
-}
-
-func saveTask(task *Task, project int64, db *sql.DB) error {
 
 	res, err := db.Exec(`
 	INSERT INTO task (project, max_retries, recipe, priority) 
@@ -52,12 +46,6 @@ func saveTask(task *Task, project int64, db *sql.DB) error {
 func (database *Database) GetTask(worker *Worker) *Task {
 
 	db := database.getDB()
-	task := getTask(worker, db)
-
-	return task
-}
-
-func getTask(worker *Worker, db *sql.DB) *Task {
 
 	row := db.QueryRow(`
 	UPDATE task
@@ -111,12 +99,6 @@ func getTaskById(id int64, db *sql.DB) *Task {
 func (database Database) ReleaseTask(id int64, workerId *uuid.UUID, success bool) bool {
 
 	db := database.getDB()
-	res := releaseTask(workerId, id, success, db)
-
-	return res
-}
-
-func releaseTask(workerId *uuid.UUID, id int64, success bool, db *sql.DB) bool {
 
 	var res sql.Result
 	var err error
@@ -139,15 +121,9 @@ func releaseTask(workerId *uuid.UUID, id int64, success bool, db *sql.DB) bool {
 	return rowsAffected == 1
 }
 
-func (database *Database) GetTaskFromProject(worker *Worker, project int64) *Task {
+func (database *Database) GetTaskFromProject(worker *Worker, projectId int64) *Task {
 
 	db := database.getDB()
-	task := getTaskFromProject(worker, project, db)
-
-	return task
-}
-
-func getTaskFromProject(worker *Worker, projectId int64, db *sql.DB) *Task {
 
 	row := db.QueryRow(`
 	UPDATE task
@@ -158,7 +134,7 @@ func getTaskFromProject(worker *Worker, projectId int64, db *sql.DB) *Task {
 	FROM task
 	INNER JOIN project p on task.project = p.id
 	WHERE assignee IS NULL AND p.id=$2
-	ORDER BY p.priority DESC, task.priority DESC
+	ORDER BY task.priority DESC
 	LIMIT 1
 	)
 	RETURNING id`, worker.Id, projectId)

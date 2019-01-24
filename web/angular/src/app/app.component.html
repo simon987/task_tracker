@@ -1,8 +1,12 @@
-<mat-toolbar>
-    <a [routerLink]="''">Index</a>
-    <a [routerLink]="'log'">Logs</a>
-    <a [routerLink]="'project'">Project</a>
-</mat-toolbar>
+<!--<mat-toolbar>-->
+<ul>
+    <li><a [routerLink]="''">Index</a></li>
+    <li><a [routerLink]="'log'">Logs</a></li>
+    <li><a [routerLink]="'project'">Project</a></li>
+    <li><a [routerLink]="'projects'">list</a></li>
+    <li><a [routerLink]="'new_project'">new project</a></li>
+</ul>
+<!--</mat-toolbar>-->
 
 
 <router-outlet></router-outlet>

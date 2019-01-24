@@ -4,6 +4,7 @@ import * as d3 from "d3"
 import * as _ from "lodash"
 import {interval} from "rxjs";
 import {ApiService} from "../api.service";
+import {ActivatedRoute} from "@angular/router";
 
 @Component({
     selector: 'app-project-dashboard',
@@ -12,7 +13,9 @@ import {ApiService} from "../api.service";
 })
 export class ProjectDashboardComponent implements OnInit {
 
+    private projectId;
     projectStats;
+
     private pieWidth = 360;
     private pieHeight = 360;
     private pieRadius = Math.min(this.pieWidth, this.pieHeight) / 2;
@@ -47,7 +50,7 @@ export class ProjectDashboardComponent implements OnInit {
     private assigneesPath: any;
     private assigneesSvg: any;
 
-    constructor(private apiService: ApiService) {
+    constructor(private apiService: ApiService, private route: ActivatedRoute) {
     }
 
     setupStatusPieChart() {
@@ -165,7 +168,7 @@ export class ProjectDashboardComponent implements OnInit {
     }
 
     getStats() {
-        this.apiService.getProjectStats(2).subscribe((data) => {
+        this.apiService.getProjectStats(this.projectId).subscribe((data) => {
 
             this.projectStats = data["stats"];
 
@@ -259,9 +262,13 @@ export class ProjectDashboardComponent implements OnInit {
         this.setupAssigneesPieChart();
         this.setupLine();
 
-        this.getStats();
-        interval(1000).subscribe(() => {
-            this.getStats()
-        })
+        this.route.params.subscribe(params => {
+                this.projectId = params["id"];
+                this.getStats();
+                interval(1000).subscribe(() => {
+                    // this.getStats()
+                })
+            }
+        )
     }
 }

@@ -21,17 +21,6 @@ type Worker struct {
 func (database *Database) SaveWorker(worker *Worker) {
 
 	db := database.getDB()
-	saveWorker(worker, db)
-}
-
-func (database *Database) GetWorker(id uuid.UUID) *Worker {
-
-	db := database.getDB()
-	worker := getWorker(id, db)
-	return worker
-}
-
-func saveWorker(worker *Worker, db *sql.DB) {
 
 	identityId := getOrCreateIdentity(worker.Identity, db)
 
@@ -45,7 +34,9 @@ func saveWorker(worker *Worker, db *sql.DB) {
 	}).Trace("Database.saveWorker INSERT worker")
 }
 
-func getWorker(id uuid.UUID, db *sql.DB) *Worker {
+func (database *Database) GetWorker(id uuid.UUID) *Worker {
+
+	db := database.getDB()
 
 	worker := &Worker{}
 	var identityId int64

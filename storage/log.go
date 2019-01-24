@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"database/sql"
 	"encoding/json"
 	"github.com/Sirupsen/logrus"
 	"src/task_tracker/config"
@@ -44,12 +43,6 @@ func (database *Database) SetupLoggerHook() {
 func (database *Database) GetLogs(since int64, level logrus.Level) *[]LogEntry {
 
 	db := database.getDB()
-	logs := getLogs(since, level, db)
-
-	return logs
-}
-
-func getLogs(since int64, level logrus.Level, db *sql.DB) *[]LogEntry {
 
 	var logs []LogEntry
 

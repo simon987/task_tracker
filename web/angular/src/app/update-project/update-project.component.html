@@ -1,0 +1,29 @@
+<mat-card>
+    <mat-card-title>Update project</mat-card-title>
+    <mat-card-subtitle>Changes are saved in real time</mat-card-subtitle>
+
+    <mat-card-content>
+        <form>
+            <mat-form-field>
+                <input type="text" matInput [(ngModel)]="project.name" name="name" placeholder="Name">
+            </mat-form-field>
+
+            <mat-form-field>
+                <textarea matInput placeholder="Message of the day"></textarea>
+            </mat-form-field>
+
+            <mat-form-field>
+                <input type="text" matInput [(ngModel)]="project.clone_url" name="clone_url"
+                       placeholder="Git clone url">
+            </mat-form-field>
+            <mat-form-field>
+                <input type="text" matInput [(ngModel)]="project.git_repo" name="clone_url"
+                       placeholder='Full repository name (e.g. "simon987/task_tracker")'>
+                <mat-hint align="start">Changes on the <strong>master</strong> branch will be tracked if webhooks are
+                    enabled
+                </mat-hint>
+            </mat-form-field>
+            <input type="hidden" name="version" value="{{project.version}}">
+        </form>
+    </mat-card-content>
+</mat-card>

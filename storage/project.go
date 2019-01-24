@@ -102,12 +102,6 @@ func scanProject(row *sql.Row) (*Project, error) {
 func (database *Database) GetProjectWithRepoName(repoName string) *Project {
 
 	db := database.getDB()
-	project := getProjectWithRepoName(repoName, db)
-	return project
-}
-
-func getProjectWithRepoName(repoName string, db *sql.DB) *Project {
-
 	row := db.QueryRow(`SELECT * FROM project WHERE LOWER(git_repo)=$1`, strings.ToLower(repoName))
 
 	project, err := scanProject(row)
@@ -124,10 +118,6 @@ func getProjectWithRepoName(repoName string, db *sql.DB) *Project {
 func (database *Database) UpdateProject(project *Project) {
 
 	db := database.getDB()
-	updateProject(project, db)
-}
-
-func updateProject(project *Project, db *sql.DB) {
 
 	res, err := db.Exec(`UPDATE project 
 		SET (priority, name, clone_url, git_repo, version, motd) = ($1,$2,$3,$4,$5,$6) WHERE id=$7`,
@@ -147,13 +137,6 @@ func updateProject(project *Project, db *sql.DB) {
 func (database *Database) GetProjectStats(id int64) *ProjectStats {
 
 	db := database.getDB()
-	stats := getProjectStats(id, db)
-
-	return stats
-}
-
-func getProjectStats(id int64, db *sql.DB) *ProjectStats {
-
 	stats := ProjectStats{}
 
 	stats.Project = getProject(id, db)
@@ -169,7 +152,7 @@ func getProjectStats(id int64, db *sql.DB) *ProjectStats {
 		if err != nil {
 			logrus.WithError(err).WithFields(logrus.Fields{
 				"id": id,
-			}).Warn("???") //todo
+			}).Trace("Get project stats: No task for this project")
 			return nil
 		}
 
@@ -186,4 +169,37 @@ func getProjectStats(id int64, db *sql.DB) *ProjectStats {
 	}
 
 	return &stats
+}
+
+func (database Database) GetAllProjectsStats() *[]ProjectStats {
+	var statsList []ProjectStats
+
+	db := database.getDB()
+	rows, err := db.Query(`SELECT 
+       	SUM(CASE WHEN status='new' THEN 1 ELSE 0 END) newCount,
+       	SUM(CASE WHEN status='failed' THEN 1 ELSE 0 END) failedCount,
+		SUM(CASE WHEN status='closed' THEN 1 ELSE 0 END) closedCount,
+       	p.*
+		FROM task INNER JOIN project p on task.project = p.id
+		GROUP BY p.id`)
+	handleErr(err)
+
+	for rows.Next() {
+
+		stats := ProjectStats{}
+		p := &Project{}
+		err := rows.Scan(&stats.NewTaskCount, &stats.FailedTaskCount, &stats.ClosedTaskCount,
+			&p.Id, &p.Priority, &p.Motd, &p.Name, &p.CloneUrl, &p.GitRepo, &p.Version)
+		handleErr(err)
+
+		stats.Project = p
+
+		statsList = append(statsList, stats)
+	}
+
+	logrus.WithFields(logrus.Fields{
+		"statsList": statsList,
+	}).Trace("Get all projects stats")
+
+	return &statsList
 }

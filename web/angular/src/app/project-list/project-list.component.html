@@ -1,0 +1,19 @@
+<mat-card>
+    <mat-card-header>
+        <mat-card-title>Projects</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+        <mat-accordion>
+            <mat-expansion-panel *ngFor="let stats of projects">
+                <mat-expansion-panel-header>
+                    <mat-panel-title>{{stats.project.id}}: {{stats.project.name}}</mat-panel-title>
+                    <mat-panel-description>{{stats.project.motd}}</mat-panel-description>
+                </mat-expansion-panel-header>
+                <pre>{{stats.project | json}}</pre>
+                <div style="display: flex;">
+                    <a [routerLink]="'/project/' + stats.project.id">Dashboard</a>
+                </div>
+            </mat-expansion-panel>
+        </mat-accordion>
+    </mat-card-content>
+</mat-card>

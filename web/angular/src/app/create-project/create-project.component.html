@@ -1,0 +1,30 @@
+<mat-card>
+    <mat-card-title>Create new project</mat-card-title>
+    <mat-card-subtitle></mat-card-subtitle>
+
+    <mat-card-content>
+        <form>
+            <mat-form-field>
+                <input type="text" matInput [(ngModel)]="project.name" name="name" placeholder="Name">
+            </mat-form-field>
+
+            <mat-form-field>
+                <input type="text" matInput [(ngModel)]="project.clone_url" name="clone_url"
+                       placeholder="Git clone url">
+            </mat-form-field>
+            <mat-form-field>
+                <input type="text" matInput [(ngModel)]="project.git_repo" name="clone_url"
+                       placeholder='Full repository name (e.g. "simon987/task_tracker")'>
+                <mat-hint align="start">Changes on the <strong>master</strong> branch will be tracked if webhooks are
+                    enabled
+                </mat-hint>
+            </mat-form-field>
+            <input type="hidden" name="version" value="{{project.version}}">
+        </form>
+    </mat-card-content>
+
+    <mat-card-actions>
+        <button>Create</button>
+    </mat-card-actions>
+
+</mat-card>
