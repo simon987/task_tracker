@@ -7,14 +7,16 @@ import (
 )
 
 type Task struct {
-	Id         int64     `json:"id"`
-	Priority   int64     `json:"priority"`
-	Project    *Project  `json:"project"`
-	Assignee   uuid.UUID `json:"assignee"`
-	Retries    int64     `json:"retries"`
-	MaxRetries int64     `json:"max_retries"`
-	Status     string    `json:"status"`
-	Recipe     string    `json:"recipe"`
+	Id            int64     `json:"id"`
+	Priority      int64     `json:"priority"`
+	Project       *Project  `json:"project"`
+	Assignee      uuid.UUID `json:"assignee"`
+	Retries       int64     `json:"retries"`
+	MaxRetries    int64     `json:"max_retries"`
+	Status        string    `json:"status"`
+	Recipe        string    `json:"recipe"`
+	MaxAssignTime int64     `json:"max_assign_time"`
+	AssignTime    int64     `json:"assign_time"`
 }
 
 func (database *Database) SaveTask(task *Task, project int64) error {
@@ -22,9 +24,9 @@ func (database *Database) SaveTask(task *Task, project int64) error {
 	db := database.getDB()
 
 	res, err := db.Exec(`
-	INSERT INTO task (project, max_retries, recipe, priority) 
-	VALUES ($1,$2,$3,$4)`,
-		project, task.MaxRetries, task.Recipe, task.Priority)
+	INSERT INTO task (project, max_retries, recipe, priority, max_assign_time) 
+	VALUES ($1,$2,$3,$4,$5)`,
+		project, task.MaxRetries, task.Recipe, task.Priority, task.MaxAssignTime)
 	if err != nil {
 		logrus.WithError(err).WithFields(logrus.Fields{
 			"task": task,
@@ -56,6 +58,9 @@ func (database *Database) GetTask(worker *Worker) *Task {
 	FROM task
 	INNER JOIN project p on task.project = p.id
 	WHERE assignee IS NULL
+		AND (p.public OR EXISTS (
+		  SELECT 1 FROM worker_has_access_to_project a WHERE a.worker=$1 AND a.project=p.id
+		))
 	ORDER BY p.priority DESC, task.priority DESC
 	LIMIT 1
 	)
@@ -134,6 +139,9 @@ func (database *Database) GetTaskFromProject(worker *Worker, projectId int64) *T
 	FROM task
 	INNER JOIN project p on task.project = p.id
 	WHERE assignee IS NULL AND p.id=$2
+		AND (p.public OR EXISTS (
+		  SELECT 1 FROM worker_has_access_to_project a WHERE a.worker=$1 AND a.project=$2
+		))
 	ORDER BY task.priority DESC
 	LIMIT 1
 	)
@@ -165,8 +173,9 @@ func scanTask(row *sql.Row) *Task {
 	task.Project = project
 
 	err := row.Scan(&task.Id, &task.Priority, &project.Id, &task.Assignee,
-		&task.Retries, &task.MaxRetries, &task.Status, &task.Recipe, &project.Id,
-		&project.Priority, &project.Motd, &project.Name, &project.CloneUrl, &project.GitRepo, &project.Version)
+		&task.Retries, &task.MaxRetries, &task.Status, &task.Recipe, &task.MaxAssignTime,
+		&task.AssignTime, &project.Id, &project.Priority, &project.Name,
+		&project.CloneUrl, &project.GitRepo, &project.Version, &project.Motd, &project.Public)
 	handleErr(err)
 
 	return task

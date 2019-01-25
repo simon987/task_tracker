@@ -19,6 +19,7 @@ func TestCreateGetProject(t *testing.T) {
 		Version:  "Test Version",
 		Priority: 123,
 		Motd:     "motd",
+		Public:   true,
 	})
 
 	id := resp.Id
@@ -54,6 +55,9 @@ func TestCreateGetProject(t *testing.T) {
 		t.Error()
 	}
 	if getResp.Project.Motd != "motd" {
+		t.Error()
+	}
+	if getResp.Project.Public != true {
 		t.Error()
 	}
 }

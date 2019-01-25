@@ -129,6 +129,7 @@ func TestCreateGetTask(t *testing.T) {
 		CloneUrl: "http://github.com/test/test",
 		GitRepo:  "myrepo",
 		Priority: 999,
+		Public:   true,
 	})
 
 	createTask(api.CreateTaskRequest{
@@ -170,6 +171,9 @@ func TestCreateGetTask(t *testing.T) {
 	if taskResp.Task.Project.CloneUrl != "http://github.com/test/test" {
 		t.Error()
 	}
+	if taskResp.Task.Project.Public != true {
+		t.Error()
+	}
 }
 
 func createTasks(prefix string) (int64, int64) {
@@ -180,6 +184,7 @@ func createTasks(prefix string) (int64, int64) {
 		CloneUrl: "http://github.com/test/test",
 		GitRepo:  prefix + "low1",
 		Priority: 1,
+		Public:   true,
 	})
 	highP := createProject(api.CreateProjectRequest{
 		Name:     prefix + "high",
@@ -187,6 +192,7 @@ func createTasks(prefix string) (int64, int64) {
 		CloneUrl: "http://github.com/test/test",
 		GitRepo:  prefix + "high1",
 		Priority: 999,
+		Public:   true,
 	})
 	createTask(api.CreateTaskRequest{
 		Project:  lowP.Id,
@@ -262,6 +268,86 @@ func TestTaskPriority(t *testing.T) {
 		t.Error()
 	}
 	if t4.Task.Recipe != "low1" {
+		t.Error()
+	}
+}
+
+func TestTaskNoAccess(t *testing.T) {
+
+	wid := genWid()
+
+	pid := createProject(api.CreateProjectRequest{
+		Name:     "This is a private proj",
+		Motd:     "private",
+		Version:  "private",
+		Priority: 1,
+		CloneUrl: "fjkslejf cesl",
+		GitRepo:  "fffffffff",
+		Public:   false,
+	}).Id
+
+	createResp := createTask(api.CreateTaskRequest{
+		Project:       pid,
+		Priority:      1,
+		MaxAssignTime: 10,
+		MaxRetries:    2,
+		Recipe:        "---",
+	})
+
+	if createResp.Ok != true {
+		t.Error()
+	}
+
+	grantAccess(wid, pid)
+	removeAccess(wid, pid)
+
+	tResp := getTaskFromProject(pid, wid)
+
+	if tResp.Ok != false {
+		t.Error()
+	}
+	if len(tResp.Message) <= 0 {
+		t.Error()
+	}
+	if tResp.Task != nil {
+		t.Error()
+	}
+}
+
+func TestTaskHasAccess(t *testing.T) {
+
+	wid := genWid()
+
+	pid := createProject(api.CreateProjectRequest{
+		Name:     "This is a private proj1",
+		Motd:     "private1",
+		Version:  "private1",
+		Priority: 1,
+		CloneUrl: "josaeiuf cesl",
+		GitRepo:  "wewwwwwwwwwwwwwwwwwwwwww",
+		Public:   false,
+	}).Id
+
+	createResp := createTask(api.CreateTaskRequest{
+		Project:       pid,
+		Priority:      1,
+		MaxAssignTime: 10,
+		MaxRetries:    2,
+		Recipe:        "---",
+	})
+
+	if createResp.Ok != true {
+		t.Error()
+	}
+
+	grantAccess(wid, pid)
+
+	tResp := getTaskFromProject(pid, wid)
+
+	if tResp.Ok != true {
+		t.Error()
+	}
+	if tResp.Task == nil {
 		t.Error()
 	}
 }

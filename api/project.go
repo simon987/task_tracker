@@ -13,6 +13,7 @@ type CreateProjectRequest struct {
 	Version  string `json:"version"`
 	Priority int64  `json:"priority"`
 	Motd     string `json:"motd"`
+	Public   bool   `json:"public"`
 }
 
 type CreateProjectResponse struct {
@@ -51,6 +52,7 @@ func (api *WebAPI) ProjectCreate(r *Request) {
 			GitRepo:  createReq.GitRepo,
 			Priority: createReq.Priority,
 			Motd:     createReq.Motd,
+			Public:   createReq.Public,
 		}
 
 		if isValidProject(project) {

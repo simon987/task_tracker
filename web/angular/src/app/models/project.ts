@@ -6,4 +6,5 @@ export class Project {
     public clone_url: string;
     public git_repo: string;
     public version: string;
+    public public: boolean;
 }

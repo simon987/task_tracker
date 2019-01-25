@@ -11,7 +11,8 @@ export class CreateProjectComponent implements OnInit {
     private project = new Project();
 
     constructor() {
-        this.project.name = "test"
+        this.project.name = "test";
+        this.project.public = true;
     }
 
     ngOnInit() {

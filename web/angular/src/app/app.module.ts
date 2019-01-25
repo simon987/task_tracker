@@ -10,12 +10,16 @@ import {
     MatAutocompleteModule,
     MatButtonModule,
     MatCardModule,
+    MatCheckboxModule,
+    MatDividerModule,
     MatExpansionModule,
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
     MatMenuModule,
     MatPaginatorModule,
+    MatSliderModule,
+    MatSlideToggleModule,
     MatSortModule,
     MatTableModule,
     MatToolbarModule,
@@ -58,6 +62,11 @@ import {UpdateProjectComponent} from './update-project/update-project.component'
         MatTreeModule,
         BrowserAnimationsModule,
         HttpClientModule,
+        MatSliderModule,
+        MatSlideToggleModule,
+        MatCheckboxModule,
+        MatDividerModule
+
     ],
     exports: [],
     providers: [

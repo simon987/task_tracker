@@ -22,6 +22,16 @@ type GetWorkerResponse struct {
 	Worker  *storage.Worker `json:"worker,omitempty"`
 }
 
+type WorkerAccessRequest struct {
+	WorkerId  *uuid.UUID `json:"worker_id"`
+	ProjectId int64      `json:"project_id"`
+}
+
+type WorkerAccessResponse struct {
+	Ok      bool   `json:"ok"`
+	Message string `json:"message"`
+}
+
 func (api *WebAPI) WorkerCreate(r *Request) {
 
 	workerReq := &CreateWorkerRequest{}
@@ -83,6 +93,46 @@ func (api *WebAPI) WorkerGet(r *Request) {
 			Ok:      false,
 			Message: "Worker not found",
 		}, 404)
+	}
+}
+
+func (api *WebAPI) WorkerGrantAccess(r *Request) {
+
+	req := &WorkerAccessRequest{}
+	if r.GetJson(req) {
+
+		ok := api.Database.GrantAccess(req.WorkerId, req.ProjectId)
+
+		if ok {
+			r.OkJson(WorkerAccessResponse{
+				Ok: true,
+			})
+		} else {
+			r.OkJson(WorkerAccessResponse{
+				Ok:      false,
+				Message: "Worker already has access to this project",
+			})
+		}
+	}
+}
+
+func (api *WebAPI) WorkerRemoveAccess(r *Request) {
+
+	req := &WorkerAccessRequest{}
+	if r.GetJson(req) {
+
+		ok := api.Database.RemoveAccess(req.WorkerId, req.ProjectId)
+
+		if ok {
+			r.OkJson(WorkerAccessResponse{
+				Ok: true,
+			})
+		} else {
+			r.OkJson(WorkerAccessResponse{
+				Ok:      false,
+				Message: "Worker did not have access to this project",
+			})
+		}
 	}
 }
 

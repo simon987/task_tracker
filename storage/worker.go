@@ -101,3 +101,46 @@ func getOrCreateIdentity(identity *Identity, db *sql.DB) int64 {
 
 	return rowId
 }
+
+func (database *Database) GrantAccess(workerId *uuid.UUID, projectId int64) bool {
+
+	db := database.getDB()
+	res, err := db.Exec(`INSERT INTO worker_has_access_to_project (worker, project) VALUES ($1,$2)
+		ON CONFLICT DO NOTHING`,
+		workerId, projectId)
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"workerId":  workerId,
+			"projectId": projectId,
+		}).WithError(err).Warn("Database.GrantAccess INSERT worker_hase_access_to_project")
+		return false
+	}
+
+	rowsAffected, _ := res.RowsAffected()
+
+	logrus.WithFields(logrus.Fields{
+		"rowsAffected": rowsAffected,
+		"workerId":     workerId,
+		"projectId":    projectId,
+	}).Trace("Database.GrantAccess INSERT worker_has_access_to_project")
+
+	return rowsAffected == 1
+}
+
+func (database Database) RemoveAccess(workerId *uuid.UUID, projectId int64) bool {
+
+	db := database.getDB()
+	res, err := db.Exec(`DELETE FROM worker_has_access_to_project WHERE worker=$1 AND project=$2`,
+		workerId, projectId)
+	handleErr(err)
+
+	rowsAffected, _ := res.RowsAffected()
+
+	logrus.WithFields(logrus.Fields{
+		"rowsAffected": rowsAffected,
+		"workerId":     workerId,
+		"projectId":    projectId,
+	}).Trace("Database.RemoveAccess DELETE worker_has_access_to_project")
+
+	return rowsAffected == 1
+}

@@ -15,6 +15,7 @@ type Project struct {
 	GitRepo  string `json:"git_repo"`
 	Version  string `json:"version"`
 	Motd     string `json:"motd"`
+	Public   bool   `json:"public"`
 }
 
 type AssignedTasks struct {
@@ -39,9 +40,9 @@ func (database *Database) SaveProject(project *Project) (int64, error) {
 
 func saveProject(project *Project, db *sql.DB) (int64, error) {
 
-	row := db.QueryRow(`INSERT INTO project (name, git_repo, clone_url, version, priority, motd)
-		VALUES ($1,$2,$3,$4,$5,$6) RETURNING id`,
-		project.Name, project.GitRepo, project.CloneUrl, project.Version, project.Priority, project.Motd)
+	row := db.QueryRow(`INSERT INTO project (name, git_repo, clone_url, version, priority, motd, public)
+		VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id`,
+		project.Name, project.GitRepo, project.CloneUrl, project.Version, project.Priority, project.Motd, project.Public)
 
 	var id int64
 	err := row.Scan(&id)
@@ -93,8 +94,8 @@ func getProject(id int64, db *sql.DB) *Project {
 func scanProject(row *sql.Row) (*Project, error) {
 
 	project := &Project{}
-	err := row.Scan(&project.Id, &project.Priority, &project.Motd, &project.Name, &project.CloneUrl,
-		&project.GitRepo, &project.Version)
+	err := row.Scan(&project.Id, &project.Priority, &project.Name, &project.CloneUrl,
+		&project.GitRepo, &project.Version, &project.Motd, &project.Public)
 
 	return project, err
 }
@@ -120,8 +121,8 @@ func (database *Database) UpdateProject(project *Project) {
 	db := database.getDB()
 
 	res, err := db.Exec(`UPDATE project 
-		SET (priority, name, clone_url, git_repo, version, motd) = ($1,$2,$3,$4,$5,$6) WHERE id=$7`,
-		project.Priority, project.Name, project.CloneUrl, project.GitRepo, project.Version, project.Motd, project.Id)
+		SET (priority, name, clone_url, git_repo, version, motd, public) = ($1,$2,$3,$4,$5,$6,$7) WHERE id=$8`,
+		project.Priority, project.Name, project.CloneUrl, project.GitRepo, project.Version, project.Motd, project.Public, project.Id)
 	handleErr(err)
 
 	rowsAffected, _ := res.RowsAffected()
@@ -156,6 +157,7 @@ func (database *Database) GetProjectStats(id int64) *ProjectStats {
 			return nil
 		}
 
+		//todo: only expose worker alias
 		rows, err := db.Query(`SELECT assignee, COUNT(*) FROM TASK
   			LEFT JOIN worker ON TASK.assignee = worker.id WHERE project=$1 GROUP BY assignee`, id)
 
@@ -189,7 +191,7 @@ func (database Database) GetAllProjectsStats() *[]ProjectStats {
 		stats := ProjectStats{}
 		p := &Project{}
 		err := rows.Scan(&stats.NewTaskCount, &stats.FailedTaskCount, &stats.ClosedTaskCount,
-			&p.Id, &p.Priority, &p.Motd, &p.Name, &p.CloneUrl, &p.GitRepo, &p.Version)
+			&p.Id, &p.Priority, &p.Motd, &p.Name, &p.CloneUrl, &p.GitRepo, &p.Version, &p.Public)
 		handleErr(err)
 
 		stats.Project = p

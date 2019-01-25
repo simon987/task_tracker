@@ -66,6 +66,78 @@ func TestGetWorkerInvalid(t *testing.T) {
 	}
 }
 
+func TestGrantAccessFailedProjectConstraint(t *testing.T) {
+
+	wid := genWid()
+
+	resp := grantAccess(wid, 38274593)
+
+	if resp.Ok != false {
+		t.Error()
+	}
+	if len(resp.Message) <= 0 {
+		t.Error()
+	}
+}
+
+func TestRemoveAccessFailedProjectConstraint(t *testing.T) {
+
+	wid := genWid()
+
+	resp := removeAccess(wid, 38274593)
+
+	if resp.Ok != false {
+		t.Error()
+	}
+	if len(resp.Message) <= 0 {
+		t.Error()
+	}
+}
+
+func TestRemoveAccessFailedWorkerConstraint(t *testing.T) {
+
+	pid := createProject(api.CreateProjectRequest{
+		Priority: 1,
+		GitRepo:  "dfffffffffff",
+		CloneUrl: "fffffffffff23r",
+		Version:  "f83w9rw",
+		Motd:     "ddddddddd",
+		Name:     "removeaccessfailedworkerconstraint",
+		Public:   true,
+	}).Id
+
+	resp := removeAccess(&uuid.Nil, pid)
+
+	if resp.Ok != false {
+		t.Error()
+	}
+	if len(resp.Message) <= 0 {
+		t.Error()
+	}
+}
+
+func TestGrantAccessFailedWorkerConstraint(t *testing.T) {
+
+	pid := createProject(api.CreateProjectRequest{
+		Priority: 1,
+		GitRepo:  "dfffffffffff1",
+		CloneUrl: "fffffffffff23r1",
+		Version:  "f83w9rw1",
+		Motd:     "ddddddddd1",
+		Name:     "grantaccessfailedworkerconstraint",
+		Public:   true,
+	}).Id
+
+	resp := removeAccess(&uuid.Nil, pid)
+
+	if resp.Ok != false {
+		t.Error()
+	}
+	if len(resp.Message) <= 0 {
+		t.Error()
+	}
+}
+
 func createWorker(req api.CreateWorkerRequest) (*api.CreateWorkerResponse, *http.Response) {
 	r := Post("/worker/create", req)
 
@@ -93,4 +165,34 @@ func genWid() *uuid.UUID {
 
 	resp, _ := createWorker(api.CreateWorkerRequest{})
 	return &resp.WorkerId
+}
+
+func grantAccess(wid *uuid.UUID, project int64) *api.WorkerAccessResponse {
+
+	r := Post("/access/grant", api.WorkerAccessRequest{
+		WorkerId:  wid,
+		ProjectId: project,
+	})
+
+	var resp *api.WorkerAccessResponse
+	data, _ := ioutil.ReadAll(r.Body)
+	err := json.Unmarshal(data, &resp)
+	handleErr(err)
+
+	return resp
+}
+
+func removeAccess(wid *uuid.UUID, project int64) *api.WorkerAccessResponse {
+
+	r := Post("/access/remove", api.WorkerAccessRequest{
+		WorkerId:  wid,
+		ProjectId: project,
+	})
+
+	var resp *api.WorkerAccessResponse
+	data, _ := ioutil.ReadAll(r.Body)
+	err := json.Unmarshal(data, &resp)
+	handleErr(err)
+
+	return resp
 }

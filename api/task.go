@@ -9,10 +9,11 @@ import (
 )
 
 type CreateTaskRequest struct {
-	Project    int64  `json:"project"`
-	MaxRetries int64  `json:"max_retries"`
-	Recipe     string `json:"recipe"`
-	Priority   int64  `json:"priority"`
+	Project       int64  `json:"project"`
+	MaxRetries    int64  `json:"max_retries"`
+	Recipe        string `json:"recipe"`
+	Priority      int64  `json:"priority"`
+	MaxAssignTime int64  `json:"max_assign_time"`
 }
 
 type ReleaseTaskRequest struct {
@@ -43,9 +44,11 @@ func (api *WebAPI) TaskCreate(r *Request) {
 	if r.GetJson(&createReq) {
 
 		task := &storage.Task{
-			MaxRetries: createReq.MaxRetries,
-			Recipe:     createReq.Recipe,
-			Priority:   createReq.Priority,
+			MaxRetries:    createReq.MaxRetries,
+			Recipe:        createReq.Recipe,
+			Priority:      createReq.Priority,
+			AssignTime:    0,
+			MaxAssignTime: createReq.MaxAssignTime,
 		}
 
 		if isTaskValid(task) {
@@ -99,10 +102,21 @@ func (api *WebAPI) TaskGetFromProject(r *Request) {
 	handleErr(err, r)
 	task := api.Database.GetTaskFromProject(worker, int64(project))
 
-	r.OkJson(GetTaskResponse{
-		Ok:   true,
-		Task: task,
-	})
+	if task == nil {
+
+		r.OkJson(GetTaskResponse{
+			Ok:      false,
+			Message: "No task available",
+		})
+
+	} else {
+
+		r.OkJson(GetTaskResponse{
+			Ok:   true,
+			Task: task,
+		})
+	}
+
 }
 
 func (api *WebAPI) TaskGet(r *Request) {

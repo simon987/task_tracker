@@ -50,6 +50,9 @@ func New() *WebAPI {
 	api.router.POST("/worker/create", LogRequestMiddleware(api.WorkerCreate))
 	api.router.GET("/worker/get/:id", LogRequestMiddleware(api.WorkerGet))
 
+	api.router.POST("/access/grant", LogRequestMiddleware(api.WorkerGrantAccess))
+	api.router.POST("/access/remove", LogRequestMiddleware(api.WorkerRemoveAccess))
+
 	api.router.POST("/project/create", LogRequestMiddleware(api.ProjectCreate))
 	api.router.GET("/project/get/:id", LogRequestMiddleware(api.ProjectGet))
 	api.router.GET("/project/stats/:id", LogRequestMiddleware(api.ProjectGetStats))
