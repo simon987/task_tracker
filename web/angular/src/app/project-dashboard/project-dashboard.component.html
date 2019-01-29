@@ -37,6 +37,8 @@
                 <pre>{{projectStats | json}}</pre>
             </mat-expansion-panel>
 
+            <a [routerLink]="'/project/' + projectStats.project.id + '/update'">Update</a>
+
         </mat-card-content>
     </mat-card>
 </div>

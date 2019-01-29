@@ -20,18 +20,21 @@ import {
     MatPaginatorModule,
     MatSliderModule,
     MatSlideToggleModule,
+    MatSnackBarModule,
     MatSortModule,
     MatTableModule,
     MatToolbarModule,
     MatTreeModule
 } from "@angular/material";
 import {ApiService} from "./api.service";
+import {MessengerService} from "./messenger.service";
 import {HttpClientModule} from "@angular/common/http";
 import {ProjectDashboardComponent} from './project-dashboard/project-dashboard.component';
 import {ProjectListComponent} from './project-list/project-list.component';
 import {CreateProjectComponent} from './create-project/create-project.component';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {UpdateProjectComponent} from './update-project/update-project.component';
+import {SnackBarComponent} from "./messenger/snack-bar.component";
 
 @NgModule({
     declarations: [
@@ -40,7 +43,8 @@ import {UpdateProjectComponent} from './update-project/update-project.component'
         ProjectDashboardComponent,
         ProjectListComponent,
         CreateProjectComponent,
-        UpdateProjectComponent
+        UpdateProjectComponent,
+        SnackBarComponent,
     ],
     imports: [
         BrowserModule,
@@ -65,12 +69,17 @@ import {UpdateProjectComponent} from './update-project/update-project.component'
         MatSliderModule,
         MatSlideToggleModule,
         MatCheckboxModule,
-        MatDividerModule
+        MatDividerModule,
+        MatSnackBarModule,
 
     ],
     exports: [],
     providers: [
         ApiService,
+        MessengerService,
+    ],
+    entryComponents: [
+        SnackBarComponent,
     ],
     bootstrap: [AppComponent]
 })

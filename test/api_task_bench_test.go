@@ -15,6 +15,8 @@ func BenchmarkCreateTask(b *testing.B) {
 		CloneUrl: "http://localhost",
 	})
 
+	worker := genWid()
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		createTask(api.CreateTaskRequest{
@@ -22,6 +24,6 @@ func BenchmarkCreateTask(b *testing.B) {
 			Priority:   1,
 			Recipe:     "{}",
 			MaxRetries: 1,
-		})
+		}, worker)
 	}
 }

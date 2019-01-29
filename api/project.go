@@ -16,6 +16,20 @@ type CreateProjectRequest struct {
 	Public   bool   `json:"public"`
 }
 
+type UpdateProjectRequest struct {
+	Name     string `json:"name"`
+	CloneUrl string `json:"clone_url"`
+	GitRepo  string `json:"git_repo"`
+	Priority int64  `json:"priority"`
+	Motd     string `json:"motd"`
+	Public   bool   `json:"public"`
+}
+
+type UpdateProjectResponse struct {
+	Ok      bool   `json:"ok"`
+	Message string `json:"message,omitempty"`
+}
+
 type CreateProjectResponse struct {
 	Ok      bool   `json:"ok"`
 	Id      int64  `json:"id,omitempty"`
@@ -86,8 +100,64 @@ func (api *WebAPI) ProjectCreate(r *Request) {
 	}
 }
 
+func (api *WebAPI) ProjectUpdate(r *Request) {
+
+	id, err := strconv.ParseInt(r.Ctx.UserValue("id").(string), 10, 64)
+	handleErr(err, r) //todo handle invalid id
+
+	updateReq := &UpdateProjectRequest{}
+	if r.GetJson(updateReq) {
+
+		project := &storage.Project{
+			Id:       id,
+			Name:     updateReq.Name,
+			CloneUrl: updateReq.CloneUrl,
+			GitRepo:  updateReq.GitRepo,
+			Priority: updateReq.Priority,
+			Motd:     updateReq.Motd,
+			Public:   updateReq.Public,
+		}
+
+		if isValidProject(project) {
+			err := api.Database.UpdateProject(project)
+
+			if err != nil {
+				r.Json(CreateProjectResponse{
+					Ok:      false,
+					Message: err.Error(),
+				}, 500)
+
+				logrus.WithError(err).WithFields(logrus.Fields{
+					"project": project,
+				}).Warn("Error during project update")
+			} else {
+				r.OkJson(UpdateProjectResponse{
+					Ok: true,
+				})
+
+				logrus.WithFields(logrus.Fields{
+					"project": project,
+				}).Debug("Updated project")
+			}
+
+		} else {
+			logrus.WithFields(logrus.Fields{
+				"project": project,
+			}).Warn("Invalid project")
+
+			r.Json(CreateProjectResponse{
+				Ok:      false,
+				Message: "Invalid project",
+			}, 400)
+		}
+	}
+}
+
 func isValidProject(project *storage.Project) bool {
 	if len(project.Name) <= 0 {
+		return false
+	}
+	if project.Priority < 0 {
 		return false
 	}
 
@@ -97,7 +167,7 @@ func isValidProject(project *storage.Project) bool {
 func (api *WebAPI) ProjectGet(r *Request) {
 
 	id, err := strconv.ParseInt(r.Ctx.UserValue("id").(string), 10, 64)
-	handleErr(err, r)
+	handleErr(err, r) //todo handle invalid id
 
 	project := api.Database.GetProject(id)
 

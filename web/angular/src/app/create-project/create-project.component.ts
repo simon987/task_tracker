@@ -1,5 +1,9 @@
 import {Component, OnInit} from '@angular/core';
 import {Project} from "../models/project";
+import {ApiService} from "../api.service";
+import {MessengerService} from "../messenger.service";
+import {Router} from "@angular/router";
+
 
 @Component({
     selector: 'app-create-project',
@@ -10,12 +14,26 @@ export class CreateProjectComponent implements OnInit {
 
     private project = new Project();
 
-    constructor() {
+    constructor(private apiService: ApiService,
+                private messengerService: MessengerService,
+                private router: Router) {
         this.project.name = "test";
         this.project.public = true;
     }
 
     ngOnInit() {
+    }
+
+    onSubmit() {
+        this.apiService.createProject(this.project).subscribe(
+            data => {
+                this.router.navigateByUrl("/project/" + data["id"]);
+            },
+            error => {
+                console.log(error.error.message);
+                this.messengerService.show(error.error.message);
+            }
+        )
     }
 
 }

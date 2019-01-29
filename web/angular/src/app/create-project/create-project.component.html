@@ -3,7 +3,7 @@
     <mat-card-subtitle></mat-card-subtitle>
 
     <mat-card-content>
-        <form>
+        <form (ngSubmit)="onSubmit()">
             <mat-form-field appearance="outline">
                 <mat-label>Project name</mat-label>
                 <input type="text" matInput [(ngModel)]="project.name" name="name" placeholder="Project name">
@@ -29,11 +29,10 @@
 
 
             <input type="hidden" name="version" value="{{project.version}}">
+
+            <input type="submit" value="Create">
         </form>
     </mat-card-content>
 
-    <mat-card-actions>
-        <button>Create</button>
-    </mat-card-actions>
 
 </mat-card>

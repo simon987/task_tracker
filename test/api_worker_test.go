@@ -7,12 +7,15 @@ import (
 	"io/ioutil"
 	"net/http"
 	"src/task_tracker/api"
+	"src/task_tracker/storage"
 	"testing"
 )
 
 func TestCreateGetWorker(t *testing.T) {
 
-	resp, r := createWorker(api.CreateWorkerRequest{})
+	resp, r := createWorker(api.CreateWorkerRequest{
+		Alias: "my_worker_alias",
+	})
 
 	if r.StatusCode != 200 {
 		t.Error()
@@ -22,12 +25,12 @@ func TestCreateGetWorker(t *testing.T) {
 		t.Error()
 	}
 
-	getResp, r := getWorker(resp.WorkerId.String())
+	getResp, r := getWorker(resp.Worker.Id.String())
 
 	if r.StatusCode != 200 {
 		t.Error()
 	}
-	if resp.WorkerId != getResp.Worker.Id {
+	if resp.Worker.Id != getResp.Worker.Id {
 		t.Error()
 	}
 
@@ -35,6 +38,9 @@ func TestCreateGetWorker(t *testing.T) {
 		t.Error()
 	}
 	if len(getResp.Worker.Identity.UserAgent) <= 0 {
+		t.Error()
+	}
+	if resp.Worker.Alias != "my_worker_alias" {
 		t.Error()
 	}
 }
@@ -70,7 +76,7 @@ func TestGrantAccessFailedProjectConstraint(t *testing.T) {
 
 	wid := genWid()
 
-	resp := grantAccess(wid, 38274593)
+	resp := grantAccess(&wid.Id, 38274593)
 
 	if resp.Ok != false {
 		t.Error()
@@ -82,9 +88,9 @@ func TestGrantAccessFailedProjectConstraint(t *testing.T) {
 
 func TestRemoveAccessFailedProjectConstraint(t *testing.T) {
 
-	wid := genWid()
+	worker := genWid()
 
-	resp := removeAccess(wid, 38274593)
+	resp := removeAccess(&worker.Id, 38274593)
 
 	if resp.Ok != false {
 		t.Error()
@@ -138,8 +144,43 @@ func TestGrantAccessFailedWorkerConstraint(t *testing.T) {
 	}
 }
 
+func TestUpdateAliasValid(t *testing.T) {
+
+	wid := genWid()
+
+	updateResp := updateWorker(api.UpdateWorkerRequest{
+		Alias: "new alias",
+	}, wid)
+
+	if updateResp.Ok != true {
+		t.Error()
+	}
+
+	w, _ := getWorker(wid.Id.String())
+
+	if w.Worker.Alias != "new alias" {
+		t.Error()
+	}
+}
+
+func TestCreateWorkerAliasInvalid(t *testing.T) {
+
+	resp, _ := createWorker(api.CreateWorkerRequest{
+		Alias: "unassigned", //reserved alias
+	})
+
+	if resp.Ok != false {
+		t.Error()
+	}
+
+	if len(resp.Message) <= 0 {
+		t.Error()
+	}
+
+}
+
 func createWorker(req api.CreateWorkerRequest) (*api.CreateWorkerResponse, *http.Response) {
-	r := Post("/worker/create", req)
+	r := Post("/worker/create", req, nil)
 
 	var resp *api.CreateWorkerResponse
 	data, _ := ioutil.ReadAll(r.Body)
@@ -151,7 +192,7 @@ func createWorker(req api.CreateWorkerRequest) (*api.CreateWorkerResponse, *http
 
 func getWorker(id string) (*api.GetWorkerResponse, *http.Response) {
 
-	r := Get(fmt.Sprintf("/worker/get/%s", id))
+	r := Get(fmt.Sprintf("/worker/get/%s", id), nil)
 
 	var resp *api.GetWorkerResponse
 	data, _ := ioutil.ReadAll(r.Body)
@@ -161,10 +202,10 @@ func getWorker(id string) (*api.GetWorkerResponse, *http.Response) {
 	return resp, r
 }
 
-func genWid() *uuid.UUID {
+func genWid() *storage.Worker {
 
 	resp, _ := createWorker(api.CreateWorkerRequest{})
-	return &resp.WorkerId
+	return resp.Worker
 }
 
 func grantAccess(wid *uuid.UUID, project int64) *api.WorkerAccessResponse {
@@ -172,7 +213,7 @@ func grantAccess(wid *uuid.UUID, project int64) *api.WorkerAccessResponse {
 	r := Post("/access/grant", api.WorkerAccessRequest{
 		WorkerId:  wid,
 		ProjectId: project,
-	})
+	}, nil)
 
 	var resp *api.WorkerAccessResponse
 	data, _ := ioutil.ReadAll(r.Body)
@@ -187,9 +228,21 @@ func removeAccess(wid *uuid.UUID, project int64) *api.WorkerAccessResponse {
 	r := Post("/access/remove", api.WorkerAccessRequest{
 		WorkerId:  wid,
 		ProjectId: project,
-	})
+	}, nil)
 
 	var resp *api.WorkerAccessResponse
+	data, _ := ioutil.ReadAll(r.Body)
+	err := json.Unmarshal(data, &resp)
+	handleErr(err)
+
+	return resp
+}
+
+func updateWorker(request api.UpdateWorkerRequest, w *storage.Worker) *api.UpdateWorkerResponse {
+
+	r := Post("/worker/update", request, w)
+
+	var resp *api.UpdateWorkerResponse
 	data, _ := ioutil.ReadAll(r.Body)
 	err := json.Unmarshal(data, &resp)
 	handleErr(err)

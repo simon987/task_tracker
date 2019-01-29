@@ -16,7 +16,7 @@ func TestTraceValid(t *testing.T) {
 		Scope:     "test",
 		Message:   "This is a test message",
 		TimeStamp: time.Now().Unix(),
-	})
+	}, nil)
 
 	if r.StatusCode != 200 {
 		t.Fail()
@@ -27,7 +27,7 @@ func TestTraceInvalidScope(t *testing.T) {
 	r := Post("/log/trace", api.LogRequest{
 		Message:   "this is a test message",
 		TimeStamp: time.Now().Unix(),
-	})
+	}, nil)
 
 	if r.StatusCode != 500 {
 		t.Fail()
@@ -37,7 +37,7 @@ func TestTraceInvalidScope(t *testing.T) {
 		Scope:     "",
 		Message:   "this is a test message",
 		TimeStamp: time.Now().Unix(),
-	})
+	}, nil)
 
 	if r.StatusCode != 500 {
 		t.Fail()
@@ -52,7 +52,7 @@ func TestTraceInvalidMessage(t *testing.T) {
 		Scope:     "test",
 		Message:   "",
 		TimeStamp: time.Now().Unix(),
-	})
+	}, nil)
 
 	if r.StatusCode != 500 {
 		t.Fail()
@@ -66,7 +66,7 @@ func TestTraceInvalidTime(t *testing.T) {
 	r := Post("/log/trace", api.LogRequest{
 		Scope:   "test",
 		Message: "test",
-	})
+	}, nil)
 	if r.StatusCode != 500 {
 		t.Fail()
 	}
@@ -81,7 +81,7 @@ func TestWarnValid(t *testing.T) {
 		Scope:     "test",
 		Message:   "test",
 		TimeStamp: time.Now().Unix(),
-	})
+	}, nil)
 	if r.StatusCode != 200 {
 		t.Fail()
 	}
@@ -93,7 +93,7 @@ func TestInfoValid(t *testing.T) {
 		Scope:     "test",
 		Message:   "test",
 		TimeStamp: time.Now().Unix(),
-	})
+	}, nil)
 	if r.StatusCode != 200 {
 		t.Fail()
 	}
@@ -105,7 +105,7 @@ func TestErrorValid(t *testing.T) {
 		Scope:     "test",
 		Message:   "test",
 		TimeStamp: time.Now().Unix(),
-	})
+	}, nil)
 	if r.StatusCode != 200 {
 		t.Fail()
 	}
@@ -171,7 +171,7 @@ func getLogs(since int64, level logrus.Level) *api.GetLogResponse {
 	r := Post(fmt.Sprintf("/logs"), api.GetLogRequest{
 		Since: since,
 		Level: level,
-	})
+	}, nil)
 
 	resp := &api.GetLogResponse{}
 	data, _ := ioutil.ReadAll(r.Body)

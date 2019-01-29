@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"io/ioutil"
 	"src/task_tracker/api"
+	"src/task_tracker/storage"
 	"testing"
 )
 
@@ -18,11 +19,13 @@ func TestCreateTaskValid(t *testing.T) {
 		CloneUrl: "http://github.com/test/test",
 	})
 
+	worker := genWid()
+
 	resp := createTask(api.CreateTaskRequest{
 		Project:    1,
 		Recipe:     "{}",
 		MaxRetries: 3,
-	})
+	}, worker)
 
 	if resp.Ok != true {
 		t.Fail()
@@ -31,11 +34,13 @@ func TestCreateTaskValid(t *testing.T) {
 
 func TestCreateTaskInvalidProject(t *testing.T) {
 
+	worker := genWid()
+
 	resp := createTask(api.CreateTaskRequest{
 		Project:    123456,
 		Recipe:     "{}",
 		MaxRetries: 3,
-	})
+	}, worker)
 
 	if resp.Ok != false {
 		t.Error()
@@ -62,7 +67,9 @@ func TestGetTaskInvalidWid(t *testing.T) {
 func TestGetTaskInvalidWorker(t *testing.T) {
 
 	id := uuid.New()
-	resp := getTask(&id)
+	resp := getTask(&storage.Worker{
+		Id: id,
+	})
 
 	if resp.Ok != false {
 		t.Error()
@@ -76,7 +83,9 @@ func TestGetTaskInvalidWorker(t *testing.T) {
 func TestGetTaskFromProjectInvalidWorker(t *testing.T) {
 
 	id := uuid.New()
-	resp := getTaskFromProject(1, &id)
+	resp := getTaskFromProject(1, &storage.Worker{
+		Id: id,
+	})
 
 	if resp.Ok != false {
 		t.Error()
@@ -89,10 +98,12 @@ func TestGetTaskFromProjectInvalidWorker(t *testing.T) {
 
 func TestCreateTaskInvalidRetries(t *testing.T) {
 
+	worker := genWid()
+
 	resp := createTask(api.CreateTaskRequest{
 		Project:    1,
 		MaxRetries: -1,
-	})
+	}, worker)
 
 	if resp.Ok != false {
 		t.Error()
@@ -105,11 +116,13 @@ func TestCreateTaskInvalidRetries(t *testing.T) {
 
 func TestCreateTaskInvalidRecipe(t *testing.T) {
 
+	worker := genWid()
+
 	resp := createTask(api.CreateTaskRequest{
 		Project:    1,
 		Recipe:     "",
 		MaxRetries: 3,
-	})
+	}, worker)
 
 	if resp.Ok != false {
 		t.Error()
@@ -132,12 +145,14 @@ func TestCreateGetTask(t *testing.T) {
 		Public:   true,
 	})
 
+	worker := genWid()
+
 	createTask(api.CreateTaskRequest{
 		Project:    resp.Id,
 		Recipe:     "{\"url\":\"test\"}",
 		MaxRetries: 3,
 		Priority:   9999,
-	})
+	}, worker)
 
 	taskResp := getTaskFromProject(resp.Id, genWid())
 
@@ -194,26 +209,27 @@ func createTasks(prefix string) (int64, int64) {
 		Priority: 999,
 		Public:   true,
 	})
+	worker := genWid()
 	createTask(api.CreateTaskRequest{
 		Project:  lowP.Id,
 		Recipe:   "low1",
 		Priority: 0,
-	})
+	}, worker)
 	createTask(api.CreateTaskRequest{
 		Project:  lowP.Id,
 		Recipe:   "low2",
 		Priority: 1,
-	})
+	}, worker)
 	createTask(api.CreateTaskRequest{
 		Project:  highP.Id,
 		Recipe:   "high1",
 		Priority: 100,
-	})
+	}, worker)
 	createTask(api.CreateTaskRequest{
 		Project:  highP.Id,
 		Recipe:   "high2",
 		Priority: 101,
-	})
+	}, worker)
 
 	return lowP.Id, highP.Id
 }
@@ -274,7 +290,7 @@ func TestTaskPriority(t *testing.T) {
 
 func TestTaskNoAccess(t *testing.T) {
 
-	wid := genWid()
+	worker := genWid()
 
 	pid := createProject(api.CreateProjectRequest{
 		Name:     "This is a private proj",
@@ -292,16 +308,16 @@ func TestTaskNoAccess(t *testing.T) {
 		MaxAssignTime: 10,
 		MaxRetries:    2,
 		Recipe:        "---",
-	})
+	}, worker)
 
 	if createResp.Ok != true {
 		t.Error()
 	}
 
-	grantAccess(wid, pid)
-	removeAccess(wid, pid)
+	grantAccess(&worker.Id, pid)
+	removeAccess(&worker.Id, pid)
 
-	tResp := getTaskFromProject(pid, wid)
+	tResp := getTaskFromProject(pid, worker)
 
 	if tResp.Ok != false {
 		t.Error()
@@ -316,7 +332,7 @@ func TestTaskNoAccess(t *testing.T) {
 
 func TestTaskHasAccess(t *testing.T) {
 
-	wid := genWid()
+	worker := genWid()
 
 	pid := createProject(api.CreateProjectRequest{
 		Name:     "This is a private proj1",
@@ -334,15 +350,15 @@ func TestTaskHasAccess(t *testing.T) {
 		MaxAssignTime: 10,
 		MaxRetries:    2,
 		Recipe:        "---",
-	})
+	}, worker)
 
 	if createResp.Ok != true {
 		t.Error()
 	}
 
-	grantAccess(wid, pid)
+	grantAccess(&worker.Id, pid)
 
-	tResp := getTaskFromProject(pid, wid)
+	tResp := getTaskFromProject(pid, worker)
 
 	if tResp.Ok != true {
 		t.Error()
@@ -354,16 +370,16 @@ func TestTaskHasAccess(t *testing.T) {
 
 func TestNoMoreTasks(t *testing.T) {
 
-	wid := genWid()
+	worker := genWid()
 
 	for i := 0; i < 15; i++ {
-		getTask(wid)
+		getTask(worker)
 	}
 }
 
 func TestReleaseTaskSuccess(t *testing.T) {
 
-	//wid := genWid()
+	worker := genWid()
 
 	pid := createProject(api.CreateProjectRequest{
 		Priority: 0,
@@ -372,6 +388,7 @@ func TestReleaseTaskSuccess(t *testing.T) {
 		Version:  "11111111111111111",
 		Name:     "testreleasetask",
 		Motd:     "",
+		Public:   true,
 	}).Id
 
 	createTask(api.CreateTaskRequest{
@@ -379,13 +396,119 @@ func TestReleaseTaskSuccess(t *testing.T) {
 		Project:    pid,
 		Recipe:     "{}",
 		MaxRetries: 3,
-	})
+	}, worker)
 
+	task := getTaskFromProject(pid, worker).Task
+
+	releaseResp := releaseTask(api.ReleaseTaskRequest{
+		TaskId:  task.Id,
+		Success: true,
+	}, worker)
+
+	if releaseResp.Ok != true {
+		t.Error()
+	}
+
+	otherTask := getTaskFromProject(pid, worker)
+
+	//Shouldn't have more tasks available
+	if otherTask.Ok != false {
+		t.Error()
+	}
 }
 
-func createTask(request api.CreateTaskRequest) *api.CreateTaskResponse {
+func TestCreateIntCollision(t *testing.T) {
 
-	r := Post("/task/create", request)
+	pid := createProject(api.CreateProjectRequest{
+		Priority: 1,
+		GitRepo:  "testcreateintcollision",
+		CloneUrl: "testcreateintcollision",
+		Motd:     "testcreateintcollision",
+		Public:   true,
+		Name:     "testcreateintcollision",
+		Version:  "testcreateintcollision",
+	}).Id
+
+	w := genWid()
+
+	if createTask(api.CreateTaskRequest{
+		Project:  pid,
+		Hash64:   123,
+		Priority: 1,
+		Recipe:   "{}",
+	}, w).Ok != true {
+		t.Error()
+	}
+
+	resp := createTask(api.CreateTaskRequest{
+		Project:  pid,
+		Hash64:   123,
+		Priority: 1,
+		Recipe:   "{}",
+	}, w)
+
+	if resp.Ok != false {
+		t.Error()
+	}
+
+	fmt.Println(resp.Message)
+	if len(resp.Message) <= 0 {
+		t.Error()
+	}
+}
+
+func TestCreateStringCollision(t *testing.T) {
+
+	pid := createProject(api.CreateProjectRequest{
+		Priority: 1,
+		GitRepo:  "testcreatestringcollision",
+		CloneUrl: "testcreatestringcollision",
+		Motd:     "testcreatestringcollision",
+		Public:   true,
+		Name:     "testcreatestringcollision",
+		Version:  "testcreatestringcollision",
+	}).Id
+
+	w := genWid()
+
+	if createTask(api.CreateTaskRequest{
+		Project:      pid,
+		UniqueString: "Hello, world",
+		Priority:     1,
+		Recipe:       "{}",
+	}, w).Ok != true {
+		t.Error()
+	}
+
+	resp := createTask(api.CreateTaskRequest{
+		Project:      pid,
+		UniqueString: "Hello, world",
+		Priority:     1,
+		Recipe:       "{}",
+	}, w)
+
+	if !createTask(api.CreateTaskRequest{
+		Project:      pid,
+		UniqueString: "This one should work",
+		Priority:     1,
+		Recipe:       "{}",
+	}, w).Ok {
+		t.Error()
+	}
+
+	if resp.Ok != false {
+		t.Error()
+	}
+
+	fmt.Println(resp.Message)
+	if len(resp.Message) <= 0 {
+		t.Error()
+	}
+}
+
+func createTask(request api.CreateTaskRequest, worker *storage.Worker) *api.CreateTaskResponse {
+
+	r := Post("/task/create", request, worker)
 
 	var resp api.CreateTaskResponse
 	data, _ := ioutil.ReadAll(r.Body)
@@ -395,9 +518,9 @@ func createTask(request api.CreateTaskRequest) *api.CreateTaskResponse {
 	return &resp
 }
 
-func getTask(wid *uuid.UUID) *api.GetTaskResponse {
+func getTask(worker *storage.Worker) *api.GetTaskResponse {
 
-	r := Get(fmt.Sprintf("/task/get?wid=%s", wid))
+	r := Get(fmt.Sprintf("/task/get"), worker)
 
 	var resp api.GetTaskResponse
 	data, _ := ioutil.ReadAll(r.Body)
@@ -407,11 +530,23 @@ func getTask(wid *uuid.UUID) *api.GetTaskResponse {
 	return &resp
 }
 
-func getTaskFromProject(project int64, wid *uuid.UUID) *api.GetTaskResponse {
+func getTaskFromProject(project int64, worker *storage.Worker) *api.GetTaskResponse {
 
-	r := Get(fmt.Sprintf("/task/get/%d?wid=%s", project, wid))
+	r := Get(fmt.Sprintf("/task/get/%d", project), worker)
 
 	var resp api.GetTaskResponse
+	data, _ := ioutil.ReadAll(r.Body)
+	err := json.Unmarshal(data, &resp)
+	handleErr(err)
+
+	return &resp
+}
+
+func releaseTask(request api.ReleaseTaskRequest, worker *storage.Worker) *api.ReleaseTaskResponse {
+
+	r := Post("/task/release", request, worker)
+
+	var resp api.ReleaseTaskResponse
 	data, _ := ioutil.ReadAll(r.Body)
 	err := json.Unmarshal(data, &resp)
 	handleErr(err)

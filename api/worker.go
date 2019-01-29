@@ -3,17 +3,28 @@ package api
 import (
 	"github.com/Sirupsen/logrus"
 	"github.com/google/uuid"
+	"math/rand"
 	"src/task_tracker/storage"
 	"time"
 )
 
 type CreateWorkerRequest struct {
+	Alias string `json:"alias"`
+}
+
+type UpdateWorkerRequest struct {
+	Alias string `json:"alias"`
+}
+
+type UpdateWorkerResponse struct {
+	Ok      bool   `json:"ok"`
+	Message string `json:"message,omitempty"`
 }
 
 type CreateWorkerResponse struct {
-	Ok       bool      `json:"ok"`
-	Message  string    `json:"message,omitempty"`
-	WorkerId uuid.UUID `json:"id,omitempty"`
+	Ok      bool            `json:"ok"`
+	Message string          `json:"message,omitempty"`
+	Worker  *storage.Worker `json:"worker,omitempty"`
 }
 
 type GetWorkerResponse struct {
@@ -55,13 +66,13 @@ func (api *WebAPI) WorkerCreate(r *Request) {
 		return
 	}
 
-	id, err := api.workerCreate(workerReq, getIdentity(r))
+	worker, err := api.workerCreate(workerReq, getIdentity(r))
 	if err != nil {
 		handleErr(err, r)
 	} else {
 		r.OkJson(CreateWorkerResponse{
-			Ok:       true,
-			WorkerId: id,
+			Ok:     true,
+			Worker: worker,
 		})
 	}
 }
@@ -84,6 +95,9 @@ func (api *WebAPI) WorkerGet(r *Request) {
 	worker := api.Database.GetWorker(id)
 
 	if worker != nil {
+
+		worker.Secret = nil
+
 		r.OkJson(GetWorkerResponse{
 			Ok:     true,
 			Worker: worker,
@@ -136,20 +150,73 @@ func (api *WebAPI) WorkerRemoveAccess(r *Request) {
 	}
 }
 
-func (api *WebAPI) workerCreate(request *CreateWorkerRequest, identity *storage.Identity) (uuid.UUID, error) {
+func (api *WebAPI) WorkerUpdate(r *Request) {
+
+	worker, err := api.validateSignature(r)
+	if err != nil {
+		r.Json(GetTaskResponse{
+			Ok:      false,
+			Message: err.Error(),
+		}, 403)
+		return
+	}
+
+	req := &UpdateWorkerRequest{}
+	if r.GetJson(req) {
+
+		worker.Alias = req.Alias
+
+		ok := api.Database.UpdateWorker(worker)
+
+		if ok {
+			r.OkJson(UpdateWorkerResponse{
+				Ok: true,
+			})
+		} else {
+			r.OkJson(UpdateWorkerResponse{
+				Ok:      false,
+				Message: "Could not update worker",
+			})
+		}
+	}
+}
+
+func (api *WebAPI) workerCreate(request *CreateWorkerRequest, identity *storage.Identity) (*storage.Worker, error) {
+
+	if request.Alias == "" {
+		request.Alias = "default_alias"
+	}
 
 	worker := storage.Worker{
 		Id:       uuid.New(),
 		Created:  time.Now().Unix(),
 		Identity: identity,
+		Secret:   makeSecret(),
+		Alias:    request.Alias,
 	}
 
 	api.Database.SaveWorker(&worker)
-	return worker.Id, nil
+	return &worker, nil
 }
 
 func canCreateWorker(r *Request, cwr *CreateWorkerRequest, identity *storage.Identity) bool {
+
+	if cwr.Alias == "unassigned" {
+		//Reserved alias
+		return false
+	}
+
 	return true
+}
+
+func makeSecret() []byte {
+
+	secret := make([]byte, 32)
+	for i := 0; i < 32; i++ {
+		secret[i] = byte(rand.Int31())
+	}
+
+	return secret
 }
 
 func getIdentity(r *Request) *storage.Identity {

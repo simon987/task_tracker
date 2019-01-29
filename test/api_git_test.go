@@ -13,7 +13,7 @@ import (
 
 func TestWebHookNoSignature(t *testing.T) {
 
-	r := Post("/git/receivehook", api.GitPayload{})
+	r := Post("/git/receivehook", api.GitPayload{}, nil)
 
 	if r.StatusCode != 403 {
 		t.Error()

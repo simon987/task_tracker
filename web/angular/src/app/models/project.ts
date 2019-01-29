@@ -1,5 +1,6 @@
 export class Project {
 
+    public id: number;
     public priority: number;
     public motd: string;
     public name: string;

@@ -72,7 +72,8 @@ func (api *WebAPI) ReceiveGitWebHook(r *Request) {
 	version := getVersion(payload)
 
 	project.Version = version
-	api.Database.UpdateProject(project)
+	err := api.Database.UpdateProject(project)
+	handleErr(err, r)
 }
 
 func signatureValid(r *Request) (matches bool) {

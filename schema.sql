@@ -26,9 +26,10 @@ CREATE TABLE worker_identity
 CREATE TABLE worker
 (
   id       TEXT PRIMARY KEY,
-  alias    TEXT DEFAULT NULL,
+  alias    TEXT,
   created  INTEGER,
-  identity INTEGER REFERENCES workerIdentity (id)
+  identity INTEGER REFERENCES worker_identity (id),
+  secret   BYTEA
 );
 
 CREATE TABLE project
@@ -61,7 +62,8 @@ CREATE TABLE task
   status          Status  DEFAULT 'new',
   recipe          TEXT,
   max_assign_time INTEGER DEFAULT 0,
-  assign_time     INTEGER DEFAULT 0
+  assign_time     INTEGER DEFAULT 0,
+  hash64          BIGINT  DEFAULT NULL UNIQUE
 );
 
 CREATE TABLE log_entry

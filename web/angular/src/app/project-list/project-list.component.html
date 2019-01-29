@@ -12,6 +12,7 @@
                 <pre>{{stats.project | json}}</pre>
                 <div style="display: flex;">
                     <a [routerLink]="'/project/' + stats.project.id">Dashboard</a>
+                    <a [routerLink]="'/project/' + stats.project.id + '/update'">Update</a>
                 </div>
             </mat-expansion-panel>
         </mat-accordion>

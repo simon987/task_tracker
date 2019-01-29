@@ -3,7 +3,6 @@ package storage
 import (
 	"database/sql"
 	"github.com/Sirupsen/logrus"
-	"github.com/google/uuid"
 	"strings"
 )
 
@@ -19,8 +18,8 @@ type Project struct {
 }
 
 type AssignedTasks struct {
-	Assignee  uuid.UUID `json:"assignee"`
-	TaskCount int64     `json:"task_count"`
+	Assignee  string `json:"assignee"`
+	TaskCount int64  `json:"task_count"`
 }
 
 type ProjectStats struct {
@@ -116,14 +115,16 @@ func (database *Database) GetProjectWithRepoName(repoName string) *Project {
 	return project
 }
 
-func (database *Database) UpdateProject(project *Project) {
+func (database *Database) UpdateProject(project *Project) error {
 
 	db := database.getDB()
 
 	res, err := db.Exec(`UPDATE project 
 		SET (priority, name, clone_url, git_repo, version, motd, public) = ($1,$2,$3,$4,$5,$6,$7) WHERE id=$8`,
 		project.Priority, project.Name, project.CloneUrl, project.GitRepo, project.Version, project.Motd, project.Public, project.Id)
-	handleErr(err)
+	if err != nil {
+		return err
+	}
 
 	rowsAffected, _ := res.RowsAffected()
 
@@ -132,7 +133,7 @@ func (database *Database) UpdateProject(project *Project) {
 		"rowsAffected": rowsAffected,
 	}).Trace("Database.updateProject UPDATE project")
 
-	return
+	return nil
 }
 
 func (database *Database) GetProjectStats(id int64) *ProjectStats {
@@ -154,17 +155,26 @@ func (database *Database) GetProjectStats(id int64) *ProjectStats {
 			logrus.WithError(err).WithFields(logrus.Fields{
 				"id": id,
 			}).Trace("Get project stats: No task for this project")
-			return nil
+
 		}
 
-		//todo: only expose worker alias
-		rows, err := db.Query(`SELECT assignee, COUNT(*) FROM TASK
-  			LEFT JOIN worker ON TASK.assignee = worker.id WHERE project=$1 GROUP BY assignee`, id)
+		rows, err := db.Query(`SELECT worker.alias, COUNT(*) as wc FROM TASK
+  			LEFT JOIN worker ON TASK.assignee = worker.id WHERE project=$1 
+			GROUP BY worker.id ORDER BY wc LIMIT 10`, id)
+
+		stats.Assignees = []*AssignedTasks{}
 
 		for rows.Next() {
 			assignee := AssignedTasks{}
-			err = rows.Scan(&assignee.Assignee, &assignee.TaskCount)
+			var assigneeAlias sql.NullString
+			err = rows.Scan(&assigneeAlias, &assignee.TaskCount)
 			handleErr(err)
+
+			if assigneeAlias.Valid {
+				assignee.Assignee = assigneeAlias.String
+			} else {
+				assignee.Assignee = "unassigned"
+			}
 
 			stats.Assignees = append(stats.Assignees, &assignee)
 		}
@@ -182,8 +192,8 @@ func (database Database) GetAllProjectsStats() *[]ProjectStats {
        	SUM(CASE WHEN status='failed' THEN 1 ELSE 0 END) failedCount,
 		SUM(CASE WHEN status='closed' THEN 1 ELSE 0 END) closedCount,
        	p.*
-		FROM task INNER JOIN project p on task.project = p.id
-		GROUP BY p.id`)
+		FROM task RIGHT JOIN project p on task.project = p.id
+		GROUP BY p.id ORDER BY p.name`)
 	handleErr(err)
 
 	for rows.Next() {
@@ -191,7 +201,7 @@ func (database Database) GetAllProjectsStats() *[]ProjectStats {
 		stats := ProjectStats{}
 		p := &Project{}
 		err := rows.Scan(&stats.NewTaskCount, &stats.FailedTaskCount, &stats.ClosedTaskCount,
-			&p.Id, &p.Priority, &p.Motd, &p.Name, &p.CloneUrl, &p.GitRepo, &p.Version, &p.Public)
+			&p.Id, &p.Priority, &p.Name, &p.CloneUrl, &p.GitRepo, &p.Version, &p.Motd, &p.Public)
 		handleErr(err)
 
 		stats.Project = p

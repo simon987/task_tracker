@@ -2,6 +2,7 @@ package storage
 
 import (
 	"database/sql"
+	"fmt"
 	"github.com/Sirupsen/logrus"
 	"github.com/google/uuid"
 )
@@ -19,13 +20,14 @@ type Task struct {
 	AssignTime    int64     `json:"assign_time"`
 }
 
-func (database *Database) SaveTask(task *Task, project int64) error {
+func (database *Database) SaveTask(task *Task, project int64, hash64 int64) error {
 
 	db := database.getDB()
 
-	res, err := db.Exec(`
-	INSERT INTO task (project, max_retries, recipe, priority, max_assign_time) 
-	VALUES ($1,$2,$3,$4,$5)`,
+	//TODO: For some reason it refuses to insert the 64-bit value unless I do that...
+	res, err := db.Exec(fmt.Sprintf(`
+	INSERT INTO task (project, max_retries, recipe, priority, max_assign_time, hash64) 
+	VALUES ($1,$2,$3,$4,$5,NULLIF(%d, 0))`, hash64),
 		project, task.MaxRetries, task.Recipe, task.Priority, task.MaxAssignTime)
 	if err != nil {
 		logrus.WithError(err).WithFields(logrus.Fields{
@@ -57,7 +59,7 @@ func (database *Database) GetTask(worker *Worker) *Task {
 		SELECT task.id
 	FROM task
 	INNER JOIN project p on task.project = p.id
-	WHERE assignee IS NULL
+	WHERE assignee IS NULL AND task.status='new'
 		AND (p.public OR EXISTS (
 		  SELECT 1 FROM worker_has_access_to_project a WHERE a.worker=$1 AND a.project=p.id
 		))
@@ -88,7 +90,8 @@ func (database *Database) GetTask(worker *Worker) *Task {
 func getTaskById(id int64, db *sql.DB) *Task {
 
 	row := db.QueryRow(`
-	SELECT * FROM task 
+	SELECT task.id, task.priority, task.project, assignee, retries, max_retries,
+	        status, recipe, max_assign_time, assign_time, project.* FROM task 
 	  INNER JOIN project ON task.project = project.id
 	WHERE task.id=$1`, id)
 	task := scanTask(row)
@@ -109,11 +112,11 @@ func (database Database) ReleaseTask(id int64, workerId *uuid.UUID, success bool
 	var err error
 	if success {
 		res, err = db.Exec(`UPDATE task SET (status, assignee) = ('closed', NULL)
-		WHERE id=$2 AND task.assignee=$2`, id, workerId)
+		WHERE id=$1 AND task.assignee=$2`, id, workerId)
 	} else {
 		res, err = db.Exec(`UPDATE task SET (status, assignee, retries) = 
   		(CASE WHEN retries+1 >= max_retries THEN 'failed' ELSE 'new' END, NULL, retries+1)
-		WHERE id=$2 AND assignee=$2`, id, workerId)
+		WHERE id=$1 AND assignee=$2`, id, workerId)
 	}
 	handleErr(err)
 
@@ -138,7 +141,7 @@ func (database *Database) GetTaskFromProject(worker *Worker, projectId int64) *T
 		SELECT task.id
 	FROM task
 	INNER JOIN project p on task.project = p.id
-	WHERE assignee IS NULL AND p.id=$2
+	WHERE assignee IS NULL AND p.id=$2 AND status='new'
 		AND (p.public OR EXISTS (
 		  SELECT 1 FROM worker_has_access_to_project a WHERE a.worker=$1 AND a.project=$2
 		))

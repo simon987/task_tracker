@@ -1,9 +1,11 @@
 package main
 
 import (
+	"math/rand"
 	"src/task_tracker/api"
 	"src/task_tracker/config"
 	"src/task_tracker/storage"
+	"time"
 )
 
 func tmpDebugSetup() {
@@ -15,6 +17,7 @@ func tmpDebugSetup() {
 
 func main() {
 
+	rand.Seed(time.Now().UTC().UnixNano())
 	config.SetupConfig()
 
 	webApi := api.New()

@@ -56,14 +56,14 @@ export class ProjectDashboardComponent implements OnInit {
     setupStatusPieChart() {
         let tooltip = d3.select("#stooltip");
 
-        this.statusSvg = d3.select('#status')
+        this.statusSvg = d3.select("#status")
             .append('svg')
             .attr('width', this.pieWidth)
             .attr('height', this.pieHeight)
             .append("g")
             .attr("transform", "translate(" + this.pieRadius + "," + this.pieRadius + ")");
 
-        this.statusPath = this.statusSvg.selectAll("path")
+        this.statusPath = this.statusSvg.selectAll()
             .data(this.pieFun(this.statusData))
             .enter()
             .append('path')
@@ -76,14 +76,14 @@ export class ProjectDashboardComponent implements OnInit {
     setupAssigneesPieChart() {
         let tooltip = d3.select("#atooltip");
 
-        this.assigneesSvg = d3.select('#assignees')
+        this.assigneesSvg = d3.select("#assignees")
             .append('svg')
             .attr('width', this.pieWidth)
             .attr('height', this.pieHeight)
             .append("g")
             .attr("transform", "translate(" + this.pieRadius + "," + this.pieRadius + ")");
 
-        this.assigneesPath = this.assigneesSvg.selectAll("path")
+        this.assigneesPath = this.assigneesSvg.selectAll()
             .data(this.pieFun(this.assigneesData))
             .enter()
             .append('path')
@@ -229,10 +229,10 @@ export class ProjectDashboardComponent implements OnInit {
             {label: "Failed", count: this.projectStats["failed_task_count"]},
             {label: "Closed", count: this.projectStats["closed_task_count"]},
         ];
-        this.assigneesData = _.map(this.projectStats["assignees"], (assignedTasks) => {
+        this.assigneesData = _.map(this.projectStats["assignees"], assignedTask => {
             return {
-                label: assignedTasks["assignee"] == "00000000-0000-0000-0000-000000000000" ? "unassigned" : assignedTasks["assignee"],
-                count: assignedTasks["task_count"]
+                label: assignedTask["assignee"],
+                count: assignedTask["task_count"],
             }
         });
 
@@ -255,6 +255,16 @@ export class ProjectDashboardComponent implements OnInit {
             {label: 'closed', count: 0},
         ];
         this.assigneesData = [
+            {label: 'null', count: 0},
+            {label: 'null', count: 0},
+            {label: 'null', count: 0},
+            {label: 'null', count: 0},
+            {label: 'null', count: 0},
+            {label: 'null', count: 0},
+            {label: 'null', count: 0},
+            {label: 'null', count: 0},
+            {label: 'null', count: 0},
+            {label: 'null', count: 0},
             {label: 'null', count: 0},
         ];
 

@@ -1,5 +1,6 @@
 import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
+import {Project} from "./models/project";
 
 @Injectable()
 export class ApiService {
@@ -25,5 +26,13 @@ export class ApiService {
 
     getProject(id: number) {
         return this.http.get(this.url + "/project/get/" + id)
+    }
+
+    createProject(project: Project) {
+        return this.http.post(this.url + "/project/create", project)
+    }
+
+    updateProject(project: Project) {
+        return this.http.post(this.url + "/project/update/" + project.id, project)
     }
 }

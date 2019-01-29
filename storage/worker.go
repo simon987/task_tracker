@@ -16,6 +16,8 @@ type Worker struct {
 	Id       uuid.UUID `json:"id"`
 	Created  int64     `json:"created"`
 	Identity *Identity `json:"identity"`
+	Alias    string    `json:"alias,omitempty"`
+	Secret   []byte    `json:"secret"`
 }
 
 func (database *Database) SaveWorker(worker *Worker) {
@@ -24,8 +26,8 @@ func (database *Database) SaveWorker(worker *Worker) {
 
 	identityId := getOrCreateIdentity(worker.Identity, db)
 
-	res, err := db.Exec("INSERT INTO worker (id, created, identity) VALUES ($1,$2,$3)",
-		worker.Id, worker.Created, identityId)
+	res, err := db.Exec("INSERT INTO worker (id, created, identity, secret, alias) VALUES ($1,$2,$3,$4,$5)",
+		worker.Id, worker.Created, identityId, worker.Secret, worker.Alias)
 	handleErr(err)
 
 	var rowsAffected, _ = res.RowsAffected()
@@ -41,8 +43,8 @@ func (database *Database) GetWorker(id uuid.UUID) *Worker {
 	worker := &Worker{}
 	var identityId int64
 
-	row := db.QueryRow("SELECT id, created, identity FROM worker WHERE id=$1", id)
-	err := row.Scan(&worker.Id, &worker.Created, &identityId)
+	row := db.QueryRow("SELECT id, created, identity, secret, alias FROM worker WHERE id=$1", id)
+	err := row.Scan(&worker.Id, &worker.Created, &identityId, &worker.Secret, &worker.Alias)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"id": id,
@@ -64,7 +66,7 @@ func getIdentity(id int64, db *sql.DB) (*Identity, error) {
 
 	identity := &Identity{}
 
-	row := db.QueryRow("SELECT remote_addr, user_agent FROM workeridentity WHERE id=$1", id)
+	row := db.QueryRow("SELECT remote_addr, user_agent FROM worker_identity WHERE id=$1", id)
 	err := row.Scan(&identity.RemoteAddr, &identity.UserAgent)
 
 	if err != nil {
@@ -80,7 +82,7 @@ func getIdentity(id int64, db *sql.DB) (*Identity, error) {
 
 func getOrCreateIdentity(identity *Identity, db *sql.DB) int64 {
 
-	res, err := db.Exec("INSERT INTO workeridentity (remote_addr, user_agent) VALUES ($1,$2) ON CONFLICT DO NOTHING",
+	res, err := db.Exec("INSERT INTO worker_identity (remote_addr, user_agent) VALUES ($1,$2) ON CONFLICT DO NOTHING",
 		identity.RemoteAddr, identity.UserAgent)
 	handleErr(err)
 
@@ -89,7 +91,7 @@ func getOrCreateIdentity(identity *Identity, db *sql.DB) int64 {
 		"rowsAffected": rowsAffected,
 	}).Trace("Database.saveWorker INSERT workerIdentity")
 
-	row := db.QueryRow("SELECT (id) FROM workeridentity WHERE remote_addr=$1", identity.RemoteAddr)
+	row := db.QueryRow("SELECT (id) FROM worker_identity WHERE remote_addr=$1", identity.RemoteAddr)
 
 	var rowId int64
 	err = row.Scan(&rowId)
@@ -127,7 +129,7 @@ func (database *Database) GrantAccess(workerId *uuid.UUID, projectId int64) bool
 	return rowsAffected == 1
 }
 
-func (database Database) RemoveAccess(workerId *uuid.UUID, projectId int64) bool {
+func (database *Database) RemoveAccess(workerId *uuid.UUID, projectId int64) bool {
 
 	db := database.getDB()
 	res, err := db.Exec(`DELETE FROM worker_has_access_to_project WHERE worker=$1 AND project=$2`,
@@ -141,6 +143,23 @@ func (database Database) RemoveAccess(workerId *uuid.UUID, projectId int64) bool
 		"workerId":     workerId,
 		"projectId":    projectId,
 	}).Trace("Database.RemoveAccess DELETE worker_has_access_to_project")
+
+	return rowsAffected == 1
+}
+
+func (database *Database) UpdateWorker(worker *Worker) bool {
+
+	db := database.getDB()
+	res, err := db.Exec(`UPDATE worker SET alias=$1 WHERE id=$2`,
+		worker.Alias, worker.Id)
+	handleErr(err)
+
+	rowsAffected, _ := res.RowsAffected()
+
+	logrus.WithFields(logrus.Fields{
+		"rowsAffected": rowsAffected,
+		"worker":       worker,
+	}).Trace("Database.UpdateWorker UPDATE worker")
 
 	return rowsAffected == 1
 }

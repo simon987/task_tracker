@@ -3,7 +3,6 @@ package test
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/google/uuid"
 	"io/ioutil"
 	"net/http"
 	"src/task_tracker/api"
@@ -132,28 +131,30 @@ func TestGetProjectStats(t *testing.T) {
 		CloneUrl: "http://github.com/drone/test",
 		GitRepo:  "drone/test",
 		Priority: 3,
+		Public:   true,
 	})
 
 	pid := r.Id
+	worker := genWid()
 
 	createTask(api.CreateTaskRequest{
 		Priority:   1,
 		Project:    pid,
 		MaxRetries: 0,
 		Recipe:     "{}",
-	})
+	}, worker)
 	createTask(api.CreateTaskRequest{
 		Priority:   2,
 		Project:    pid,
 		MaxRetries: 0,
 		Recipe:     "{}",
-	})
+	}, worker)
 	createTask(api.CreateTaskRequest{
 		Priority:   3,
 		Project:    pid,
 		MaxRetries: 0,
 		Recipe:     "{}",
-	})
+	}, worker)
 
 	stats := getProjectStats(pid)
 
@@ -169,7 +170,7 @@ func TestGetProjectStats(t *testing.T) {
 		t.Error()
 	}
 
-	if stats.Stats.Assignees[0].Assignee != uuid.Nil {
+	if stats.Stats.Assignees[0].Assignee != "unassigned" {
 		t.Error()
 	}
 	if stats.Stats.Assignees[0].TaskCount != 3 {
@@ -189,19 +190,132 @@ func TestGetProjectStatsNotFound(t *testing.T) {
 	})
 	s := getProjectStats(r.Id)
 
-	if s.Ok != false {
+	if s.Ok != true {
 		t.Error()
 	}
 
-	if len(s.Message) <= 0 {
+	if s.Stats == nil {
 		t.Error()
 	}
 
 }
 
+func TestUpdateProjectValid(t *testing.T) {
+
+	pid := createProject(api.CreateProjectRequest{
+		Public:   true,
+		Version:  "versionA",
+		Motd:     "MotdA",
+		Name:     "NameA",
+		CloneUrl: "CloneUrlA",
+		GitRepo:  "GitRepoA",
+		Priority: 1,
+	}).Id
+
+	updateResp := updateProject(api.UpdateProjectRequest{
+		Priority: 2,
+		GitRepo:  "GitRepoB",
+		CloneUrl: "CloneUrlB",
+		Name:     "NameB",
+		Motd:     "MotdB",
+		Public:   false,
+	}, pid)
+
+	if updateResp.Ok != true {
+		t.Error()
+	}
+
+	proj, _ := getProject(pid)
+
+	if proj.Project.Public != false {
+		t.Error()
+	}
+	if proj.Project.Motd != "MotdB" {
+		t.Error()
+	}
+	if proj.Project.CloneUrl != "CloneUrlB" {
+		t.Error()
+	}
+	if proj.Project.GitRepo != "GitRepoB" {
+		t.Error()
+	}
+	if proj.Project.Priority != 2 {
+		t.Error()
+	}
+}
+
+func TestUpdateProjectInvalid(t *testing.T) {
+
+	pid := createProject(api.CreateProjectRequest{
+		Public:   true,
+		Version:  "lllllllllllll",
+		Motd:     "2wwwwwwwwwwwwwww",
+		Name:     "aaaaaaaaaaaaaaaaaaaaaa",
+		CloneUrl: "333333333333333",
+		GitRepo:  "llllllllllllllllllls",
+		Priority: 1,
+	}).Id
+
+	updateResp := updateProject(api.UpdateProjectRequest{
+		Priority: -1,
+		GitRepo:  "GitRepo------",
+		CloneUrl: "CloneUrlB000000",
+		Name:     "NameB-0",
+		Motd:     "MotdB000000",
+		Public:   false,
+	}, pid)
+
+	if updateResp.Ok != false {
+		t.Error()
+	}
+
+	if len(updateResp.Message) <= 0 {
+		t.Error()
+	}
+}
+
+func TestUpdateProjectConstraintFail(t *testing.T) {
+
+	pid := createProject(api.CreateProjectRequest{
+		Public:   true,
+		Version:  "testUpdateProjectConstraintFail",
+		Motd:     "testUpdateProjectConstraintFail",
+		Name:     "testUpdateProjectConstraintFail",
+		CloneUrl: "testUpdateProjectConstraintFail",
+		GitRepo:  "testUpdateProjectConstraintFail",
+		Priority: 1,
+	}).Id
+
+	createProject(api.CreateProjectRequest{
+		Public:   true,
+		Version:  "testUpdateProjectConstraintFail_d",
+		Motd:     "testUpdateProjectConstraintFail_d",
+		Name:     "testUpdateProjectConstraintFail_d",
+		CloneUrl: "testUpdateProjectConstraintFail_d",
+		GitRepo:  "testUpdateProjectConstraintFail_d",
+		Priority: 1,
+	})
+
+	updateResp := updateProject(api.UpdateProjectRequest{
+		Priority: 1,
+		GitRepo:  "testUpdateProjectConstraintFail_d",
+		CloneUrl: "testUpdateProjectConstraintFail_d",
+		Name:     "testUpdateProjectConstraintFail_d",
+		Motd:     "testUpdateProjectConstraintFail_d",
+	}, pid)
+
+	if updateResp.Ok != false {
+		t.Error()
+	}
+
+	if len(updateResp.Message) <= 0 {
+		t.Error()
+	}
+}
+
 func createProject(req api.CreateProjectRequest) *api.CreateProjectResponse {
 
-	r := Post("/project/create", req)
+	r := Post("/project/create", req, nil)
 
 	var resp api.CreateProjectResponse
 	data, _ := ioutil.ReadAll(r.Body)
@@ -213,7 +327,7 @@ func createProject(req api.CreateProjectRequest) *api.CreateProjectResponse {
 
 func getProject(id int64) (*api.GetProjectResponse, *http.Response) {
 
-	r := Get(fmt.Sprintf("/project/get/%d", id))
+	r := Get(fmt.Sprintf("/project/get/%d", id), nil)
 
 	var getResp api.GetProjectResponse
 	data, _ := ioutil.ReadAll(r.Body)
@@ -225,7 +339,7 @@ func getProject(id int64) (*api.GetProjectResponse, *http.Response) {
 
 func getProjectStats(id int64) *api.GetProjectStatsResponse {
 
-	r := Get(fmt.Sprintf("/project/stats/%d", id))
+	r := Get(fmt.Sprintf("/project/stats/%d", id), nil)
 
 	var getResp api.GetProjectStatsResponse
 	data, _ := ioutil.ReadAll(r.Body)
@@ -233,4 +347,16 @@ func getProjectStats(id int64) *api.GetProjectStatsResponse {
 	handleErr(err)
 
 	return &getResp
+}
+
+func updateProject(request api.UpdateProjectRequest, pid int64) *api.UpdateProjectResponse {
+
+	r := Post(fmt.Sprintf("/project/update/%d", pid), request, nil)
+
+	var resp api.UpdateProjectResponse
+	data, _ := ioutil.ReadAll(r.Body)
+	err := json.Unmarshal(data, &resp)
+	handleErr(err)
+
+	return &resp
 }

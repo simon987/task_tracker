@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"github.com/Sirupsen/logrus"
 	"github.com/buaazp/fasthttprouter"
 	"github.com/valyala/fasthttp"
@@ -48,6 +49,7 @@ func New() *WebAPI {
 	api.router.POST("/log/error", LogRequestMiddleware(LogError))
 
 	api.router.POST("/worker/create", LogRequestMiddleware(api.WorkerCreate))
+	api.router.POST("/worker/update", LogRequestMiddleware(api.WorkerUpdate))
 	api.router.GET("/worker/get/:id", LogRequestMiddleware(api.WorkerGet))
 
 	api.router.POST("/access/grant", LogRequestMiddleware(api.WorkerGrantAccess))
@@ -55,6 +57,7 @@ func New() *WebAPI {
 
 	api.router.POST("/project/create", LogRequestMiddleware(api.ProjectCreate))
 	api.router.GET("/project/get/:id", LogRequestMiddleware(api.ProjectGet))
+	api.router.POST("/project/update/:id", LogRequestMiddleware(api.ProjectUpdate))
 	api.router.GET("/project/stats/:id", LogRequestMiddleware(api.ProjectGetStats))
 	api.router.GET("/project/stats", LogRequestMiddleware(api.ProjectGetAllStats))
 
@@ -66,6 +69,19 @@ func New() *WebAPI {
 	api.router.POST("/git/receivehook", LogRequestMiddleware(api.ReceiveGitWebHook))
 
 	api.router.POST("/logs", LogRequestMiddleware(api.GetLog))
+
+	api.router.NotFound = func(ctx *fasthttp.RequestCtx) {
+
+		if ctx.Request.Header.IsOptions() {
+			ctx.Response.Header.Add("Access-Control-Allow-Headers", "Content-Type")
+			ctx.Response.Header.Add("Access-Control-Allow-Methods", "GET, POST, OPTION")
+			ctx.Response.Header.Add("Access-Control-Allow-Origin", "*")
+		} else {
+			ctx.SetStatusCode(404)
+			_, _ = fmt.Fprintf(ctx, "Not found")
+		}
+
+	}
 
 	return api
 }

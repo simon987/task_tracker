@@ -1,8 +1,13 @@
 package api
 
 import (
+	"bytes"
+	"crypto"
+	"crypto/hmac"
+	"encoding/hex"
 	"errors"
 	"github.com/Sirupsen/logrus"
+	"github.com/dchest/siphash"
 	"github.com/google/uuid"
 	"src/task_tracker/storage"
 	"strconv"
@@ -14,12 +19,13 @@ type CreateTaskRequest struct {
 	Recipe        string `json:"recipe"`
 	Priority      int64  `json:"priority"`
 	MaxAssignTime int64  `json:"max_assign_time"`
+	Hash64        int64  `json:"hash_u64"`
+	UniqueString  string `json:"unique_string"`
 }
 
 type ReleaseTaskRequest struct {
-	TaskId   int64      `json:"task_id"`
-	Success  bool       `json:"success"`
-	WorkerId *uuid.UUID `json:"worker_id"`
+	TaskId  int64 `json:"task_id"`
+	Success bool  `json:"success"`
 }
 
 type ReleaseTaskResponse struct {
@@ -51,8 +57,14 @@ func (api *WebAPI) TaskCreate(r *Request) {
 			MaxAssignTime: createReq.MaxAssignTime,
 		}
 
-		if isTaskValid(task) {
-			err := api.Database.SaveTask(task, createReq.Project)
+		if createReq.IsValid() && isTaskValid(task) {
+
+			if createReq.UniqueString != "" {
+				//TODO: Load key from config
+				createReq.Hash64 = int64(siphash.Hash(1, 2, []byte(createReq.UniqueString)))
+			}
+
+			err := api.Database.SaveTask(task, createReq.Project, createReq.Hash64)
 
 			if err != nil {
 				r.Json(CreateTaskResponse{
@@ -76,6 +88,10 @@ func (api *WebAPI) TaskCreate(r *Request) {
 	}
 }
 
+func (req *CreateTaskRequest) IsValid() bool {
+	return req.Hash64 == 0 || req.UniqueString == ""
+}
+
 func isTaskValid(task *storage.Task) bool {
 	if task.MaxRetries < 0 {
 		return false
@@ -89,7 +105,7 @@ func isTaskValid(task *storage.Task) bool {
 
 func (api *WebAPI) TaskGetFromProject(r *Request) {
 
-	worker, err := api.workerFromQueryArgs(r)
+	worker, err := api.validateSignature(r)
 	if err != nil {
 		r.Json(GetTaskResponse{
 			Ok:      false,
@@ -121,7 +137,7 @@ func (api *WebAPI) TaskGetFromProject(r *Request) {
 
 func (api *WebAPI) TaskGet(r *Request) {
 
-	worker, err := api.workerFromQueryArgs(r)
+	worker, err := api.validateSignature(r)
 	if err != nil {
 		r.Json(GetTaskResponse{
 			Ok:      false,
@@ -138,9 +154,11 @@ func (api *WebAPI) TaskGet(r *Request) {
 	})
 }
 
-func (api WebAPI) workerFromQueryArgs(r *Request) (*storage.Worker, error) {
+func (api WebAPI) validateSignature(r *Request) (*storage.Worker, error) {
 
-	widStr := string(r.Ctx.QueryArgs().Peek("wid"))
+	widStr := string(r.Ctx.Request.Header.Peek("X-Worker-Id"))
+	signature := r.Ctx.Request.Header.Peek("X-Signature")
+
 	wid, err := uuid.Parse(widStr)
 	if err != nil {
 		logrus.WithError(err).WithFields(logrus.Fields{
@@ -155,9 +173,33 @@ func (api WebAPI) workerFromQueryArgs(r *Request) (*storage.Worker, error) {
 	if worker == nil {
 		logrus.WithError(err).WithFields(logrus.Fields{
 			"wid": widStr,
-		}).Warn("Can't parse wid")
+		}).Warn("Worker id does not match any valid worker")
 
 		return nil, errors.New("worker id does not match any valid worker")
+	}
+
+	var body []byte
+	if r.Ctx.Request.Header.IsGet() {
+		body = r.Ctx.Request.RequestURI()
+	} else {
+		body = r.Ctx.Request.Body()
+	}
+
+	mac := hmac.New(crypto.SHA256.New, worker.Secret)
+	mac.Write(body)
+
+	expectedMac := make([]byte, 64)
+	hex.Encode(expectedMac, mac.Sum(nil))
+	matches := bytes.Compare(expectedMac, signature) == 0
+
+	logrus.WithFields(logrus.Fields{
+		"expected":  string(expectedMac),
+		"signature": string(signature),
+		"matches":   matches,
+	}).Trace("Validating Worker signature")
+
+	if !matches {
+		return nil, errors.New("invalid signature")
 	}
 
 	return worker, nil
@@ -165,10 +207,19 @@ func (api WebAPI) workerFromQueryArgs(r *Request) (*storage.Worker, error) {
 
 func (api *WebAPI) TaskRelease(r *Request) {
 
-	req := ReleaseTaskRequest{}
-	if r.GetJson(req) {
+	worker, err := api.validateSignature(r)
+	if err != nil {
+		r.Json(GetTaskResponse{
+			Ok:      false,
+			Message: err.Error(),
+		}, 403)
+		return
+	}
 
-		res := api.Database.ReleaseTask(req.TaskId, req.WorkerId, req.Success)
+	var req ReleaseTaskRequest
+	if r.GetJson(&req) {
+
+		res := api.Database.ReleaseTask(req.TaskId, &worker.Id, req.Success)
 
 		response := ReleaseTaskResponse{
 			Ok: res,

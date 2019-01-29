@@ -9,7 +9,7 @@ import (
 
 func TestIndex(t *testing.T) {
 
-	r := Get("/")
+	r := Get("/", nil)
 
 	body, _ := ioutil.ReadAll(r.Body)
 	var info api.Info
