@@ -145,9 +145,9 @@ func (database *Database) GetProjectStats(id int64) *ProjectStats {
 
 	if stats.Project != nil {
 		row := db.QueryRow(`SELECT 
-       SUM(CASE WHEN status='new' THEN 1 ELSE 0 END) newCount,
-       SUM(CASE WHEN status='failed' THEN 1 ELSE 0 END) failedCount,
-       SUM(CASE WHEN status='closed' THEN 1 ELSE 0 END) closedCount
+       SUM(CASE WHEN status=1 THEN 1 ELSE 0 END) newCount,
+       SUM(CASE WHEN status=2 THEN 1 ELSE 0 END) failedCount,
+       SUM(CASE WHEN status=3 THEN 1 ELSE 0 END) closedCount
        FROM task WHERE project=$1 GROUP BY project`, id)
 
 		err := row.Scan(&stats.NewTaskCount, &stats.FailedTaskCount, &stats.ClosedTaskCount)
@@ -188,9 +188,9 @@ func (database Database) GetAllProjectsStats() *[]ProjectStats {
 
 	db := database.getDB()
 	rows, err := db.Query(`SELECT 
-       	SUM(CASE WHEN status='new' THEN 1 ELSE 0 END) newCount,
-       	SUM(CASE WHEN status='failed' THEN 1 ELSE 0 END) failedCount,
-		SUM(CASE WHEN status='closed' THEN 1 ELSE 0 END) closedCount,
+       	SUM(CASE WHEN status= 1 THEN 1 ELSE 0 END) newCount,
+       	SUM(CASE WHEN status=2 THEN 1 ELSE 0 END) failedCount,
+		SUM(CASE WHEN status=3 THEN 1 ELSE 0 END) closedCount,
        	p.*
 		FROM task RIGHT JOIN project p on task.project = p.id
 		GROUP BY p.id ORDER BY p.name`)

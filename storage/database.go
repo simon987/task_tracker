@@ -10,7 +10,8 @@ import (
 )
 
 type Database struct {
-	db *sql.DB
+	db           *sql.DB
+	saveTaskStmt *sql.Stmt
 }
 
 func (database *Database) Reset() {

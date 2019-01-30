@@ -13,8 +13,8 @@ import (
 type RequestHandler func(*Request)
 
 type GetLogRequest struct {
-	Level logrus.Level `json:"level"`
-	Since int64        `json:"since"`
+	Level storage.LogLevel `json:"level"`
+	Since int64            `json:"since"`
 }
 
 type LogRequest struct {

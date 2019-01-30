@@ -162,10 +162,10 @@ func TestCreateGetTask(t *testing.T) {
 	if taskResp.Task.Id == 0 {
 		t.Error()
 	}
-	if taskResp.Task.Recipe != "{\"url\":\"test\"}" {
+	if string(taskResp.Task.Recipe) != "{\"url\":\"test\"}" {
 		t.Error()
 	}
-	if taskResp.Task.Status != "new" {
+	if taskResp.Task.Status != 1 {
 		t.Error()
 	}
 	if taskResp.Task.MaxRetries != 3 {

@@ -6,6 +6,7 @@ import (
 	"github.com/Sirupsen/logrus"
 	"io/ioutil"
 	"src/task_tracker/api"
+	"src/task_tracker/storage"
 	"testing"
 	"time"
 )
@@ -134,7 +135,7 @@ func TestGetLogs(t *testing.T) {
 		"test": "value",
 	}).Error("error")
 
-	r := getLogs(time.Now().Add(time.Second*-150).Unix(), logrus.DebugLevel)
+	r := getLogs(time.Now().Add(time.Second*-150).Unix(), storage.DEBUG)
 
 	if r.Ok != true {
 		t.Error()
@@ -162,7 +163,7 @@ func TestGetLogs(t *testing.T) {
 
 func TestGetLogsInvalid(t *testing.T) {
 
-	r := getLogs(-1, logrus.ErrorLevel)
+	r := getLogs(-1, storage.ERROR)
 
 	if r.Ok != false {
 		t.Error()
@@ -173,7 +174,7 @@ func TestGetLogsInvalid(t *testing.T) {
 	}
 }
 
-func getLogs(since int64, level logrus.Level) *api.GetLogResponse {
+func getLogs(since int64, level storage.LogLevel) *api.GetLogResponse {
 
 	r := Post(fmt.Sprintf("/logs"), api.GetLogRequest{
 		Since: since,

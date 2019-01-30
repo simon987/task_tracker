@@ -75,8 +75,8 @@ func (api *WebAPI) TaskCreate(r *Request) {
 		if err != nil {
 			r.Json(CreateTaskResponse{
 				Ok:      false,
-				Message: err.Error(), //todo: hide sensitive error?
-			}, 500)
+				Message: err.Error(),
+			}, 400)
 		} else {
 			r.OkJson(CreateTaskResponse{
 				Ok: true,

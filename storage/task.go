@@ -7,17 +7,26 @@ import (
 )
 
 type Task struct {
-	Id            int64    `json:"id"`
-	Priority      int64    `json:"priority"`
-	Project       *Project `json:"project"`
-	Assignee      int64    `json:"assignee"`
-	Retries       int64    `json:"retries"`
-	MaxRetries    int64    `json:"max_retries"`
-	Status        string   `json:"status"`
-	Recipe        string   `json:"recipe"`
-	MaxAssignTime int64    `json:"max_assign_time"`
-	AssignTime    int64    `json:"assign_time"`
+	Id            int64      `json:"id"`
+	Priority      int64      `json:"priority"`
+	Project       *Project   `json:"project"`
+	Assignee      int64      `json:"assignee"`
+	Retries       int64      `json:"retries"`
+	MaxRetries    int64      `json:"max_retries"`
+	Status        TaskStatus `json:"status"`
+	Recipe        string     `json:"recipe"`
+	MaxAssignTime int64      `json:"max_assign_time"`
+	AssignTime    int64      `json:"assign_time"`
 }
+
+type TaskStatus int
+
+const (
+	NEW     TaskStatus = 1
+	FAILED  TaskStatus = 2
+	CLOSED  TaskStatus = 3
+	TIMEOUT TaskStatus = 4
+)
 
 func (database *Database) SaveTask(task *Task, project int64, hash64 int64) error {
 
@@ -58,7 +67,7 @@ func (database *Database) GetTask(worker *Worker) *Task {
 		SELECT task.id
 	FROM task
 	INNER JOIN project p on task.project = p.id
-	WHERE assignee IS NULL AND task.status='new'
+	WHERE assignee IS NULL AND task.status=1
 		AND (p.public OR EXISTS (
 		  SELECT 1 FROM worker_has_access_to_project a WHERE a.worker=$1 AND a.project=p.id
 		))
@@ -93,7 +102,15 @@ func getTaskById(id int64, db *sql.DB) *Task {
 	        status, recipe, max_assign_time, assign_time, project.* FROM task 
 	  INNER JOIN project ON task.project = project.id
 	WHERE task.id=$1`, id)
-	task := scanTask(row)
+	project := &Project{}
+	task := &Task{}
+	task.Project = project
+
+	err := row.Scan(&task.Id, &task.Priority, &project.Id, &task.Assignee,
+		&task.Retries, &task.MaxRetries, &task.Status, &task.Recipe, &task.MaxAssignTime,
+		&task.AssignTime, &project.Id, &project.Priority, &project.Name,
+		&project.CloneUrl, &project.GitRepo, &project.Version, &project.Motd, &project.Public)
+	handleErr(err)
 
 	logrus.WithFields(logrus.Fields{
 		"id":   id,
@@ -110,11 +127,11 @@ func (database Database) ReleaseTask(id int64, workerId int64, success bool) boo
 	var res sql.Result
 	var err error
 	if success {
-		res, err = db.Exec(`UPDATE task SET (status, assignee) = ('closed', NULL)
+		res, err = db.Exec(`UPDATE task SET (status, assignee) = (3, NULL)
 		WHERE id=$1 AND task.assignee=$2`, id, workerId)
 	} else {
 		res, err = db.Exec(`UPDATE task SET (status, assignee, retries) = 
-  		(CASE WHEN retries+1 >= max_retries THEN 'failed' ELSE 'new' END, NULL, retries+1)
+  		(CASE WHEN retries+1 >= max_retries THEN 2 ELSE 1 END, NULL, retries+1)
 		WHERE id=$1 AND assignee=$2`, id, workerId)
 	}
 	handleErr(err)
@@ -140,7 +157,7 @@ func (database *Database) GetTaskFromProject(worker *Worker, projectId int64) *T
 		SELECT task.id
 	FROM task
 	INNER JOIN project p on task.project = p.id
-	WHERE assignee IS NULL AND p.id=$2 AND status='new'
+	WHERE assignee IS NULL AND p.id=$2 AND status=1
 		AND (p.public OR EXISTS (
 		  SELECT 1 FROM worker_has_access_to_project a WHERE a.worker=$1 AND a.project=$2
 		))
@@ -164,21 +181,6 @@ func (database *Database) GetTaskFromProject(worker *Worker, projectId int64) *T
 	}).Trace("Database.getTask UPDATE task")
 
 	task := getTaskById(id, db)
-
-	return task
-}
-
-func scanTask(row *sql.Row) *Task {
-
-	project := &Project{}
-	task := &Task{}
-	task.Project = project
-
-	err := row.Scan(&task.Id, &task.Priority, &project.Id, &task.Assignee,
-		&task.Retries, &task.MaxRetries, &task.Status, &task.Recipe, &task.MaxAssignTime,
-		&task.AssignTime, &project.Id, &project.Priority, &project.Name,
-		&project.CloneUrl, &project.GitRepo, &project.Version, &project.Motd, &project.Public)
-	handleErr(err)
 
 	return task
 }

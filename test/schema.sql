@@ -3,17 +3,6 @@ DROP TABLE IF EXISTS worker_identity, worker, project, task, log_entry,
 DROP TYPE IF EXISTS status;
 DROP TYPE IF EXISTS log_level;
 
-CREATE TYPE status as ENUM (
-  'new',
-  'failed',
-  'closed',
-  'timeout'
-  );
-
-CREATE TYPE log_level as ENUM (
-  'fatal', 'panic', 'error', 'warning', 'info', 'debug', 'trace'
-  );
-
 CREATE TABLE worker_identity
 (
   id          SERIAL PRIMARY KEY,
@@ -53,25 +42,24 @@ CREATE TABLE worker_has_access_to_project
 
 CREATE TABLE task
 (
+  hash64          BIGINT   DEFAULT NULL UNIQUE,
   id              SERIAL PRIMARY KEY,
-  priority        INTEGER DEFAULT 0,
   project         INTEGER REFERENCES project (id),
   assignee        INTEGER REFERENCES worker (id),
-  retries         INTEGER DEFAULT 0,
-  max_retries     INTEGER,
-  status          Status  DEFAULT 'new',
-  recipe          TEXT,
-  max_assign_time INTEGER DEFAULT 0,
-  assign_time     INTEGER DEFAULT 0,
-  hash64          BIGINT  DEFAULT NULL UNIQUE
+  max_assign_time INTEGER  DEFAULT 0,
+  assign_time     INTEGER  DEFAULT 0,
+  priority        SMALLINT DEFAULT 0,
+  retries         SMALLINT DEFAULT 0,
+  max_retries     SMALLINT,
+  status          SMALLINT DEFAULT 1,
+  recipe          TEXT
 );
 
 CREATE TABLE log_entry
 (
-  level        log_level,
+  level        INTEGER,
   message      TEXT,
   message_data TEXT,
-  timestamp    INT
+  timestamp    INTEGER
 );
-
 
