@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/Sirupsen/logrus"
 	"github.com/valyala/fasthttp"
@@ -20,6 +21,7 @@ type LogRequest struct {
 	Scope     string `json:"scope"`
 	Message   string `json:"Message"`
 	TimeStamp int64  `json:"timestamp"`
+	worker    *storage.Worker
 }
 
 type GetLogResponse struct {
@@ -52,86 +54,134 @@ func (api *WebAPI) SetupLogger() {
 	api.Database.SetupLoggerHook()
 }
 
-func parseLogEntry(r *Request) *LogRequest {
+func (api *WebAPI) parseLogEntry(r *Request) (*LogRequest, error) {
+
+	worker, err := api.validateSignature(r)
+	if err != nil {
+		return nil, err
+	}
 
 	entry := LogRequest{}
 
-	if r.GetJson(&entry) {
-		if len(entry.Message) == 0 {
-			handleErr(errors.New("invalid message"), r)
-		} else if len(entry.Scope) == 0 {
-			handleErr(errors.New("invalid scope"), r)
-		} else if entry.TimeStamp <= 0 {
-			handleErr(errors.New("invalid timestamp"), r)
-		}
+	err = json.Unmarshal(r.Ctx.Request.Body(), &entry)
+	if err != nil {
+		return nil, err
 	}
 
-	return &entry
+	if len(entry.Message) == 0 {
+		return nil, errors.New("invalid message")
+	} else if len(entry.Scope) == 0 {
+		return nil, errors.New("invalid scope")
+	} else if entry.TimeStamp <= 0 {
+		return nil, errors.New("invalid timestamp")
+	}
+
+	entry.worker = worker
+
+	return &entry, nil
 }
 
-func LogTrace(r *Request) {
+func (api *WebAPI) LogTrace(r *Request) {
 
-	entry := parseLogEntry(r)
+	entry, err := api.parseLogEntry(r)
+	if err != nil {
+		r.Json(GetLogResponse{
+			Ok:      false,
+			Message: "Could not parse request",
+		}, 400)
+		return
+	}
 
 	logrus.WithFields(logrus.Fields{
-		"scope": entry.Scope,
+		"scope":  entry.Scope,
+		"worker": entry.worker.Id,
 	}).WithTime(entry.Time()).Trace(entry.Message)
 }
 
-func LogInfo(r *Request) {
+func (api *WebAPI) LogInfo(r *Request) {
 
-	entry := parseLogEntry(r)
+	entry, err := api.parseLogEntry(r)
+	if err != nil {
+		r.Json(GetLogResponse{
+			Ok:      false,
+			Message: "Could not parse request",
+		}, 400)
+		return
+	}
 
 	logrus.WithFields(logrus.Fields{
-		"scope": entry.Scope,
+		"scope":  entry.Scope,
+		"worker": entry.worker.Id,
 	}).WithTime(entry.Time()).Info(entry.Message)
 }
 
-func LogWarn(r *Request) {
+func (api *WebAPI) LogWarn(r *Request) {
 
-	entry := parseLogEntry(r)
+	entry, err := api.parseLogEntry(r)
+	if err != nil {
+		r.Json(GetLogResponse{
+			Ok:      false,
+			Message: "Could not parse request",
+		}, 400)
+		return
+	}
 
 	logrus.WithFields(logrus.Fields{
-		"scope": entry.Scope,
+		"scope":  entry.Scope,
+		"worker": entry.worker.Id,
 	}).WithTime(entry.Time()).Warn(entry.Message)
 }
 
-func LogError(r *Request) {
+func (api *WebAPI) LogError(r *Request) {
 
-	entry := parseLogEntry(r)
+	entry, err := api.parseLogEntry(r)
+	if err != nil {
+		r.Json(GetLogResponse{
+			Ok:      false,
+			Message: "Could not parse request",
+		}, 400)
+		return
+	}
 
 	logrus.WithFields(logrus.Fields{
-		"scope": entry.Scope,
+		"scope":  entry.Scope,
+		"worker": entry.worker.Id,
 	}).WithTime(entry.Time()).Error(entry.Message)
 }
 
 func (api *WebAPI) GetLog(r *Request) {
 
 	req := &GetLogRequest{}
-	if r.GetJson(req) {
-		if req.isValid() {
+	err := json.Unmarshal(r.Ctx.Request.Body(), req)
+	if err != nil {
+		r.Json(GetLogResponse{
+			Ok:      false,
+			Message: "Could not parse request",
+		}, 400)
+		return
+	}
+	if req.isValid() {
 
-			logs := api.Database.GetLogs(req.Since, req.Level)
+		logs := api.Database.GetLogs(req.Since, req.Level)
 
-			logrus.WithFields(logrus.Fields{
-				"getLogRequest": req,
-				"logCount":      len(*logs),
-			}).Trace("Get log request")
+		logrus.WithFields(logrus.Fields{
+			"getLogRequest": req,
+			"logCount":      len(*logs),
+		}).Trace("Get log request")
 
-			r.OkJson(GetLogResponse{
-				Ok:   true,
-				Logs: logs,
-			})
-		} else {
-			logrus.WithFields(logrus.Fields{
-				"getLogRequest": req,
-			}).Warn("Invalid log request")
+		r.OkJson(GetLogResponse{
+			Ok:   true,
+			Logs: logs,
+		})
+	} else {
+		logrus.WithFields(logrus.Fields{
+			"getLogRequest": req,
+		}).Warn("Invalid log request")
 
-			r.Json(GetLogResponse{
-				Ok:      false,
-				Message: "Invalid log request",
-			}, 400)
-		}
+		r.Json(GetLogResponse{
+			Ok:      false,
+			Message: "Invalid log request",
+		}, 400)
 	}
 }
 

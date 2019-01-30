@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"github.com/Sirupsen/logrus"
 	"math/rand"
 	"src/task_tracker/storage"
@@ -46,12 +47,12 @@ type WorkerAccessResponse struct {
 func (api *WebAPI) WorkerCreate(r *Request) {
 
 	workerReq := &CreateWorkerRequest{}
-	if !r.GetJson(workerReq) {
+	err := json.Unmarshal(r.Ctx.Request.Body(), workerReq)
+	if err != nil {
 		return
 	}
 
 	identity := getIdentity(r)
-
 	if !canCreateWorker(r, workerReq, identity) {
 
 		logrus.WithFields(logrus.Fields{
@@ -123,40 +124,51 @@ func (api *WebAPI) WorkerGet(r *Request) {
 func (api *WebAPI) WorkerGrantAccess(r *Request) {
 
 	req := &WorkerAccessRequest{}
-	if r.GetJson(req) {
+	err := json.Unmarshal(r.Ctx.Request.Body(), req)
+	if err != nil {
+		r.Json(GetTaskResponse{
+			Ok:      false,
+			Message: "Could not parse request",
+		}, 400)
+		return
+	}
 
-		ok := api.Database.GrantAccess(req.WorkerId, req.ProjectId)
+	ok := api.Database.GrantAccess(req.WorkerId, req.ProjectId)
 
-		if ok {
-			r.OkJson(WorkerAccessResponse{
-				Ok: true,
-			})
-		} else {
-			r.OkJson(WorkerAccessResponse{
-				Ok:      false,
-				Message: "Worker already has access to this project",
-			})
-		}
+	if ok {
+		r.OkJson(WorkerAccessResponse{
+			Ok: true,
+		})
+	} else {
+		r.OkJson(WorkerAccessResponse{
+			Ok:      false,
+			Message: "Worker already has access to this project",
+		})
 	}
 }
 
 func (api *WebAPI) WorkerRemoveAccess(r *Request) {
 
 	req := &WorkerAccessRequest{}
-	if r.GetJson(req) {
+	err := json.Unmarshal(r.Ctx.Request.Body(), req)
+	if err != nil {
+		r.Json(GetTaskResponse{
+			Ok:      false,
+			Message: "Could not parse request",
+		}, 400)
+		return
+	}
+	ok := api.Database.RemoveAccess(req.WorkerId, req.ProjectId)
 
-		ok := api.Database.RemoveAccess(req.WorkerId, req.ProjectId)
-
-		if ok {
-			r.OkJson(WorkerAccessResponse{
-				Ok: true,
-			})
-		} else {
-			r.OkJson(WorkerAccessResponse{
-				Ok:      false,
-				Message: "Worker did not have access to this project",
-			})
-		}
+	if ok {
+		r.OkJson(WorkerAccessResponse{
+			Ok: true,
+		})
+	} else {
+		r.OkJson(WorkerAccessResponse{
+			Ok:      false,
+			Message: "Worker did not have access to this project",
+		})
 	}
 }
 
@@ -172,22 +184,27 @@ func (api *WebAPI) WorkerUpdate(r *Request) {
 	}
 
 	req := &UpdateWorkerRequest{}
-	if r.GetJson(req) {
+	err = json.Unmarshal(r.Ctx.Request.Body(), req)
+	if err != nil {
+		r.Json(GetTaskResponse{
+			Ok:      false,
+			Message: "Could not parse request",
+		}, 400)
+		return
+	}
+	worker.Alias = req.Alias
 
-		worker.Alias = req.Alias
+	ok := api.Database.UpdateWorker(worker)
 
-		ok := api.Database.UpdateWorker(worker)
-
-		if ok {
-			r.OkJson(UpdateWorkerResponse{
-				Ok: true,
-			})
-		} else {
-			r.OkJson(UpdateWorkerResponse{
-				Ok:      false,
-				Message: "Could not update worker",
-			})
-		}
+	if ok {
+		r.OkJson(UpdateWorkerResponse{
+			Ok: true,
+		})
+	} else {
+		r.OkJson(UpdateWorkerResponse{
+			Ok:      false,
+			Message: "Could not update worker",
+		})
 	}
 }
 

@@ -43,10 +43,10 @@ func New() *WebAPI {
 
 	api.router.GET("/", LogRequestMiddleware(Index))
 
-	api.router.POST("/log/trace", LogRequestMiddleware(LogTrace))
-	api.router.POST("/log/info", LogRequestMiddleware(LogInfo))
-	api.router.POST("/log/warn", LogRequestMiddleware(LogWarn))
-	api.router.POST("/log/error", LogRequestMiddleware(LogError))
+	api.router.POST("/log/trace", LogRequestMiddleware(api.LogTrace))
+	api.router.POST("/log/info", LogRequestMiddleware(api.LogInfo))
+	api.router.POST("/log/warn", LogRequestMiddleware(api.LogWarn))
+	api.router.POST("/log/error", LogRequestMiddleware(api.LogError))
 
 	api.router.POST("/worker/create", LogRequestMiddleware(api.WorkerCreate))
 	api.router.POST("/worker/update", LogRequestMiddleware(api.WorkerUpdate))

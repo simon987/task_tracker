@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"github.com/Sirupsen/logrus"
 	"src/task_tracker/storage"
 	"strconv"
@@ -57,99 +58,114 @@ type GetAllProjectsStatsResponse struct {
 func (api *WebAPI) ProjectCreate(r *Request) {
 
 	createReq := &CreateProjectRequest{}
-	if r.GetJson(createReq) {
+	err := json.Unmarshal(r.Ctx.Request.Body(), createReq)
+	if err != nil {
+		r.Json(CreateProjectResponse{
+			Ok:      false,
+			Message: "Could not parse request",
+		}, 400)
+		return
+	}
+	project := &storage.Project{
+		Name:     createReq.Name,
+		Version:  createReq.Version,
+		CloneUrl: createReq.CloneUrl,
+		GitRepo:  createReq.GitRepo,
+		Priority: createReq.Priority,
+		Motd:     createReq.Motd,
+		Public:   createReq.Public,
+	}
 
-		project := &storage.Project{
-			Name:     createReq.Name,
-			Version:  createReq.Version,
-			CloneUrl: createReq.CloneUrl,
-			GitRepo:  createReq.GitRepo,
-			Priority: createReq.Priority,
-			Motd:     createReq.Motd,
-			Public:   createReq.Public,
-		}
+	if isValidProject(project) {
+		id, err := api.Database.SaveProject(project)
 
-		if isValidProject(project) {
-			id, err := api.Database.SaveProject(project)
-
-			if err != nil {
-				r.Json(CreateProjectResponse{
-					Ok:      false,
-					Message: err.Error(),
-				}, 500)
-			} else {
-				r.OkJson(CreateProjectResponse{
-					Ok: true,
-					Id: id,
-				})
-				logrus.WithFields(logrus.Fields{
-					"project": project,
-				}).Debug("Created project")
-			}
-		} else {
-			logrus.WithFields(logrus.Fields{
-				"project": project,
-			}).Warn("Invalid project")
-
+		if err != nil {
 			r.Json(CreateProjectResponse{
 				Ok:      false,
-				Message: "Invalid project",
-			}, 400)
+				Message: err.Error(),
+			}, 500)
+		} else {
+			r.OkJson(CreateProjectResponse{
+				Ok: true,
+				Id: id,
+			})
+			logrus.WithFields(logrus.Fields{
+				"project": project,
+			}).Debug("Created project")
 		}
+	} else {
+		logrus.WithFields(logrus.Fields{
+			"project": project,
+		}).Warn("Invalid project")
 
+		r.Json(CreateProjectResponse{
+			Ok:      false,
+			Message: "Invalid project",
+		}, 400)
 	}
 }
 
 func (api *WebAPI) ProjectUpdate(r *Request) {
 
 	id, err := strconv.ParseInt(r.Ctx.UserValue("id").(string), 10, 64)
-	handleErr(err, r) //todo handle invalid id
+	if err != nil || id <= 0 {
+		r.Json(CreateProjectResponse{
+			Ok:      false,
+			Message: "Invalid project id",
+		}, 400)
+		return
+	}
 
 	updateReq := &UpdateProjectRequest{}
-	if r.GetJson(updateReq) {
+	err = json.Unmarshal(r.Ctx.Request.Body(), updateReq)
+	if err != nil {
+		r.Json(CreateProjectResponse{
+			Ok:      false,
+			Message: "Could not parse request",
+		}, 400)
+		return
+	}
+	project := &storage.Project{
+		Id:       id,
+		Name:     updateReq.Name,
+		CloneUrl: updateReq.CloneUrl,
+		GitRepo:  updateReq.GitRepo,
+		Priority: updateReq.Priority,
+		Motd:     updateReq.Motd,
+		Public:   updateReq.Public,
+	}
 
-		project := &storage.Project{
-			Id:       id,
-			Name:     updateReq.Name,
-			CloneUrl: updateReq.CloneUrl,
-			GitRepo:  updateReq.GitRepo,
-			Priority: updateReq.Priority,
-			Motd:     updateReq.Motd,
-			Public:   updateReq.Public,
-		}
+	if isValidProject(project) {
+		err := api.Database.UpdateProject(project)
 
-		if isValidProject(project) {
-			err := api.Database.UpdateProject(project)
-
-			if err != nil {
-				r.Json(CreateProjectResponse{
-					Ok:      false,
-					Message: err.Error(),
-				}, 500)
-
-				logrus.WithError(err).WithFields(logrus.Fields{
-					"project": project,
-				}).Warn("Error during project update")
-			} else {
-				r.OkJson(UpdateProjectResponse{
-					Ok: true,
-				})
-
-				logrus.WithFields(logrus.Fields{
-					"project": project,
-				}).Debug("Updated project")
-			}
-
-		} else {
-			logrus.WithFields(logrus.Fields{
-				"project": project,
-			}).Warn("Invalid project")
-
+		if err != nil {
 			r.Json(CreateProjectResponse{
 				Ok:      false,
-				Message: "Invalid project",
-			}, 400)
+				Message: err.Error(),
+			}, 500)
+
+			logrus.WithError(err).WithFields(logrus.Fields{
+				"project": project,
+			}).Warn("Error during project update")
+		} else {
+			r.OkJson(UpdateProjectResponse{
+				Ok: true,
+			})
+
+			logrus.WithFields(logrus.Fields{
+				"project": project,
+			}).Debug("Updated project")
 		}
+
+	} else {
+		logrus.WithFields(logrus.Fields{
+			"project": project,
+		}).Warn("Invalid project")
+
+		r.Json(CreateProjectResponse{
+			Ok:      false,
+			Message: "Invalid project",
+		}, 400)
 	}
 }
 
@@ -187,7 +203,13 @@ func (api *WebAPI) ProjectGet(r *Request) {
 func (api *WebAPI) ProjectGetStats(r *Request) {
 
 	id, err := strconv.ParseInt(r.Ctx.UserValue("id").(string), 10, 64)
-	handleErr(err, r)
+	if err != nil {
+		r.Json(GetProjectStatsResponse{
+			Ok:      false,
+			Message: "Could not parse request",
+		}, 400)
+		return
+	}
 
 	stats := api.Database.GetProjectStats(id)
 

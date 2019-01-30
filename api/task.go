@@ -5,6 +5,7 @@ import (
 	"crypto"
 	"crypto/hmac"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"github.com/Sirupsen/logrus"
 	"github.com/dchest/siphash"
@@ -45,45 +46,50 @@ type GetTaskResponse struct {
 
 func (api *WebAPI) TaskCreate(r *Request) {
 
-	var createReq CreateTaskRequest
-	if r.GetJson(&createReq) {
+	createReq := &CreateTaskRequest{}
+	err := json.Unmarshal(r.Ctx.Request.Body(), createReq)
+	if err != nil {
+		r.Json(CreateProjectResponse{
+			Ok:      false,
+			Message: "Could not parse request",
+		}, 400)
+		return
+	}
+	task := &storage.Task{
+		MaxRetries:    createReq.MaxRetries,
+		Recipe:        createReq.Recipe,
+		Priority:      createReq.Priority,
+		AssignTime:    0,
+		MaxAssignTime: createReq.MaxAssignTime,
+	}
 
-		task := &storage.Task{
-			MaxRetries:    createReq.MaxRetries,
-			Recipe:        createReq.Recipe,
-			Priority:      createReq.Priority,
-			AssignTime:    0,
-			MaxAssignTime: createReq.MaxAssignTime,
+	if createReq.IsValid() && isTaskValid(task) {
+
+		if createReq.UniqueString != "" {
+			//TODO: Load key from config
+			createReq.Hash64 = int64(siphash.Hash(1, 2, []byte(createReq.UniqueString)))
 		}
 
-		if createReq.IsValid() && isTaskValid(task) {
+		err := api.Database.SaveTask(task, createReq.Project, createReq.Hash64)
 
-			if createReq.UniqueString != "" {
-				//TODO: Load key from config
-				createReq.Hash64 = int64(siphash.Hash(1, 2, []byte(createReq.UniqueString)))
-			}
-
-			err := api.Database.SaveTask(task, createReq.Project, createReq.Hash64)
-
-			if err != nil {
-				r.Json(CreateTaskResponse{
-					Ok:      false,
-					Message: err.Error(), //todo: hide sensitive error?
-				}, 500)
-			} else {
-				r.OkJson(CreateTaskResponse{
-					Ok: true,
-				})
-			}
-		} else {
-			logrus.WithFields(logrus.Fields{
-				"task": task,
-			}).Warn("Invalid task")
+		if err != nil {
 			r.Json(CreateTaskResponse{
 				Ok:      false,
-				Message: "Invalid task",
-			}, 400)
+				Message: err.Error(), //todo: hide sensitive error?
+			}, 500)
+		} else {
+			r.OkJson(CreateTaskResponse{
+				Ok: true,
+			})
 		}
+	} else {
+		logrus.WithFields(logrus.Fields{
+			"task": task,
+		}).Warn("Invalid task")
+		r.Json(CreateTaskResponse{
+			Ok:      false,
+			Message: "Invalid task",
+		}, 400)
 	}
 }
 
@@ -215,30 +221,34 @@ func (api *WebAPI) TaskRelease(r *Request) {
 		return
 	}
 
-	var req ReleaseTaskRequest
-	if r.GetJson(&req) {
-
-		res := api.Database.ReleaseTask(req.TaskId, worker.Id, req.Success)
-
-		response := ReleaseTaskResponse{
-			Ok: res,
-		}
-
-		if !res {
-			response.Message = "Could not find a task with the specified Id assigned to this workerId"
-
-			logrus.WithFields(logrus.Fields{
-				"releaseTaskRequest": req,
-				"taskUpdated":        res,
-			}).Warn("Release task: NOT FOUND")
-		} else {
-
-			logrus.WithFields(logrus.Fields{
-				"releaseTaskRequest": req,
-				"taskUpdated":        res,
-			}).Trace("Release task")
-		}
-
-		r.OkJson(response)
+	req := &ReleaseTaskRequest{}
+	err = json.Unmarshal(r.Ctx.Request.Body(), req)
+	if err != nil {
+		r.Json(CreateProjectResponse{
+			Ok:      false,
+			Message: "Could not parse request",
+		}, 400)
 	}
+	res := api.Database.ReleaseTask(req.TaskId, worker.Id, req.Success)
+
+	response := ReleaseTaskResponse{
+		Ok: res,
+	}
+
+	if !res {
+		response.Message = "Could not find a task with the specified Id assigned to this workerId"
+
+		logrus.WithFields(logrus.Fields{
+			"releaseTaskRequest": req,
+			"taskUpdated":        res,
+		}).Warn("Release task: NOT FOUND")
+	} else {
+
+		logrus.WithFields(logrus.Fields{
+			"releaseTaskRequest": req,
+			"taskUpdated":        res,
+		}).Trace("Release task")
+	}
+
+	r.OkJson(response)
 }

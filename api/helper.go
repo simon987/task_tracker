@@ -37,11 +37,3 @@ func (r *Request) Json(object interface{}, code int) {
 	}
 
 }
-
-func (r *Request) GetJson(x interface{}) bool {
-
-	err := json.Unmarshal(r.Ctx.Request.Body(), x)
-	handleErr(err, r)
-
-	return err == nil
-}

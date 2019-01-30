@@ -12,11 +12,12 @@ import (
 
 func TestTraceValid(t *testing.T) {
 
+	w := genWid()
 	r := Post("/log/trace", api.LogRequest{
 		Scope:     "test",
 		Message:   "This is a test message",
 		TimeStamp: time.Now().Unix(),
-	}, nil)
+	}, w)
 
 	if r.StatusCode != 200 {
 		t.Fail()
@@ -24,64 +25,68 @@ func TestTraceValid(t *testing.T) {
 }
 
 func TestTraceInvalidScope(t *testing.T) {
+	w := genWid()
 	r := Post("/log/trace", api.LogRequest{
 		Message:   "this is a test message",
 		TimeStamp: time.Now().Unix(),
-	}, nil)
+	}, w)
 
-	if r.StatusCode != 500 {
-		t.Fail()
+	if r.StatusCode == 200 {
+		t.Error()
 	}
 
 	r = Post("/log/trace", api.LogRequest{
 		Scope:     "",
 		Message:   "this is a test message",
 		TimeStamp: time.Now().Unix(),
-	}, nil)
+	}, w)
 
-	if r.StatusCode != 500 {
-		t.Fail()
+	if r.StatusCode == 200 {
+		t.Error()
 	}
-	if GenericJson(r.Body)["message"] != "invalid scope" {
-		t.Fail()
+	if len(GenericJson(r.Body)["message"].(string)) <= 0 {
+		t.Error()
 	}
 }
 
 func TestTraceInvalidMessage(t *testing.T) {
+	w := genWid()
 	r := Post("/log/trace", api.LogRequest{
 		Scope:     "test",
 		Message:   "",
 		TimeStamp: time.Now().Unix(),
-	}, nil)
+	}, w)
 
-	if r.StatusCode != 500 {
-		t.Fail()
+	if r.StatusCode == 200 {
+		t.Error()
 	}
-	if GenericJson(r.Body)["message"] != "invalid message" {
-		t.Fail()
+	if len(GenericJson(r.Body)["message"].(string)) <= 0 {
+		t.Error()
 	}
 }
 
 func TestTraceInvalidTime(t *testing.T) {
+	w := genWid()
 	r := Post("/log/trace", api.LogRequest{
 		Scope:   "test",
 		Message: "test",
-	}, nil)
-	if r.StatusCode != 500 {
-		t.Fail()
+	}, w)
+	if r.StatusCode == 200 {
+		t.Error()
 	}
-	if GenericJson(r.Body)["message"] != "invalid timestamp" {
-		t.Fail()
+	if len(GenericJson(r.Body)["message"].(string)) <= 0 {
+		t.Error()
 	}
 }
 
 func TestWarnValid(t *testing.T) {
 
+	w := genWid()
 	r := Post("/log/warn", api.LogRequest{
 		Scope:     "test",
 		Message:   "test",
 		TimeStamp: time.Now().Unix(),
-	}, nil)
+	}, w)
 	if r.StatusCode != 200 {
 		t.Fail()
 	}
@@ -89,11 +94,12 @@ func TestWarnValid(t *testing.T) {
 
 func TestInfoValid(t *testing.T) {
 
+	w := genWid()
 	r := Post("/log/info", api.LogRequest{
 		Scope:     "test",
 		Message:   "test",
 		TimeStamp: time.Now().Unix(),
-	}, nil)
+	}, w)
 	if r.StatusCode != 200 {
 		t.Fail()
 	}
@@ -101,11 +107,12 @@ func TestInfoValid(t *testing.T) {
 
 func TestErrorValid(t *testing.T) {
 
+	w := genWid()
 	r := Post("/log/error", api.LogRequest{
 		Scope:     "test",
 		Message:   "test",
 		TimeStamp: time.Now().Unix(),
-	}, nil)
+	}, w)
 	if r.StatusCode != 200 {
 		t.Fail()
 	}

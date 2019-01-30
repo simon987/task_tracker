@@ -54,11 +54,15 @@ func (api *WebAPI) ReceiveGitWebHook(r *Request) {
 	}
 
 	payload := &GitPayload{}
-	if r.GetJson(payload) {
-		logrus.WithFields(logrus.Fields{
-			"payload": payload,
-		}).Info("Received git WebHook")
+	err := json.Unmarshal(r.Ctx.Request.Body(), payload)
+	if err != nil {
+		r.Ctx.SetStatusCode(400)
+		return
 	}
+
+	logrus.WithFields(logrus.Fields{
+		"payload": payload,
+	}).Info("Received git WebHook")
 
 	if !isProductionBranch(payload) {
 		return
@@ -72,7 +76,7 @@ func (api *WebAPI) ReceiveGitWebHook(r *Request) {
 	version := getVersion(payload)
 
 	project.Version = version
-	err := api.Database.UpdateProject(project)
+	err = api.Database.UpdateProject(project)
 	handleErr(err, r)
 }
 
