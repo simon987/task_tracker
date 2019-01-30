@@ -3,7 +3,6 @@ package test
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/google/uuid"
 	"io/ioutil"
 	"net/http"
 	"src/task_tracker/api"
@@ -25,7 +24,7 @@ func TestCreateGetWorker(t *testing.T) {
 		t.Error()
 	}
 
-	getResp, r := getWorker(resp.Worker.Id.String())
+	getResp, r := getWorker(resp.Worker.Id)
 
 	if r.StatusCode != 200 {
 		t.Error()
@@ -47,7 +46,7 @@ func TestCreateGetWorker(t *testing.T) {
 
 func TestGetWorkerNotFound(t *testing.T) {
 
-	resp, r := getWorker("8bfc0ccd-d5ce-4dc5-a235-3a7ae760d9c6")
+	resp, r := getWorker(99999999)
 
 	if r.StatusCode != 404 {
 		t.Error()
@@ -59,7 +58,7 @@ func TestGetWorkerNotFound(t *testing.T) {
 
 func TestGetWorkerInvalid(t *testing.T) {
 
-	resp, r := getWorker("invalid-uuid")
+	resp, r := getWorker(-1)
 
 	if r.StatusCode != 400 {
 		t.Error()
@@ -76,7 +75,7 @@ func TestGrantAccessFailedProjectConstraint(t *testing.T) {
 
 	wid := genWid()
 
-	resp := grantAccess(&wid.Id, 38274593)
+	resp := grantAccess(wid.Id, 38274593)
 
 	if resp.Ok != false {
 		t.Error()
@@ -90,7 +89,7 @@ func TestRemoveAccessFailedProjectConstraint(t *testing.T) {
 
 	worker := genWid()
 
-	resp := removeAccess(&worker.Id, 38274593)
+	resp := removeAccess(worker.Id, 38274593)
 
 	if resp.Ok != false {
 		t.Error()
@@ -112,7 +111,7 @@ func TestRemoveAccessFailedWorkerConstraint(t *testing.T) {
 		Public:   true,
 	}).Id
 
-	resp := removeAccess(&uuid.Nil, pid)
+	resp := removeAccess(0, pid)
 
 	if resp.Ok != false {
 		t.Error()
@@ -134,7 +133,7 @@ func TestGrantAccessFailedWorkerConstraint(t *testing.T) {
 		Public:   true,
 	}).Id
 
-	resp := removeAccess(&uuid.Nil, pid)
+	resp := removeAccess(0, pid)
 
 	if resp.Ok != false {
 		t.Error()
@@ -156,7 +155,7 @@ func TestUpdateAliasValid(t *testing.T) {
 		t.Error()
 	}
 
-	w, _ := getWorker(wid.Id.String())
+	w, _ := getWorker(wid.Id)
 
 	if w.Worker.Alias != "new alias" {
 		t.Error()
@@ -190,9 +189,9 @@ func createWorker(req api.CreateWorkerRequest) (*api.CreateWorkerResponse, *http
 	return resp, r
 }
 
-func getWorker(id string) (*api.GetWorkerResponse, *http.Response) {
+func getWorker(id int64) (*api.GetWorkerResponse, *http.Response) {
 
-	r := Get(fmt.Sprintf("/worker/get/%s", id), nil)
+	r := Get(fmt.Sprintf("/worker/get/%d", id), nil)
 
 	var resp *api.GetWorkerResponse
 	data, _ := ioutil.ReadAll(r.Body)
@@ -208,7 +207,7 @@ func genWid() *storage.Worker {
 	return resp.Worker
 }
 
-func grantAccess(wid *uuid.UUID, project int64) *api.WorkerAccessResponse {
+func grantAccess(wid int64, project int64) *api.WorkerAccessResponse {
 
 	r := Post("/access/grant", api.WorkerAccessRequest{
 		WorkerId:  wid,
@@ -223,7 +222,7 @@ func grantAccess(wid *uuid.UUID, project int64) *api.WorkerAccessResponse {
 	return resp
 }
 
-func removeAccess(wid *uuid.UUID, project int64) *api.WorkerAccessResponse {
+func removeAccess(wid int64, project int64) *api.WorkerAccessResponse {
 
 	r := Post("/access/remove", api.WorkerAccessRequest{
 		WorkerId:  wid,

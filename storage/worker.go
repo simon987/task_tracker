@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/Sirupsen/logrus"
-	"github.com/google/uuid"
 )
 
 type Identity struct {
@@ -13,7 +12,7 @@ type Identity struct {
 }
 
 type Worker struct {
-	Id       uuid.UUID `json:"id"`
+	Id       int64     `json:"id"`
 	Created  int64     `json:"created"`
 	Identity *Identity `json:"identity"`
 	Alias    string    `json:"alias,omitempty"`
@@ -26,17 +25,18 @@ func (database *Database) SaveWorker(worker *Worker) {
 
 	identityId := getOrCreateIdentity(worker.Identity, db)
 
-	res, err := db.Exec("INSERT INTO worker (id, created, identity, secret, alias) VALUES ($1,$2,$3,$4,$5)",
-		worker.Id, worker.Created, identityId, worker.Secret, worker.Alias)
+	row := db.QueryRow("INSERT INTO worker (created, identity, secret, alias) VALUES ($1,$2,$3,$4) RETURNING id",
+		worker.Created, identityId, worker.Secret, worker.Alias)
+
+	err := row.Scan(&worker.Id)
 	handleErr(err)
 
-	var rowsAffected, _ = res.RowsAffected()
 	logrus.WithFields(logrus.Fields{
-		"rowsAffected": rowsAffected,
+		"newId": worker.Id,
 	}).Trace("Database.saveWorker INSERT worker")
 }
 
-func (database *Database) GetWorker(id uuid.UUID) *Worker {
+func (database *Database) GetWorker(id int64) *Worker {
 
 	db := database.getDB()
 
@@ -104,7 +104,7 @@ func getOrCreateIdentity(identity *Identity, db *sql.DB) int64 {
 	return rowId
 }
 
-func (database *Database) GrantAccess(workerId *uuid.UUID, projectId int64) bool {
+func (database *Database) GrantAccess(workerId int64, projectId int64) bool {
 
 	db := database.getDB()
 	res, err := db.Exec(`INSERT INTO worker_has_access_to_project (worker, project) VALUES ($1,$2)
@@ -129,7 +129,7 @@ func (database *Database) GrantAccess(workerId *uuid.UUID, projectId int64) bool
 	return rowsAffected == 1
 }
 
-func (database *Database) RemoveAccess(workerId *uuid.UUID, projectId int64) bool {
+func (database *Database) RemoveAccess(workerId int64, projectId int64) bool {
 
 	db := database.getDB()
 	res, err := db.Exec(`DELETE FROM worker_has_access_to_project WHERE worker=$1 AND project=$2`,

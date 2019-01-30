@@ -3,7 +3,6 @@ package test
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/google/uuid"
 	"io/ioutil"
 	"src/task_tracker/api"
 	"src/task_tracker/storage"
@@ -66,9 +65,8 @@ func TestGetTaskInvalidWid(t *testing.T) {
 
 func TestGetTaskInvalidWorker(t *testing.T) {
 
-	id := uuid.New()
 	resp := getTask(&storage.Worker{
-		Id: id,
+		Id: -1,
 	})
 
 	if resp.Ok != false {
@@ -82,9 +80,8 @@ func TestGetTaskInvalidWorker(t *testing.T) {
 
 func TestGetTaskFromProjectInvalidWorker(t *testing.T) {
 
-	id := uuid.New()
 	resp := getTaskFromProject(1, &storage.Worker{
-		Id: id,
+		Id: 99999999,
 	})
 
 	if resp.Ok != false {
@@ -154,7 +151,7 @@ func TestCreateGetTask(t *testing.T) {
 		Priority:   9999,
 	}, worker)
 
-	taskResp := getTaskFromProject(resp.Id, genWid())
+	taskResp := getTaskFromProject(resp.Id, worker)
 
 	if taskResp.Ok != true {
 		t.Error()
@@ -314,8 +311,8 @@ func TestTaskNoAccess(t *testing.T) {
 		t.Error()
 	}
 
-	grantAccess(&worker.Id, pid)
-	removeAccess(&worker.Id, pid)
+	grantAccess(worker.Id, pid)
+	removeAccess(worker.Id, pid)
 
 	tResp := getTaskFromProject(pid, worker)
 
@@ -356,7 +353,7 @@ func TestTaskHasAccess(t *testing.T) {
 		t.Error()
 	}
 
-	grantAccess(&worker.Id, pid)
+	grantAccess(worker.Id, pid)
 
 	tResp := getTaskFromProject(pid, worker)
 

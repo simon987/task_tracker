@@ -25,7 +25,7 @@ CREATE TABLE worker_identity
 
 CREATE TABLE worker
 (
-  id       TEXT PRIMARY KEY,
+  id       SERIAL PRIMARY KEY,
   alias    TEXT,
   created  INTEGER,
   identity INTEGER REFERENCES worker_identity (id),
@@ -46,7 +46,7 @@ CREATE TABLE project
 
 CREATE TABLE worker_has_access_to_project
 (
-  worker  TEXT REFERENCES worker (id),
+  worker  INTEGER REFERENCES worker (id),
   project INTEGER REFERENCES project (id),
   primary key (worker, project)
 );
@@ -56,7 +56,7 @@ CREATE TABLE task
   id              SERIAL PRIMARY KEY,
   priority        INTEGER DEFAULT 0,
   project         INTEGER REFERENCES project (id),
-  assignee        TEXT REFERENCES worker (id),
+  assignee        INTEGER REFERENCES worker (id),
   retries         INTEGER DEFAULT 0,
   max_retries     INTEGER,
   status          Status  DEFAULT 'new',

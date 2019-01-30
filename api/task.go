@@ -8,7 +8,6 @@ import (
 	"errors"
 	"github.com/Sirupsen/logrus"
 	"github.com/dchest/siphash"
-	"github.com/google/uuid"
 	"src/task_tracker/storage"
 	"strconv"
 )
@@ -114,9 +113,9 @@ func (api *WebAPI) TaskGetFromProject(r *Request) {
 		return
 	}
 
-	project, err := strconv.Atoi(r.Ctx.UserValue("project").(string))
+	project, err := strconv.ParseInt(r.Ctx.UserValue("project").(string), 10, 64)
 	handleErr(err, r)
-	task := api.Database.GetTaskFromProject(worker, int64(project))
+	task := api.Database.GetTaskFromProject(worker, project)
 
 	if task == nil {
 
@@ -159,7 +158,7 @@ func (api WebAPI) validateSignature(r *Request) (*storage.Worker, error) {
 	widStr := string(r.Ctx.Request.Header.Peek("X-Worker-Id"))
 	signature := r.Ctx.Request.Header.Peek("X-Signature")
 
-	wid, err := uuid.Parse(widStr)
+	wid, err := strconv.ParseInt(widStr, 10, 64)
 	if err != nil {
 		logrus.WithError(err).WithFields(logrus.Fields{
 			"wid": widStr,
@@ -219,7 +218,7 @@ func (api *WebAPI) TaskRelease(r *Request) {
 	var req ReleaseTaskRequest
 	if r.GetJson(&req) {
 
-		res := api.Database.ReleaseTask(req.TaskId, &worker.Id, req.Success)
+		res := api.Database.ReleaseTask(req.TaskId, worker.Id, req.Success)
 
 		response := ReleaseTaskResponse{
 			Ok: res,

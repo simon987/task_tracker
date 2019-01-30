@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"src/task_tracker/config"
 	"src/task_tracker/storage"
+	"strconv"
 )
 
 func Post(path string, x interface{}, worker *storage.Worker) *http.Response {
@@ -27,7 +28,7 @@ func Post(path string, x interface{}, worker *storage.Worker) *http.Response {
 		mac.Write(body)
 		sig := hex.EncodeToString(mac.Sum(nil))
 
-		req.Header.Add("X-Worker-Id", worker.Id.String())
+		req.Header.Add("X-Worker-Id", strconv.FormatInt(worker.Id, 10))
 		req.Header.Add("X-Signature", sig)
 	}
 
@@ -51,7 +52,8 @@ func Get(path string, worker *storage.Worker) *http.Response {
 		mac.Write([]byte(path))
 		sig := hex.EncodeToString(mac.Sum(nil))
 
-		req.Header.Add("X-Worker-Id", worker.Id.String())
+		fmt.Println(strconv.FormatInt(worker.Id, 10))
+		req.Header.Add("X-Worker-Id", strconv.FormatInt(worker.Id, 10))
 		req.Header.Add("X-Signature", sig)
 	}
 

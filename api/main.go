@@ -80,7 +80,6 @@ func New() *WebAPI {
 			ctx.SetStatusCode(404)
 			_, _ = fmt.Fprintf(ctx, "Not found")
 		}
-
 	}
 
 	return api

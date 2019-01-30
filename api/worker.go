@@ -2,9 +2,9 @@ package api
 
 import (
 	"github.com/Sirupsen/logrus"
-	"github.com/google/uuid"
 	"math/rand"
 	"src/task_tracker/storage"
+	"strconv"
 	"time"
 )
 
@@ -34,8 +34,8 @@ type GetWorkerResponse struct {
 }
 
 type WorkerAccessRequest struct {
-	WorkerId  *uuid.UUID `json:"worker_id"`
-	ProjectId int64      `json:"project_id"`
+	WorkerId  int64 `json:"worker_id"`
+	ProjectId int64 `json:"project_id"`
 }
 
 type WorkerAccessResponse struct {
@@ -79,15 +79,25 @@ func (api *WebAPI) WorkerCreate(r *Request) {
 
 func (api *WebAPI) WorkerGet(r *Request) {
 
-	id, err := uuid.Parse(r.Ctx.UserValue("id").(string))
+	id, err := strconv.ParseInt(r.Ctx.UserValue("id").(string), 10, 64)
 	if err != nil {
-		logrus.WithFields(logrus.Fields{
+		logrus.WithError(err).WithFields(logrus.Fields{
 			"id": id,
-		}).Warn("Invalid UUID")
+		}).Warn("Invalid worker id")
 
 		r.Json(GetWorkerResponse{
 			Ok:      false,
 			Message: err.Error(),
+		}, 400)
+		return
+	} else if id <= 0 {
+		logrus.WithFields(logrus.Fields{
+			"id": id,
+		}).Warn("Invalid worker id")
+
+		r.Json(GetWorkerResponse{
+			Ok:      false,
+			Message: "Invalid worker id",
 		}, 400)
 		return
 	}
@@ -188,7 +198,6 @@ func (api *WebAPI) workerCreate(request *CreateWorkerRequest, identity *storage.
 	}
 
 	worker := storage.Worker{
-		Id:       uuid.New(),
 		Created:  time.Now().Unix(),
 		Identity: identity,
 		Secret:   makeSecret(),

@@ -4,20 +4,19 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/Sirupsen/logrus"
-	"github.com/google/uuid"
 )
 
 type Task struct {
-	Id            int64     `json:"id"`
-	Priority      int64     `json:"priority"`
-	Project       *Project  `json:"project"`
-	Assignee      uuid.UUID `json:"assignee"`
-	Retries       int64     `json:"retries"`
-	MaxRetries    int64     `json:"max_retries"`
-	Status        string    `json:"status"`
-	Recipe        string    `json:"recipe"`
-	MaxAssignTime int64     `json:"max_assign_time"`
-	AssignTime    int64     `json:"assign_time"`
+	Id            int64    `json:"id"`
+	Priority      int64    `json:"priority"`
+	Project       *Project `json:"project"`
+	Assignee      int64    `json:"assignee"`
+	Retries       int64    `json:"retries"`
+	MaxRetries    int64    `json:"max_retries"`
+	Status        string   `json:"status"`
+	Recipe        string   `json:"recipe"`
+	MaxAssignTime int64    `json:"max_assign_time"`
+	AssignTime    int64    `json:"assign_time"`
 }
 
 func (database *Database) SaveTask(task *Task, project int64, hash64 int64) error {
@@ -53,7 +52,7 @@ func (database *Database) GetTask(worker *Worker) *Task {
 
 	row := db.QueryRow(`
 	UPDATE task
-	SET assignee=$1
+	SET assignee=$1, assign_time=extract(epoch from now() at time zone 'utc')
 	WHERE id IN
 	(
 		SELECT task.id
@@ -71,7 +70,7 @@ func (database *Database) GetTask(worker *Worker) *Task {
 
 	err := row.Scan(&id)
 	if err != nil {
-		logrus.WithFields(logrus.Fields{
+		logrus.WithError(err).WithFields(logrus.Fields{
 			"worker": worker,
 		}).Trace("No task available")
 		return nil
@@ -104,7 +103,7 @@ func getTaskById(id int64, db *sql.DB) *Task {
 	return task
 }
 
-func (database Database) ReleaseTask(id int64, workerId *uuid.UUID, success bool) bool {
+func (database Database) ReleaseTask(id int64, workerId int64, success bool) bool {
 
 	db := database.getDB()
 
