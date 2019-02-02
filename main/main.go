@@ -1,10 +1,10 @@
 package main
 
 import (
+	"github.com/simon987/task_tracker/api"
+	"github.com/simon987/task_tracker/config"
+	"github.com/simon987/task_tracker/storage"
 	"math/rand"
-	"src/task_tracker/api"
-	"src/task_tracker/config"
-	"src/task_tracker/storage"
 	"time"
 )
 

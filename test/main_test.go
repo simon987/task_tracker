@@ -1,8 +1,8 @@
 package test
 
 import (
-	"src/task_tracker/api"
-	"src/task_tracker/config"
+	"github.com/simon987/task_tracker/api"
+	"github.com/simon987/task_tracker/config"
 	"testing"
 	"time"
 )

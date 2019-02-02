@@ -3,10 +3,10 @@ package test
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/simon987/task_tracker/api"
+	"github.com/simon987/task_tracker/storage"
 	"io/ioutil"
 	"net/http"
-	"src/task_tracker/api"
-	"src/task_tracker/storage"
 	"testing"
 )
 

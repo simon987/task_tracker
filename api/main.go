@@ -4,15 +4,17 @@ import (
 	"fmt"
 	"github.com/Sirupsen/logrus"
 	"github.com/buaazp/fasthttprouter"
+	"github.com/kataras/go-sessions"
+	"github.com/simon987/task_tracker/config"
+	"github.com/simon987/task_tracker/storage"
 	"github.com/valyala/fasthttp"
-	"src/task_tracker/config"
-	"src/task_tracker/storage"
 )
 
 type WebAPI struct {
-	server   *fasthttp.Server
-	router   *fasthttprouter.Router
-	Database *storage.Database
+	server        *fasthttp.Server
+	router        *fasthttprouter.Router
+	Database      *storage.Database
+	SessionConfig *sessions.Config
 }
 
 type Info struct {
@@ -35,6 +37,11 @@ func New() *WebAPI {
 	api.Database = &storage.Database{}
 
 	api.router = &fasthttprouter.Router{}
+
+	api.SessionConfig = &sessions.Config{
+		Cookie:  config.Cfg.SessionCookieName,
+		Expires: config.Cfg.SessionCookieExpiration,
+	}
 
 	api.server = &fasthttp.Server{
 		Handler: api.router.Handler,

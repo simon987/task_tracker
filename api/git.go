@@ -7,10 +7,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/Sirupsen/logrus"
+	"github.com/simon987/task_tracker/config"
+	"github.com/simon987/task_tracker/storage"
 	"github.com/valyala/fasthttp"
 	"hash"
-	"src/task_tracker/config"
-	"src/task_tracker/storage"
 	"strings"
 )
 

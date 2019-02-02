@@ -7,11 +7,11 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/simon987/task_tracker/config"
+	"github.com/simon987/task_tracker/storage"
 	"io"
 	"io/ioutil"
 	"net/http"
-	"src/task_tracker/config"
-	"src/task_tracker/storage"
 	"strconv"
 )
 

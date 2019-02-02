@@ -3,8 +3,8 @@ package api
 import (
 	"encoding/json"
 	"github.com/Sirupsen/logrus"
+	"github.com/simon987/task_tracker/storage"
 	"math/rand"
-	"src/task_tracker/storage"
 	"strconv"
 	"time"
 )

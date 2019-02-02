@@ -3,7 +3,7 @@ package storage
 import (
 	"encoding/json"
 	"github.com/Sirupsen/logrus"
-	"src/task_tracker/config"
+	"github.com/simon987/task_tracker/config"
 )
 
 type LogEntry struct {

@@ -5,9 +5,9 @@ import (
 	"crypto"
 	"crypto/hmac"
 	"encoding/hex"
+	"github.com/simon987/task_tracker/api"
+	"github.com/simon987/task_tracker/config"
 	"net/http"
-	"src/task_tracker/api"
-	"src/task_tracker/config"
 	"testing"
 )
 

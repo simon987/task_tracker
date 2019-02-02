@@ -9,7 +9,7 @@ import (
 	"errors"
 	"github.com/Sirupsen/logrus"
 	"github.com/dchest/siphash"
-	"src/task_tracker/storage"
+	"github.com/simon987/task_tracker/storage"
 	"strconv"
 )
 

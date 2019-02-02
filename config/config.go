@@ -3,16 +3,19 @@ package config
 import (
 	"github.com/Sirupsen/logrus"
 	"github.com/spf13/viper"
+	"time"
 )
 
 var Cfg struct {
-	ServerAddr       string
-	DbConnStr        string
-	WebHookSecret    []byte
-	WebHookHash      string
-	WebHookSigHeader string
-	LogLevel         logrus.Level
-	DbLogLevels      []logrus.Level
+	ServerAddr              string
+	DbConnStr               string
+	WebHookSecret           []byte
+	WebHookHash             string
+	WebHookSigHeader        string
+	LogLevel                logrus.Level
+	DbLogLevels             []logrus.Level
+	SessionCookieName       string
+	SessionCookieExpiration time.Duration
 }
 
 func SetupConfig() {
@@ -35,4 +38,7 @@ func SetupConfig() {
 		newLevel, _ := logrus.ParseLevel(level)
 		Cfg.DbLogLevels = append(Cfg.DbLogLevels, newLevel)
 	}
+	Cfg.SessionCookieName = viper.GetString("session.cookie_name")
+	Cfg.SessionCookieExpiration, err = time.ParseDuration(viper.GetString("session.expiration"))
+
 }

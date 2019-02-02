@@ -2,8 +2,8 @@ package test
 
 import (
 	"encoding/json"
+	"github.com/simon987/task_tracker/api"
 	"io/ioutil"
-	"src/task_tracker/api"
 	"testing"
 )
 

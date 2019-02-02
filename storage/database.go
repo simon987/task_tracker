@@ -4,9 +4,9 @@ import (
 	"database/sql"
 	"github.com/Sirupsen/logrus"
 	_ "github.com/lib/pq"
+	"github.com/simon987/task_tracker/config"
 	"io/ioutil"
 	"os"
-	"src/task_tracker/config"
 )
 
 type Database struct {

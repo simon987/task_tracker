@@ -3,9 +3,9 @@ package test
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/simon987/task_tracker/api"
 	"io/ioutil"
 	"net/http"
-	"src/task_tracker/api"
 	"testing"
 )
 

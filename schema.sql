@@ -1,5 +1,5 @@
 DROP TABLE IF EXISTS worker_identity, worker, project, task, log_entry,
-  worker_has_access_to_project;
+  worker_has_access_to_project, manager, manager_has_role_on_project;
 DROP TYPE IF EXISTS status;
 DROP TYPE IF EXISTS log_level;
 
@@ -63,3 +63,17 @@ CREATE TABLE log_entry
   timestamp    INTEGER
 );
 
+CREATE TABLE manager
+(
+  id            SERIAL PRIMARY KEY,
+  username      TEXT,
+  password      TEXT,
+  website_admin BOOLEAN
+);
+
+CREATE TABLE manager_has_role_on_project
+(
+  manager INTEGER REFERENCES manager (id),
+  role    SMALLINT,
+  project INTEGER REFERENCES project (id)
+);

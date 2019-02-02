@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/Sirupsen/logrus"
+	"github.com/simon987/task_tracker/config"
+	"github.com/simon987/task_tracker/storage"
 	"github.com/valyala/fasthttp"
-	"src/task_tracker/config"
-	"src/task_tracker/storage"
 	"time"
 )
 

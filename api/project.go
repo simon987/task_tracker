@@ -3,7 +3,7 @@ package api
 import (
 	"encoding/json"
 	"github.com/Sirupsen/logrus"
-	"src/task_tracker/storage"
+	"github.com/simon987/task_tracker/storage"
 	"strconv"
 )
 

@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/Sirupsen/logrus"
+	"github.com/simon987/task_tracker/api"
+	"github.com/simon987/task_tracker/storage"
 	"io/ioutil"
-	"src/task_tracker/api"
-	"src/task_tracker/storage"
 	"testing"
 	"time"
 )

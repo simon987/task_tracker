@@ -3,8 +3,8 @@ server:
 
 database:
   conn_str: "user=task_tracker dbname=task_tracker_test sslmode=disable"
-  #  log_levels: ["debug", "error"]
-  log_levels: ["debug", "error", "trace", "info", "warning"]
+  log_levels: ["debug", "error"]
+#  log_levels: ["debug", "error", "trace", "info", "warning"]
 
 git:
   webhook_secret: "very_secret_secret"
@@ -13,3 +13,7 @@ git:
 
 log:
   level: "trace"
+
+session:
+  cookie_name: "tt"
+  expiration: "25m"
