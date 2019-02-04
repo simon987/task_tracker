@@ -145,15 +145,19 @@ func TestCreateGetTask(t *testing.T) {
 	worker := genWid()
 
 	createTask(api.CreateTaskRequest{
-		Project:    resp.Id,
-		Recipe:     "{\"url\":\"test\"}",
-		MaxRetries: 3,
-		Priority:   9999,
+		Project:           resp.Id,
+		Recipe:            "{\"url\":\"test\"}",
+		MaxRetries:        3,
+		Priority:          9999,
+		VerificationCount: 12,
 	}, worker)
 
 	taskResp := getTaskFromProject(resp.Id, worker)
 
 	if taskResp.Ok != true {
+		t.Error()
+	}
+	if taskResp.Task.VerificationCount != 12 {
 		t.Error()
 	}
 	if taskResp.Task.Priority != 9999 {
@@ -398,8 +402,8 @@ func TestReleaseTaskSuccess(t *testing.T) {
 	task := getTaskFromProject(pid, worker).Task
 
 	releaseResp := releaseTask(api.ReleaseTaskRequest{
-		TaskId:  task.Id,
-		Success: true,
+		TaskId: task.Id,
+		Result: storage.TR_OK,
 	}, worker)
 
 	if releaseResp.Ok != true {
@@ -501,6 +505,138 @@ func TestCreateStringCollision(t *testing.T) {
 	if len(resp.Message) <= 0 {
 		t.Error()
 	}
+}
+
+func TestCannotVerifySameTaskTwice(t *testing.T) {
+
+	pid := createProject(api.CreateProjectRequest{
+		Priority: 1,
+		GitRepo:  "verifysametasktwice",
+		CloneUrl: "verifysametasktwice",
+		Motd:     "verifysametasktwice",
+		Public:   true,
+		Name:     "verifysametasktwice",
+		Version:  "verifysametasktwice",
+	}).Id
+
+	w := genWid()
+
+	createTask(api.CreateTaskRequest{
+		VerificationCount: 2,
+		Project:           pid,
+		Recipe:            "verifysametasktwice",
+	}, w)
+
+	task := getTaskFromProject(pid, w).Task
+	rlr := releaseTask(api.ReleaseTaskRequest{
+		Result:       storage.TR_OK,
+		TaskId:       task.Id,
+		Verification: 123,
+	}, w)
+
+	if rlr.Updated != false {
+		t.Error()
+	}
+
+	sameTask := getTaskFromProject(pid, w)
+
+	if sameTask.Ok != false {
+		t.Error()
+	}
+}
+
+func TestVerification2(t *testing.T) {
+
+	pid := createProject(api.CreateProjectRequest{
+		Priority: 1,
+		GitRepo:  "verify2",
+		CloneUrl: "verify2",
+		Motd:     "verify2",
+		Public:   true,
+		Name:     "verify2",
+		Version:  "verify2",
+	}).Id
+
+	w := genWid()
+	w2 := genWid()
+	w3 := genWid()
+
+	createTask(api.CreateTaskRequest{
+		VerificationCount: 2,
+		Project:           pid,
+		Recipe:            "verify2",
+	}, w)
+
+	task := getTaskFromProject(pid, w).Task
+	rlr := releaseTask(api.ReleaseTaskRequest{
+		Result:       storage.TR_OK,
+		TaskId:       task.Id,
+		Verification: 123,
+	}, w)
+
+	if rlr.Updated != false {
+		t.Error()
+	}
+
+	task2 := getTaskFromProject(pid, w2).Task
+	rlr2 := releaseTask(api.ReleaseTaskRequest{
+		Result:       storage.TR_OK,
+		Verification: 1,
+		TaskId:       task2.Id,
+	}, w2)
+
+	if rlr2.Updated != false {
+		t.Error()
+	}
+
+	task3 := getTaskFromProject(pid, w3).Task
+	rlr3 := releaseTask(api.ReleaseTaskRequest{
+		Result:       storage.TR_OK,
+		Verification: 123,
+		TaskId:       task3.Id,
+	}, w3)
+
+	if rlr3.Updated != true {
+		t.Error()
+	}
+}
+
+func TestReleaseTaskFail(t *testing.T) {
+
+	pid := createProject(api.CreateProjectRequest{
+		Priority: 1,
+		GitRepo:  "releasefail",
+		CloneUrl: "releasefail",
+		Motd:     "releasefail",
+		Public:   true,
+		Name:     "releasefail",
+		Version:  "releasefail",
+	}).Id
+
+	w := genWid()
+
+	createTask(api.CreateTaskRequest{
+		MaxRetries:        0,
+		Project:           pid,
+		VerificationCount: 1,
+		Recipe:            "releasefail",
+	}, w)
+
+	task := getTaskFromProject(pid, w).Task
+
+	resp := releaseTask(api.ReleaseTaskRequest{
+		Result:       storage.TR_FAIL,
+		TaskId:       task.Id,
+		Verification: 1,
+	}, w)
+
+	if resp.Updated != true {
+		t.Error()
+	}
+	if resp.Ok != true {
+		t.Error()
+	}
+
 }
 
 func createTask(request api.CreateTaskRequest, worker *storage.Worker) *api.CreateTaskResponse {

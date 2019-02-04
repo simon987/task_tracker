@@ -72,7 +72,8 @@ func (database *Database) GetProject(id int64) *Project {
 
 func getProject(id int64, db *sql.DB) *Project {
 
-	row := db.QueryRow(`SELECT * FROM project WHERE id=$1`, id)
+	row := db.QueryRow(`SELECT id, priority, name, clone_url, git_repo, version, motd, public
+		FROM project WHERE id=$1`, id)
 
 	project, err := scanProject(row)
 	if err != nil {
@@ -102,7 +103,9 @@ func scanProject(row *sql.Row) (*Project, error) {
 func (database *Database) GetProjectWithRepoName(repoName string) *Project {
 
 	db := database.getDB()
-	row := db.QueryRow(`SELECT * FROM project WHERE LOWER(git_repo)=$1`, strings.ToLower(repoName))
+	row := db.QueryRow(`SELECT id, priority, name, clone_url, git_repo, version, motd, public 
+			FROM project WHERE LOWER(git_repo)=$1`,
+		strings.ToLower(repoName))
 
 	project, err := scanProject(row)
 	if err != nil {
@@ -191,7 +194,8 @@ func (database Database) GetAllProjectsStats() *[]ProjectStats {
        	SUM(CASE WHEN status= 1 THEN 1 ELSE 0 END) newCount,
        	SUM(CASE WHEN status=2 THEN 1 ELSE 0 END) failedCount,
 		SUM(CASE WHEN status=3 THEN 1 ELSE 0 END) closedCount,
-       	p.*
+       	p.Id, p.priority, p.name, p.clone_url, p.git_repo, p.version, p.motd,
+       	p.public
 		FROM task RIGHT JOIN project p on task.project = p.id
 		GROUP BY p.id ORDER BY p.name`)
 	handleErr(err)

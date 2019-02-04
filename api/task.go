@@ -14,22 +14,25 @@ import (
 )
 
 type CreateTaskRequest struct {
-	Project       int64  `json:"project"`
-	MaxRetries    int64  `json:"max_retries"`
-	Recipe        string `json:"recipe"`
-	Priority      int64  `json:"priority"`
-	MaxAssignTime int64  `json:"max_assign_time"`
-	Hash64        int64  `json:"hash_u64"`
-	UniqueString  string `json:"unique_string"`
+	Project           int64  `json:"project"`
+	MaxRetries        int64  `json:"max_retries"`
+	Recipe            string `json:"recipe"`
+	Priority          int64  `json:"priority"`
+	MaxAssignTime     int64  `json:"max_assign_time"`
+	Hash64            int64  `json:"hash_u64"`
+	UniqueString      string `json:"unique_string"`
+	VerificationCount int64  `json:"verification_count"`
 }
 
 type ReleaseTaskRequest struct {
-	TaskId  int64 `json:"task_id"`
-	Success bool  `json:"success"`
+	TaskId       int64              `json:"task_id"`
+	Result       storage.TaskResult `json:"result"`
+	Verification int64              `json:"verification"`
 }
 
 type ReleaseTaskResponse struct {
 	Ok      bool   `json:"ok"`
+	Updated bool   `json:"updated"`
 	Message string `json:"message,omitempty"`
 }
 
@@ -56,11 +59,12 @@ func (api *WebAPI) TaskCreate(r *Request) {
 		return
 	}
 	task := &storage.Task{
-		MaxRetries:    createReq.MaxRetries,
-		Recipe:        createReq.Recipe,
-		Priority:      createReq.Priority,
-		AssignTime:    0,
-		MaxAssignTime: createReq.MaxAssignTime,
+		MaxRetries:        createReq.MaxRetries,
+		Recipe:            createReq.Recipe,
+		Priority:          createReq.Priority,
+		AssignTime:        0,
+		MaxAssignTime:     createReq.MaxAssignTime,
+		VerificationCount: createReq.VerificationCount,
 	}
 
 	if createReq.IsValid() && isTaskValid(task) {
@@ -229,10 +233,11 @@ func (api *WebAPI) TaskRelease(r *Request) {
 			Message: "Could not parse request",
 		}, 400)
 	}
-	res := api.Database.ReleaseTask(req.TaskId, worker.Id, req.Success)
+	res := api.Database.ReleaseTask(req.TaskId, worker.Id, req.Result, req.Verification)
 
 	response := ReleaseTaskResponse{
-		Ok: res,
+		Updated: res,
+		Ok:      true,
 	}
 
 	if !res {

@@ -7,25 +7,32 @@ import (
 )
 
 type Task struct {
-	Id            int64      `json:"id"`
-	Priority      int64      `json:"priority"`
-	Project       *Project   `json:"project"`
-	Assignee      int64      `json:"assignee"`
-	Retries       int64      `json:"retries"`
-	MaxRetries    int64      `json:"max_retries"`
-	Status        TaskStatus `json:"status"`
-	Recipe        string     `json:"recipe"`
-	MaxAssignTime int64      `json:"max_assign_time"`
-	AssignTime    int64      `json:"assign_time"`
+	Id                int64      `json:"id"`
+	Priority          int64      `json:"priority"`
+	Project           *Project   `json:"project"`
+	Assignee          int64      `json:"assignee"`
+	Retries           int64      `json:"retries"`
+	MaxRetries        int64      `json:"max_retries"`
+	Status            TaskStatus `json:"status"`
+	Recipe            string     `json:"recipe"`
+	MaxAssignTime     int64      `json:"max_assign_time"`
+	AssignTime        int64      `json:"assign_time"`
+	VerificationCount int64      `json:"verification_count"`
 }
 
 type TaskStatus int
 
 const (
-	NEW     TaskStatus = 1
-	FAILED  TaskStatus = 2
-	CLOSED  TaskStatus = 3
-	TIMEOUT TaskStatus = 4
+	NEW    TaskStatus = 1
+	FAILED TaskStatus = 2
+)
+
+type TaskResult int
+
+const (
+	TR_OK   TaskResult = 0
+	TR_FAIL TaskResult = 1
+	TR_SKIP TaskResult = 2
 )
 
 func (database *Database) SaveTask(task *Task, project int64, hash64 int64) error {
@@ -34,9 +41,9 @@ func (database *Database) SaveTask(task *Task, project int64, hash64 int64) erro
 
 	//TODO: For some reason it refuses to insert the 64-bit value unless I do that...
 	res, err := db.Exec(fmt.Sprintf(`
-	INSERT INTO task (project, max_retries, recipe, priority, max_assign_time, hash64) 
-	VALUES ($1,$2,$3,$4,$5,NULLIF(%d, 0))`, hash64),
-		project, task.MaxRetries, task.Recipe, task.Priority, task.MaxAssignTime)
+	INSERT INTO task (project, max_retries, recipe, priority, max_assign_time, hash64,verification_count) 
+	VALUES ($1,$2,$3,$4,$5,NULLIF(%d, 0),$6)`, hash64),
+		project, task.MaxRetries, task.Recipe, task.Priority, task.MaxAssignTime, task.VerificationCount)
 	if err != nil {
 		logrus.WithError(err).WithFields(logrus.Fields{
 			"task": task,
@@ -67,10 +74,12 @@ func (database *Database) GetTask(worker *Worker) *Task {
 		SELECT task.id
 	FROM task
 	INNER JOIN project p on task.project = p.id
+	LEFT JOIN worker_verifies_task wvt on task.id = wvt.task AND wvt.worker=$1
 	WHERE assignee IS NULL AND task.status=1
 		AND (p.public OR EXISTS (
 		  SELECT 1 FROM worker_has_access_to_project a WHERE a.worker=$1 AND a.project=p.id
 		))
+		AND wvt.task IS NULL
 	ORDER BY p.priority DESC, task.priority DESC
 	LIMIT 1
 	)
@@ -99,8 +108,9 @@ func getTaskById(id int64, db *sql.DB) *Task {
 
 	row := db.QueryRow(`
 	SELECT task.id, task.priority, task.project, assignee, retries, max_retries,
-	        status, recipe, max_assign_time, assign_time, project.* FROM task 
-	  INNER JOIN project ON task.project = project.id
+	        status, recipe, max_assign_time, assign_time, verification_count, p.priority, p.name,
+	       p.clone_url, p.git_repo, p.version, p.motd, p.public FROM task 
+	  INNER JOIN project p ON task.project = p.id
 	WHERE task.id=$1`, id)
 	project := &Project{}
 	task := &Task{}
@@ -108,7 +118,7 @@ func getTaskById(id int64, db *sql.DB) *Task {
 
 	err := row.Scan(&task.Id, &task.Priority, &project.Id, &task.Assignee,
 		&task.Retries, &task.MaxRetries, &task.Status, &task.Recipe, &task.MaxAssignTime,
-		&task.AssignTime, &project.Id, &project.Priority, &project.Name,
+		&task.AssignTime, &task.VerificationCount, &project.Priority, &project.Name,
 		&project.CloneUrl, &project.GitRepo, &project.Version, &project.Motd, &project.Public)
 	handleErr(err)
 
@@ -120,27 +130,54 @@ func getTaskById(id int64, db *sql.DB) *Task {
 	return task
 }
 
-func (database Database) ReleaseTask(id int64, workerId int64, success bool) bool {
+func (database Database) ReleaseTask(id int64, workerId int64, result TaskResult, verification int64) bool {
 
 	db := database.getDB()
 
-	var res sql.Result
-	var err error
-	if success {
-		res, err = db.Exec(`UPDATE task SET (status, assignee) = (3, NULL)
-		WHERE id=$1 AND task.assignee=$2`, id, workerId)
-	} else {
-		res, err = db.Exec(`UPDATE task SET (status, assignee, retries) = 
-  		(CASE WHEN retries+1 >= max_retries THEN 2 ELSE 1 END, NULL, retries+1)
-		WHERE id=$1 AND assignee=$2`, id, workerId)
-	}
-	handleErr(err)
+	var rowsAffected int64
+	if result == TR_OK {
+		var pid int64
 
-	rowsAffected, _ := res.RowsAffected()
+		//If no verification is required
+		row := db.QueryRow(`DELETE FROM task WHERE id=$1 AND assignee=$2 AND verification_count < 2
+                       			  	RETURNING project`, id, workerId)
+		err := row.Scan(&pid)
+		if err == nil {
+			rowsAffected = 1
+		} else {
+			//If verification is required
+			_, err = db.Exec(`INSERT INTO worker_verifies_task (worker, verification_hash, task)
+									SELECT $1,$2,task.id FROM task WHERE assignee=$1`, workerId, verification)
+			handleErr(err)
+
+			res, _ := db.Exec(`DELETE FROM task WHERE id=$1 AND assignee=$2 AND 
+            	(SELECT COUNT(*) as vcnt FROM worker_verifies_task wvt WHERE task=$1 
+            		GROUP BY wvt.verification_hash ORDER BY vcnt DESC LIMIT 1) >= task.verification_count`,
+				id, workerId)
+			rowsAffected, _ = res.RowsAffected()
+
+			_, _ = db.Exec(`UPDATE task SET assignee=NULL WHERE id=$1 AND assignee=$2`, id, workerId)
+		}
+
+	} else if result == TR_FAIL {
+		res, err := db.Exec(`UPDATE task SET (status, assignee, retries) = 
+			(CASE WHEN retries+1 >= max_retries THEN 2 ELSE 1 END, NULL, retries+1)
+			WHERE id=$1 AND assignee=$2`, id, workerId)
+		handleErr(err)
+		rowsAffected, _ = res.RowsAffected()
+	} else if result == TR_SKIP {
+		res, err := db.Exec(`UPDATE task SET (status, assignee) = (1, NULL)
+			WHERE id=$1 AND assignee=$2`, id, workerId)
+		handleErr(err)
+		rowsAffected, _ = res.RowsAffected()
+	}
 
 	logrus.WithFields(logrus.Fields{
 		"rowsAffected": rowsAffected,
-	})
+		"taskId":       id,
+		"workerId":     workerId,
+		"verification": verification,
+	}).Trace("Database.ReleaseTask")
 
 	return rowsAffected == 1
 }
@@ -151,16 +188,18 @@ func (database *Database) GetTaskFromProject(worker *Worker, projectId int64) *T
 
 	row := db.QueryRow(`
 	UPDATE task
-	SET assignee=$1
+	SET assignee=$1, assign_time=extract(epoch from now() at time zone 'utc')
 	WHERE id IN
 	(
 		SELECT task.id
 	FROM task
 	INNER JOIN project p on task.project = p.id
+	LEFT JOIN worker_verifies_task wvt on task.id = wvt.task AND wvt.worker=$1
 	WHERE assignee IS NULL AND p.id=$2 AND status=1
 		AND (p.public OR EXISTS (
 		  SELECT 1 FROM worker_has_access_to_project a WHERE a.worker=$1 AND a.project=$2
 		))
+		AND wvt.task IS NULL
 	ORDER BY task.priority DESC
 	LIMIT 1
 	)
