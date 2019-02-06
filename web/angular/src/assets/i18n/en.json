@@ -18,6 +18,16 @@
         "items_per_page": "Items per page",
         "next_page": "Next page",
         "prev_page": "Previous page"
-
+    },
+    "projects": {
+        "projects": "Projects",
+        "dashboard": "Dashboard",
+        "update": "Update"
+    },
+    "title": {
+        "": "Index",
+        "projects": "Projects",
+        "log": "Logs",
+        "new_project": "New project"
     }
 }

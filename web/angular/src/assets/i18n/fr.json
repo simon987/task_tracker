@@ -18,6 +18,17 @@
         "items_per_page": "Items par page",
         "next_page": "Page suivante",
         "prev_page": "Page précédante"
+    },
+    "projects": {
+        "projects": "Projets",
+        "dashboard": "Tableau de bord",
+        "update": "Modifier"
+    },
+    "title": {
+        "": "Accueil",
+        "projects": "Projets",
+        "log": "Journal",
+        "new_project": "Nouveau projet"
     }
 }
 
