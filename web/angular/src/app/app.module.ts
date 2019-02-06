@@ -18,6 +18,7 @@ import {
     MatInputModule,
     MatMenuModule,
     MatPaginatorModule,
+    MatSelectModule,
     MatSliderModule,
     MatSlideToggleModule,
     MatSnackBarModule,
@@ -28,13 +29,21 @@ import {
 } from "@angular/material";
 import {ApiService} from "./api.service";
 import {MessengerService} from "./messenger.service";
-import {HttpClientModule} from "@angular/common/http";
+import {HttpClient, HttpClientModule} from "@angular/common/http";
 import {ProjectDashboardComponent} from './project-dashboard/project-dashboard.component';
 import {ProjectListComponent} from './project-list/project-list.component';
 import {CreateProjectComponent} from './create-project/create-project.component';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {UpdateProjectComponent} from './update-project/update-project.component';
 import {SnackBarComponent} from "./messenger/snack-bar.component";
+import {TranslateLoader, TranslateModule} from "@ngx-translate/core";
+import {TranslateHttpLoader} from "@ngx-translate/http-loader";
+
+
+export function createTranslateLoader(http: HttpClient) {
+    return new TranslateHttpLoader(http, './assets/i18n/', '.json');
+}
+
 
 @NgModule({
     declarations: [
@@ -71,6 +80,15 @@ import {SnackBarComponent} from "./messenger/snack-bar.component";
         MatCheckboxModule,
         MatDividerModule,
         MatSnackBarModule,
+        TranslateModule.forRoot({
+                loader: {
+                    provide: TranslateLoader,
+                    useFactory: (createTranslateLoader),
+                    deps: [HttpClient]
+                }
+            }
+        ),
+        MatSelectModule
 
     ],
     exports: [],

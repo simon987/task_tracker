@@ -122,84 +122,6 @@ func TestGetProjectNotFound(t *testing.T) {
 	}
 }
 
-func TestGetProjectStats(t *testing.T) {
-
-	r := createProject(api.CreateProjectRequest{
-		Motd:     "motd",
-		Name:     "Name",
-		Version:  "version",
-		CloneUrl: "http://github.com/drone/test",
-		GitRepo:  "drone/test",
-		Priority: 3,
-		Public:   true,
-	})
-
-	pid := r.Id
-	worker := genWid()
-
-	createTask(api.CreateTaskRequest{
-		Priority:   1,
-		Project:    pid,
-		MaxRetries: 0,
-		Recipe:     "{}",
-	}, worker)
-	createTask(api.CreateTaskRequest{
-		Priority:   2,
-		Project:    pid,
-		MaxRetries: 0,
-		Recipe:     "{}",
-	}, worker)
-	createTask(api.CreateTaskRequest{
-		Priority:   3,
-		Project:    pid,
-		MaxRetries: 0,
-		Recipe:     "{}",
-	}, worker)
-
-	stats := getProjectStats(pid)
-
-	if stats.Ok != true {
-		t.Error()
-	}
-
-	if stats.Stats.Project.Id != pid {
-		t.Error()
-	}
-
-	if stats.Stats.NewTaskCount != 3 {
-		t.Error()
-	}
-
-	if stats.Stats.Assignees[0].Assignee != "unassigned" {
-		t.Error()
-	}
-	if stats.Stats.Assignees[0].TaskCount != 3 {
-		t.Error()
-	}
-}
-
-func TestGetProjectStatsNotFound(t *testing.T) {
-
-	r := createProject(api.CreateProjectRequest{
-		Motd:     "eeeeeeeeej",
-		Name:     "Namaaaaaaaaaaaa",
-		Version:  "versionsssssssss",
-		CloneUrl: "http://github.com/drone/test1",
-		GitRepo:  "drone/test1",
-		Priority: 1,
-	})
-	s := getProjectStats(r.Id)
-
-	if s.Ok != true {
-		t.Error()
-	}
-
-	if s.Stats == nil {
-		t.Error()
-	}
-
-}
-
 func TestUpdateProjectValid(t *testing.T) {
 
 	pid := createProject(api.CreateProjectRequest{
@@ -335,18 +257,6 @@ func getProject(id int64) (*api.GetProjectResponse, *http.Response) {
 	handleErr(err)
 
 	return &getResp, r
-}
-
-func getProjectStats(id int64) *api.GetProjectStatsResponse {
-
-	r := Get(fmt.Sprintf("/project/stats/%d", id), nil)
-
-	var getResp api.GetProjectStatsResponse
-	data, _ := ioutil.ReadAll(r.Body)
-	err := json.Unmarshal(data, &getResp)
-	handleErr(err)
-
-	return &getResp
 }
 
 func updateProject(request api.UpdateProjectRequest, pid int64) *api.UpdateProjectResponse {

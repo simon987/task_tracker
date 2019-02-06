@@ -12,9 +12,9 @@ import {MatPaginator, MatSort, MatTableDataSource} from "@angular/material";
 })
 export class LogsComponent implements OnInit {
 
-    private logs: LogEntry[] = [];
-    private data: MatTableDataSource<LogEntry>;
-    private logsCols: string[] = ["level", "timestamp", "message", "data"];
+    logs: LogEntry[] = [];
+    data: MatTableDataSource<LogEntry>;
+    logsCols: string[] = ["level", "timestamp", "message", "data"];
 
     @ViewChild(MatPaginator) paginator: MatPaginator;
     @ViewChild(MatSort) sort: MatSort;

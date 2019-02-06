@@ -16,12 +16,8 @@ export class ApiService {
         return this.http.post(this.url + "/logs", "{\"level\":\"info\", \"since\":10000}");
     }
 
-    getProjectStats(id: number) {
-        return this.http.get(this.url + "/project/stats/" + id)
-    }
-
     getProjects() {
-        return this.http.get(this.url + "/project/stats")
+        return this.http.get(this.url + "/project/list")
     }
 
     getProject(id: number) {

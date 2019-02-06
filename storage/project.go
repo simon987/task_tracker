@@ -22,14 +22,6 @@ type AssignedTasks struct {
 	TaskCount int64  `json:"task_count"`
 }
 
-type ProjectStats struct {
-	Project         *Project         `json:"project"`
-	NewTaskCount    int64            `json:"new_task_count"`
-	FailedTaskCount int64            `json:"failed_task_count"`
-	ClosedTaskCount int64            `json:"closed_task_count"`
-	Assignees       []*AssignedTasks `json:"assignees"`
-}
-
 func (database *Database) SaveProject(project *Project) (int64, error) {
 	db := database.getDB()
 	id, projectErr := saveProject(project, db)
@@ -139,83 +131,28 @@ func (database *Database) UpdateProject(project *Project) error {
 	return nil
 }
 
-func (database *Database) GetProjectStats(id int64) *ProjectStats {
-
-	db := database.getDB()
-	stats := ProjectStats{}
-
-	stats.Project = getProject(id, db)
-
-	if stats.Project != nil {
-		row := db.QueryRow(`SELECT 
-       SUM(CASE WHEN status=1 THEN 1 ELSE 0 END) newCount,
-       SUM(CASE WHEN status=2 THEN 1 ELSE 0 END) failedCount,
-       SUM(CASE WHEN status=3 THEN 1 ELSE 0 END) closedCount
-       FROM task WHERE project=$1 GROUP BY project`, id)
-
-		err := row.Scan(&stats.NewTaskCount, &stats.FailedTaskCount, &stats.ClosedTaskCount)
-		if err != nil {
-			logrus.WithError(err).WithFields(logrus.Fields{
-				"id": id,
-			}).Trace("Get project stats: No task for this project")
-
-		}
-
-		rows, err := db.Query(`SELECT worker.alias, COUNT(*) as wc FROM TASK
-  			LEFT JOIN worker ON TASK.assignee = worker.id WHERE project=$1 
-			GROUP BY worker.id ORDER BY wc LIMIT 10`, id)
-
-		stats.Assignees = []*AssignedTasks{}
-
-		for rows.Next() {
-			assignee := AssignedTasks{}
-			var assigneeAlias sql.NullString
-			err = rows.Scan(&assigneeAlias, &assignee.TaskCount)
-			handleErr(err)
-
-			if assigneeAlias.Valid {
-				assignee.Assignee = assigneeAlias.String
-			} else {
-				assignee.Assignee = "unassigned"
-			}
-
-			stats.Assignees = append(stats.Assignees, &assignee)
-		}
-	}
-
-	return &stats
-}
-
-func (database Database) GetAllProjectsStats() *[]ProjectStats {
-	var statsList []ProjectStats
+func (database Database) GetAllProjects() *[]Project {
+	var projects []Project
 
 	db := database.getDB()
 	rows, err := db.Query(`SELECT 
-       	SUM(CASE WHEN status= 1 THEN 1 ELSE 0 END) newCount,
-       	SUM(CASE WHEN status=2 THEN 1 ELSE 0 END) failedCount,
-		SUM(CASE WHEN status=3 THEN 1 ELSE 0 END) closedCount,
-       	p.Id, p.priority, p.name, p.clone_url, p.git_repo, p.version, p.motd,
-       	p.public
-		FROM task RIGHT JOIN project p on task.project = p.id
-		GROUP BY p.id ORDER BY p.name`)
+       	Id, priority, name, clone_url, git_repo, version, motd, public
+		FROM project
+		ORDER BY name`)
 	handleErr(err)
 
 	for rows.Next() {
 
-		stats := ProjectStats{}
-		p := &Project{}
-		err := rows.Scan(&stats.NewTaskCount, &stats.FailedTaskCount, &stats.ClosedTaskCount,
-			&p.Id, &p.Priority, &p.Name, &p.CloneUrl, &p.GitRepo, &p.Version, &p.Motd, &p.Public)
+		p := Project{}
+		err := rows.Scan(&p.Id, &p.Priority, &p.Name, &p.CloneUrl,
+			&p.GitRepo, &p.Version, &p.Motd, &p.Public)
 		handleErr(err)
-
-		stats.Project = p
-
-		statsList = append(statsList, stats)
+		projects = append(projects, p)
 	}
 
 	logrus.WithFields(logrus.Fields{
-		"statsList": statsList,
+		"projects": projects,
 	}).Trace("Get all projects stats")
 
-	return &statsList
+	return &projects
 }

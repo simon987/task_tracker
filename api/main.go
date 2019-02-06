@@ -65,8 +65,7 @@ func New() *WebAPI {
 	api.router.POST("/project/create", LogRequestMiddleware(api.ProjectCreate))
 	api.router.GET("/project/get/:id", LogRequestMiddleware(api.ProjectGet))
 	api.router.POST("/project/update/:id", LogRequestMiddleware(api.ProjectUpdate))
-	api.router.GET("/project/stats/:id", LogRequestMiddleware(api.ProjectGetStats))
-	api.router.GET("/project/stats", LogRequestMiddleware(api.ProjectGetAllStats))
+	api.router.GET("/project/list", LogRequestMiddleware(api.ProjectGetAllProjects))
 
 	api.router.POST("/task/create", LogRequestMiddleware(api.TaskCreate))
 	api.router.GET("/task/get/:project", LogRequestMiddleware(api.TaskGetFromProject))

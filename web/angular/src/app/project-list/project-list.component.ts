@@ -1,5 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {ApiService} from "../api.service";
+import {Project} from "../models/project";
 
 @Component({
     selector: 'app-project-list',
@@ -11,14 +12,14 @@ export class ProjectListComponent implements OnInit {
     constructor(private apiService: ApiService) {
     }
 
-    projects: any[];
+    projects: Project[];
 
     ngOnInit() {
         this.getProjects()
     }
 
     getProjects() {
-        this.apiService.getProjects().subscribe(data => this.projects = data["stats"]);
+        this.apiService.getProjects().subscribe(data => this.projects = data["projects"]);
     }
 
 }

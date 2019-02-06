@@ -1,11 +1,23 @@
-<!--<mat-toolbar>-->
+<mat-toolbar color="primary">
+    <span>{{ "nav.title" | translate }}</span>
+    <span class="nav-spacer"></span>
+    <mat-icon class="example-icon">favorite</mat-icon>
+    <mat-icon class="example-icon">delete</mat-icon>
+    <mat-form-field [floatLabel]="'never'">
+        <mat-select [placeholder]="'nav.langSelect' | translate" (selectionChange)="langChange($event)">
+            <mat-option *ngFor="let lang of langList" [value]="lang.lang">
+                {{lang.display}}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+
+</mat-toolbar>
 <ul>
     <li><a [routerLink]="''">Index</a></li>
     <li><a [routerLink]="'log'">Logs</a></li>
     <li><a [routerLink]="'projects'">list</a></li>
     <li><a [routerLink]="'new_project'">new project</a></li>
 </ul>
-<!--</mat-toolbar>-->
 
 <messenger-snack-bar></messenger-snack-bar>
 

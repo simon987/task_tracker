@@ -12,7 +12,7 @@ import {Router} from "@angular/router";
 })
 export class CreateProjectComponent implements OnInit {
 
-    private project = new Project();
+    project = new Project();
 
     constructor(private apiService: ApiService,
                 private messengerService: MessengerService,

@@ -1,5 +1,6 @@
 DROP TABLE IF EXISTS worker_identity, worker, project, task, log_entry,
-  worker_has_access_to_project, manager, manager_has_role_on_project, project_monitoring, worker_verifies_task;
+  worker_has_access_to_project, manager, manager_has_role_on_project, project_monitoring_snapshot,
+  worker_verifies_task;
 DROP TYPE IF EXISTS status;
 DROP TYPE IF EXISTS log_level;
 
@@ -87,12 +88,15 @@ CREATE TABLE manager_has_role_on_project
   project INTEGER REFERENCES project (id)
 );
 
-CREATE TABLE project_monitoring
+CREATE TABLE project_monitoring_snapshot
 (
-  project           INT REFERENCES project (id),
-  new_task_count    INT,
-  failed_task_count INT,
-  closed_task_count INT
+  project                          INT REFERENCES project (id),
+  new_task_count                   INT,
+  failed_task_count                INT,
+  closed_task_count                INT,
+  awaiting_verification_task_count INT,
+  worker_access_count              INT,
+  timestamp                        INT
 );
 
 CREATE OR REPLACE FUNCTION on_task_delete_proc() RETURNS TRIGGER AS

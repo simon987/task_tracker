@@ -43,16 +43,10 @@ type GetProjectResponse struct {
 	Project *storage.Project `json:"project,omitempty"`
 }
 
-type GetProjectStatsResponse struct {
-	Ok      bool                  `json:"ok"`
-	Message string                `json:"message,omitempty"`
-	Stats   *storage.ProjectStats `json:"stats,omitempty"`
-}
-
-type GetAllProjectsStatsResponse struct {
-	Ok      bool                    `json:"ok"`
-	Message string                  `json:"message,omitempty"`
-	Stats   *[]storage.ProjectStats `json:"stats,omitempty"`
+type GetAllProjectsResponse struct {
+	Ok       bool               `json:"ok"`
+	Message  string             `json:"message,omitempty"`
+	Projects *[]storage.Project `json:"projects,omitempty"`
 }
 
 func (api *WebAPI) ProjectCreate(r *Request) {
@@ -200,38 +194,12 @@ func (api *WebAPI) ProjectGet(r *Request) {
 	}
 }
 
-func (api *WebAPI) ProjectGetStats(r *Request) {
+func (api *WebAPI) ProjectGetAllProjects(r *Request) {
 
-	id, err := strconv.ParseInt(r.Ctx.UserValue("id").(string), 10, 64)
-	if err != nil {
-		r.Json(GetProjectStatsResponse{
-			Ok:      false,
-			Message: "Could not parse request",
-		}, 400)
-		return
-	}
+	projects := api.Database.GetAllProjects()
 
-	stats := api.Database.GetProjectStats(id)
-
-	if stats != nil && stats.Project != nil {
-		r.OkJson(GetProjectStatsResponse{
-			Ok:    true,
-			Stats: stats,
-		})
-	} else {
-		r.Json(GetProjectStatsResponse{
-			Ok:      false,
-			Message: "Project not found",
-		}, 404)
-	}
-}
-
-func (api *WebAPI) ProjectGetAllStats(r *Request) {
-
-	stats := api.Database.GetAllProjectsStats()
-
-	r.OkJson(GetAllProjectsStatsResponse{
-		Ok:    true,
-		Stats: stats,
+	r.OkJson(GetAllProjectsResponse{
+		Ok:       true,
+		Projects: projects,
 	})
 }

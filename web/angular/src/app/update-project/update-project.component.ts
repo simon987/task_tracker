@@ -17,7 +17,7 @@ export class UpdateProjectComponent implements OnInit {
                 private router: Router) {
     }
 
-    private project: Project;
+    project: Project;
     private projectId: number;
 
     ngOnInit() {
