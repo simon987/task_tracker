@@ -13,7 +13,7 @@ export class ApiService {
     }
 
     getLogs() {
-        return this.http.post(this.url + "/logs", "{\"level\":\"info\", \"since\":10000}");
+        return this.http.post(this.url + "/logs", "{\"level\":6, \"since\":1}");
     }
 
     getProjects() {

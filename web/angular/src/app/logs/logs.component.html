@@ -1,32 +1,40 @@
-<div class="table-container">
-    <mat-form-field>
-        <input matInput (keyup)="applyFilter($event.target.value)" placeholder="Filter">
-    </mat-form-field>
-    <mat-table [dataSource]="data" class="mat-elevation-z8" matSort matSortActive="timestamp" matSortDirection="desc">
+<div class="container">
+    <div class="table-container">
+        <mat-form-field>
+            <input matInput (keyup)="applyFilter($event.target.value)" [placeholder]="'logs.filter' | translate">
+        </mat-form-field>
+        <div class="mat-elevation-z8">
 
-        <ng-container matColumnDef="level">
-            <mat-header-cell style="flex: 0 0 6em" mat-sort-header *matHeaderCellDef>Level</mat-header-cell>
-            <mat-cell style="flex: 0 0 6em" *matCellDef="let entry"> {{entry.level}} </mat-cell>
-        </ng-container>
-        <ng-container matColumnDef="timestamp">
-            <mat-header-cell style="flex: 0 0 21em" mat-sort-header *matHeaderCellDef>Time</mat-header-cell>
-            <mat-cell style="flex: 0 0 17em" *matCellDef="let entry"> {{entry.timestamp}} </mat-cell>
-        </ng-container>
-        <ng-container matColumnDef="message">
-            <mat-header-cell mat-sort-header *matHeaderCellDef>Message</mat-header-cell>
-            <mat-cell style="flex: 0 0 30em" *matCellDef="let entry"> {{entry.message}} </mat-cell>
-        </ng-container>
-        <ng-container matColumnDef="data">
-            <mat-header-cell mat-sort-header *matHeaderCellDef>Data</mat-header-cell>
-            <mat-cell *matCellDef="let entry">
-                <pre>{{entry.data}}</pre>
-            </mat-cell>
-        </ng-container>
+            <mat-table [dataSource]="data" matSort matSortActive="timestamp"
+                       matSortDirection="desc">
 
-        <mat-header-row *matHeaderRowDef="logsCols"></mat-header-row>
-        <mat-row *matRowDef="let row; columns: logsCols;"></mat-row>
-    </mat-table>
+                <ng-container matColumnDef="level">
+                    <mat-header-cell style="flex: 0 0 6em" mat-sort-header
+                                     *matHeaderCellDef>{{"logs.level" | translate}}</mat-header-cell>
+                    <mat-cell style="flex: 0 0 6em" *matCellDef="let entry"> {{entry.level}} </mat-cell>
+                </ng-container>
+                <ng-container matColumnDef="timestamp">
+                    <mat-header-cell style="flex: 0 0 21em" mat-sort-header
+                                     *matHeaderCellDef>{{"logs.time" | translate}}</mat-header-cell>
+                    <mat-cell style="flex: 0 0 17em" *matCellDef="let entry"> {{entry.timestamp}} </mat-cell>
+                </ng-container>
+                <ng-container matColumnDef="message">
+                    <mat-header-cell mat-sort-header *matHeaderCellDef>{{"logs.message" | translate}}</mat-header-cell>
+                    <mat-cell style="flex: 0 0 30em" *matCellDef="let entry"> {{entry.message}} </mat-cell>
+                </ng-container>
+                <ng-container matColumnDef="data">
+                    <mat-header-cell mat-sort-header *matHeaderCellDef>{{"logs.data" | translate}}</mat-header-cell>
+                    <mat-cell *matCellDef="let entry">
+                        <pre>{{entry.data}}</pre>
+                    </mat-cell>
+                </ng-container>
 
-    <mat-paginator [length]="logs.length" [pageSizeOptions]="[5,10,25,100]" [pageSize]="5"></mat-paginator>
+                <mat-header-row *matHeaderRowDef="logsCols"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: logsCols;"></mat-row>
+            </mat-table>
+
+            <mat-paginator [length]="logs.length" [pageSizeOptions]="[5,10,25,100]" [pageSize]="5"></mat-paginator>
+        </div>
+    </div>
 </div>
 

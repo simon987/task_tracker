@@ -1,36 +1,51 @@
 /* You can add global styles to this file, and also import other style files */
 @import "~@angular/material/prebuilt-themes/indigo-pink.css";
 
-.line-new {
-    fill: none;
-    stroke: #31a6a2;
-    stroke-width: 3;
+body {
+    margin: 0;
 }
 
-.line-failed {
-    fill: none;
-    stroke: #8c2627;
-    stroke-width: 3;
+.nav-title {
+    font-weight: bold;
+    font-size: 18px;
 }
 
-.line-closed {
-    fill: none;
-    stroke: #62f24b;
-    stroke-width: 3;
+
+.container {
+    width: 100%;
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-right: auto;
+    margin-left: auto;
+    margin-top: 15px;
 }
 
-.overlay {
-    fill: none;
-    pointer-events: all;
+@media (min-width: 576px) {
+    .container {
+        max-width: 540px;
+    }
 }
 
-/* Style the dots by assigning a fill and stroke */
-.dot {
-    fill: #ffab00;
-    stroke: #fff;
+@media (min-width: 768px) {
+    .container {
+        max-width: 720px;
+    }
 }
 
-.focus circle {
-    fill: none;
-    stroke: steelblue;
+@media (min-width: 992px) {
+    .container {
+        max-width: 960px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1140px;
+    }
+}
+
+@media (min-width: 1600px) {
+    .container {
+        max-width: 1440px;
+    }
 }

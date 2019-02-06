@@ -45,7 +45,7 @@ export class LogsComponent implements OnInit {
                         message: entry.message,
                         timestamp: moment.unix(entry.timestamp).toISOString(),
                         data: JSON.stringify(JSON.parse(entry.data), null, 2),
-                        level: entry.level.toUpperCase()
+                        level: entry.level
                     }
                 });
             }

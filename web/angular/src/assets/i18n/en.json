@@ -1,6 +1,23 @@
 {
     "nav": {
         "title": "task_tracker",
-        "langSelect": "Language"
+        "langSelect": "Language",
+        "logs": "Logs",
+        "project_list": "Projects",
+        "new_project": "New Project"
+    },
+    "logs": {
+        "filter": "Filter",
+        "time": "Time",
+        "level": "Level",
+        "message": "Message",
+        "data": "Details",
+        "first_page_label": "First page",
+        "last_page_label": "Last page",
+        "of": "of",
+        "items_per_page": "Items per page",
+        "next_page": "Next page",
+        "prev_page": "Previous page"
+
     }
 }

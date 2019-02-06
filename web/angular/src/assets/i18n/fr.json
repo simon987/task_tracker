@@ -1,6 +1,23 @@
 {
     "nav": {
         "title": "task_tracker (fr)",
-        "langSelect": "Langue"
+        "langSelect": "Langue",
+        "logs": "Journal",
+        "project_list": "Projets",
+        "new_project": "Nouveau projet"
+    },
+    "logs": {
+        "filter": "Filtrer",
+        "time": "Date",
+        "level": "Niveau",
+        "message": "Message",
+        "data": "Details",
+        "first_page_label": "Première page",
+        "last_page_label": "Dernière page",
+        "of": "de",
+        "items_per_page": "Items par page",
+        "next_page": "Page suivante",
+        "prev_page": "Page précédante"
     }
 }
+

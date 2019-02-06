@@ -1,8 +1,9 @@
 <mat-toolbar color="primary">
-    <span>{{ "nav.title" | translate }}</span>
+    <button mat-button class="nav-title" [routerLink]="''">{{"nav.title" | translate}}</button>
+    <button mat-button class="nav-link" [routerLink]="'log'">{{"nav.logs" | translate}}</button>
+    <button mat-button class="nav-link" [routerLink]="'projects'">{{"nav.project_list" | translate}}</button>
+    <button mat-button class="nav-link" [routerLink]="'new_project'">{{"nav.new_project" | translate}}</button>
     <span class="nav-spacer"></span>
-    <mat-icon class="example-icon">favorite</mat-icon>
-    <mat-icon class="example-icon">delete</mat-icon>
     <mat-form-field [floatLabel]="'never'">
         <mat-select [placeholder]="'nav.langSelect' | translate" (selectionChange)="langChange($event)">
             <mat-option *ngFor="let lang of langList" [value]="lang.lang">
@@ -12,12 +13,6 @@
     </mat-form-field>
 
 </mat-toolbar>
-<ul>
-    <li><a [routerLink]="''">Index</a></li>
-    <li><a [routerLink]="'log'">Logs</a></li>
-    <li><a [routerLink]="'projects'">list</a></li>
-    <li><a [routerLink]="'new_project'">new project</a></li>
-</ul>
 
 <messenger-snack-bar></messenger-snack-bar>
 

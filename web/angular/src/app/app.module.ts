@@ -17,6 +17,7 @@ import {
     MatIconModule,
     MatInputModule,
     MatMenuModule,
+    MatPaginatorIntl,
     MatPaginatorModule,
     MatSelectModule,
     MatSliderModule,
@@ -36,8 +37,9 @@ import {CreateProjectComponent} from './create-project/create-project.component'
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {UpdateProjectComponent} from './update-project/update-project.component';
 import {SnackBarComponent} from "./messenger/snack-bar.component";
-import {TranslateLoader, TranslateModule} from "@ngx-translate/core";
+import {TranslateLoader, TranslateModule, TranslateService} from "@ngx-translate/core";
 import {TranslateHttpLoader} from "@ngx-translate/http-loader";
+import {TranslatedPaginator} from "./TranslatedPaginatorConfiguration";
 
 
 export function createTranslateLoader(http: HttpClient) {
@@ -95,6 +97,7 @@ export function createTranslateLoader(http: HttpClient) {
     providers: [
         ApiService,
         MessengerService,
+        {provide: MatPaginatorIntl, useFactory: TranslatedPaginator, deps: [TranslateService]}
     ],
     entryComponents: [
         SnackBarComponent,
