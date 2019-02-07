@@ -8,9 +8,13 @@ import {UpdateProjectComponent} from "./update-project/update-project.component"
 import {Title} from "@angular/platform-browser";
 import {filter} from "rxjs/operators";
 import {TranslateService} from "@ngx-translate/core";
+import {LoginComponent} from "./login/login.component";
+import {CreateAccountComponent} from "./create-account/create-account.component";
 
 const routes: Routes = [
     {path: "log", component: LogsComponent},
+    {path: "login", component: LoginComponent},
+    {path: "new_account", component: CreateAccountComponent},
     {path: "projects", component: ProjectListComponent},
     {path: "project/:id", component: ProjectDashboardComponent},
     {path: "project/:id/update", component: UpdateProjectComponent},

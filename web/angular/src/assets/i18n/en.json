@@ -28,7 +28,9 @@
         "project": "Project",
         "projects": "Projects",
         "log": "Logs",
-        "new_project": "New project"
+        "new_project": "New project",
+        "login": "Login",
+        "new_account": "Create account"
     },
     "project": {
         "name": "Project name",
@@ -47,5 +49,16 @@
     "dashboard": {
         "title": "Dashboard for",
         "metadata": "Project metadata"
+    },
+    "login": {
+        "title": "Manager login",
+        "login": "Login",
+        "username": "Username",
+        "password": "Password",
+        "repeat_password": "Repeat password"
+    },
+    "create_account": {
+        "title": "Create manager account",
+        "create": "Create account"
     }
 }

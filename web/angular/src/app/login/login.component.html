@@ -1,0 +1,22 @@
+<div class="small-container">
+    <mat-card class="mat-elevation-z8">
+        <mat-card-title>{{"login.title" | translate}}</mat-card-title>
+        <mat-card-content style="padding: 2em 0 1em">
+            <form>
+                <mat-form-field appearance="outline">
+                    <mat-label>{{"login.username" | translate}}</mat-label>
+                    <input type="text" matInput [(ngModel)]="credentials.username">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>{{ "login.password" | translate}}</mat-label>
+                    <input type="password" matInput [(ngModel)]="credentials.password">
+                </mat-form-field>
+            </form>
+        </mat-card-content>
+        <mat-card-actions>
+            <button mat-raised-button color="primary"
+                    (click)="onClick()">{{"login.login" | translate}}</button>
+        </mat-card-actions>
+    </mat-card>
+</div>

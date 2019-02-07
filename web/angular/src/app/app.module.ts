@@ -40,7 +40,8 @@ import {SnackBarComponent} from "./messenger/snack-bar.component";
 import {TranslateLoader, TranslateModule, TranslateService} from "@ngx-translate/core";
 import {TranslateHttpLoader} from "@ngx-translate/http-loader";
 import {TranslatedPaginator} from "./TranslatedPaginatorConfiguration";
-import {Router} from "@angular/router";
+import {LoginComponent} from './login/login.component';
+import {CreateAccountComponent} from './create-account/create-account.component';
 
 
 export function createTranslateLoader(http: HttpClient) {
@@ -57,6 +58,8 @@ export function createTranslateLoader(http: HttpClient) {
         CreateProjectComponent,
         UpdateProjectComponent,
         SnackBarComponent,
+        LoginComponent,
+        CreateAccountComponent,
     ],
     imports: [
         BrowserModule,

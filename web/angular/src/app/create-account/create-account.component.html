@@ -1,0 +1,30 @@
+<div class="small-container">
+    <mat-card class="mat-elevation-z8">
+        <mat-card-title>{{"create_account.title" | translate}}</mat-card-title>
+        <mat-card-content style="padding: 2em 0 1em">
+            <form>
+                <mat-form-field appearance="outline" [hideRequiredMarker]="true">
+                    <mat-label>{{"login.username" | translate}}</mat-label>
+                    <mat-hint align="end">{{credentials.username?.length || 0}}/16</mat-hint>
+                    <input maxlength="16" type="text" matInput [(ngModel)]="credentials.username" name="username"
+                           required>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" [hideRequiredMarker]="true">
+                    <mat-label>{{ "login.password" | translate}}</mat-label>
+                    <input type="password" matInput [(ngModel)]="credentials.password" name="password" required>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                    <mat-label>{{ "login.repeat_password" | translate}}</mat-label>
+                    <input type="password" matInput [(ngModel)]="credentials.repeatPassword" name="password2"
+                    >
+                </mat-form-field>
+            </form>
+        </mat-card-content>
+        <mat-card-actions>
+            <button mat-raised-button color="primary" [disabled]="!canCreate()"
+                    (click)="onClick()">{{"create_account.create" | translate}}</button>
+        </mat-card-actions>
+    </mat-card>
+</div>

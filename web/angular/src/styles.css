@@ -49,3 +49,24 @@ body {
         max-width: 1440px;
     }
 }
+
+.small-container {
+    width: 100%;
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-right: auto;
+    margin-left: auto;
+    margin-top: 15px;
+}
+
+@media (min-width: 576px) {
+    .small-container {
+        max-width: 540px;
+    }
+}
+
+@media (min-width: 768px) {
+    .small-container {
+        max-width: 720px;
+    }
+}

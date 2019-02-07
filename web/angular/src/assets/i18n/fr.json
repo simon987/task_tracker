@@ -29,7 +29,9 @@
         "projects": "Projets",
         "log": "Journal",
         "new_project": "Nouveau projet",
-        "update": "Modifier"
+        "update": "Modifier",
+        "login": "Ouverture de session",
+        "new_account": "Création de compte"
     },
     "project": {
         "name": "Nom du projet",
@@ -42,11 +44,23 @@
         "create_subtitle": "todo: sous-titre",
         "public": "Publique",
         "create": "Créer",
-        "motd": "Message du jour"
+        "motd": "Message du jour",
+        "update": "Mettre à jour"
     },
     "dashboard": {
         "title": "Tableau de bord pour ",
         "metadata": "Métadonnés du projet"
+    },
+    "login": {
+        "title": "Identification - chef de projet",
+        "login": "Ouvrir un session",
+        "username": "Nom d'utilisateur",
+        "password": "Mot de passe",
+        "repeat_password": "Répéter le mot de passe"
+    },
+    "create_account": {
+        "title": "Création d'un compte de chef de projet",
+        "create": "Créer un compte"
     }
 }
 
