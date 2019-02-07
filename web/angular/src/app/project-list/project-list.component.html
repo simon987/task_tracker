@@ -1,5 +1,5 @@
 <div class="container">
-    <mat-card>
+    <mat-card class="mat-elevation-z8">
         <mat-card-header>
             <mat-card-title>{{"projects.projects" | translate}}</mat-card-title>
         </mat-card-header>
@@ -7,15 +7,16 @@
             <mat-accordion>
                 <mat-expansion-panel *ngFor="let project of projects">
                     <mat-expansion-panel-header>
-                        <mat-panel-title>{{project.id}}: {{project.name}}</mat-panel-title>
+                        <mat-panel-title><span style="width: 3em">{{project.id}}</span>{{project.name}}
+                        </mat-panel-title>
                         <mat-panel-description>{{project.motd}}</mat-panel-description>
                     </mat-expansion-panel-header>
                     <pre>{{project | json}}</pre>
-                    <div style="display: flex;">
-                        <button mat-button [routerLink]="'/project/' + project.id">
+                    <div>
+                        <button mat-raised-button [routerLink]="'/project/' + project.id">
                             <mat-icon>timeline</mat-icon>{{"projects.dashboard" | translate}}</button>
-                        <button mat-button [routerLink]="'/project/' + project.id + '/update'">
-                            <mat-icon>build</mat-icon>{{"projects.update" | translate}}</button>
+                        <button mat-raised-button [routerLink]="'/project/' + project.id + '/update'">
+                            <mat-icon>build</mat-icon>{{"project.update" | translate}}</button>
                     </div>
                 </mat-expansion-panel>
             </mat-accordion>

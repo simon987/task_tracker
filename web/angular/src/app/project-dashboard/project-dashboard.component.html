@@ -1,44 +1,33 @@
-<div>
+<div class="container">
     <mat-card>
-        <mat-card-title *ngIf="projectStats">Stats for project "{{projectStats["project"]["name"]}}"</mat-card-title>
+        <mat-card-title *ngIf="project">{{"dashboard.title" | translate}} "{{project.name}}"</mat-card-title>
         <mat-card-content style="padding: 2em 0 1em">
 
-            <p *ngIf="projectStats">Git repository: <a target="_blank"
-                                                       [href]="projectStats['project']['clone_url']">{{projectStats["project"]["git_repo"]}}</a>
+            <p *ngIf="project">
+                {{"project.git_repo" | translate}}:
+                <a target="_blank" [href]="project['clone_url']">{{project.git_repo}}</a>
             </p>
-            <p>Message of the day: </p>
-            <pre *ngIf="projectStats">{{projectStats["project"]["motd"]}}</pre>
+            <p>{{"project.motd" | translate}}:</p>
+            <pre *ngIf="project">{{project.motd}}</pre>
 
             <div style="display: flex; align-items: center; justify-content: center">
-                <div id="line"></div>
+                <div id="timeline"></div>
 
-                <div id="status">
-                    <div class="tooltip" id="stooltip">
-                        <div class="label"></div>
-                        <div class="count"></div>
-                        <div class="percent"></div>
-                    </div>
-                    <div class="pie-label">Task Status</div>
-                </div>
-                <div id="assignees">
-                    <div class="tooltip" id="atooltip">
-                        <div class="label"></div>
-                        <div class="count"></div>
-                        <div class="percent"></div>
-                    </div>
-                    <div class="pie-label">Assignees</div>
-                </div>
+                <div id="status-pie"></div>
+                <div id="assignees-pie"></div>
             </div>
 
-            <mat-expansion-panel *ngIf="projectStats" style="margin-top: 1em">
+            <mat-expansion-panel *ngIf="project" style="margin-top: 1em">
                 <mat-expansion-panel-header>
-                    <mat-panel-title>Project metadata</mat-panel-title>
+                    <mat-panel-title>{{"dashboard.metadata" | translate}}</mat-panel-title>
                 </mat-expansion-panel-header>
-                <pre>{{projectStats | json}}</pre>
+                <pre>{{project | json}}</pre>
             </mat-expansion-panel>
 
-            <a [routerLink]="'/project/' + projectStats.project.id + '/update'">Update</a>
-
         </mat-card-content>
+        <mat-card-actions>
+            <button mat-raised-button color="primary"
+                    [routerLink]="'/project/' + project.id + '/update'">{{"project.update" | translate}}</button>
+        </mat-card-actions>
     </mat-card>
 </div>

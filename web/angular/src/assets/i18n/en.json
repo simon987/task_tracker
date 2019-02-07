@@ -21,13 +21,31 @@
     },
     "projects": {
         "projects": "Projects",
-        "dashboard": "Dashboard",
-        "update": "Update"
+        "dashboard": "Dashboard"
     },
     "title": {
         "": "Index",
+        "project": "Project",
         "projects": "Projects",
         "log": "Logs",
         "new_project": "New project"
+    },
+    "project": {
+        "name": "Project name",
+        "clone_url": "Clone url",
+        "clone_url_placeholder": "Example: \"https://github.com/simon987/task_tracker\"",
+        "git_repo_placeholder": "Example: \"simon987/task_tracker\"",
+        "git_repo_hint": "Changes in the master branch will be tracked if webhooks are enabled",
+        "create_title": "Create new project",
+        "create_subtitle": "Todo: subtitle",
+        "public": "Public",
+        "create": "Create",
+        "git_repo": "Git repository name",
+        "motd": "Message of the day",
+        "update": "Update"
+    },
+    "dashboard": {
+        "title": "Dashboard for",
+        "metadata": "Project metadata"
     }
 }
