@@ -1,44 +1,14 @@
-#status {
-    height: 360px;
-    position: relative;
-    width: 360px;
-    margin: 1em;
+#timeline-wrapper {
+    width: 100%;
 }
 
-#assignees {
-    height: 360px;
-    position: relative;
-    width: 360px;
-    margin: 1em;
+#status-pie-wrapper {
+    height: 50%;
+    width: 400px;
 }
 
-.pie-label {
-    left: 130px;
-    padding: 10px;
-    position: absolute;
-    text-align: center;
-    top: 150px;
-    width: 80px;
-    z-index: 10;
-    font-family: Roboto, "Helvetica Neue", sans-serif;
-    font-weight: bold;
+#assignees-pie-wrapper {
+    margin-top: 1em;
+    height: 50%;
+    width: 400px;
 }
-
-.tooltip {
-    background: #eee;
-    box-shadow: 0 0 5px #999999;
-    color: #333;
-    display: none;
-    font-size: 12px;
-    left: 130px;
-    padding: 10px;
-    position: absolute;
-    text-align: center;
-    top: 95px;
-    width: 80px;
-    z-index: 10;
-}
-
-/*---------*/
-
-

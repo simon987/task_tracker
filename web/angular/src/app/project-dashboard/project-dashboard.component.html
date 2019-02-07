@@ -1,5 +1,5 @@
 <div class="container">
-    <mat-card>
+    <mat-card class="mat-elevation-z8">
         <mat-card-title *ngIf="project">{{"dashboard.title" | translate}} "{{project.name}}"</mat-card-title>
         <mat-card-content style="padding: 2em 0 1em">
 
@@ -11,10 +11,18 @@
             <pre *ngIf="project">{{project.motd}}</pre>
 
             <div style="display: flex; align-items: center; justify-content: center">
-                <div id="timeline"></div>
+                <div id="timeline-wrapper">
+                    <canvas id="timeline"></canvas>
+                </div>
 
-                <div id="status-pie"></div>
-                <div id="assignees-pie"></div>
+                <div>
+                    <div id="status-pie-wrapper">
+                        <canvas id="status-pie"></canvas>
+                    </div>
+                    <div id="assignees-pie-wrapper">
+                        <canvas id="assignees-pie"></canvas>
+                    </div>
+                </div>
             </div>
 
             <mat-expansion-panel *ngIf="project" style="margin-top: 1em">
@@ -26,7 +34,7 @@
 
         </mat-card-content>
         <mat-card-actions>
-            <button mat-raised-button color="primary"
+            <button mat-raised-button color="primary" *ngIf="project"
                     [routerLink]="'/project/' + project.id + '/update'">{{"project.update" | translate}}</button>
         </mat-card-actions>
     </mat-card>
