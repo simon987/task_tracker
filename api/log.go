@@ -39,6 +39,10 @@ func (e *LogRequest) Time() time.Time {
 func LogRequestMiddleware(h RequestHandler) fasthttp.RequestHandler {
 	return fasthttp.RequestHandler(func(ctx *fasthttp.RequestCtx) {
 
+		ctx.Response.Header.Add("Access-Control-Allow-Headers", "Content-Type")
+		ctx.Response.Header.Add("Access-Control-Allow-Methods", "GET, POST, OPTION")
+		ctx.Response.Header.Add("Access-Control-Allow-Origin", "*")
+
 		logrus.WithFields(logrus.Fields{
 			"path":   string(ctx.Path()),
 			"header": ctx.Request.Header.String(),

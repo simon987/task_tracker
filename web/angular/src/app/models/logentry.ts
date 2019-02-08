@@ -1,4 +1,4 @@
-interface LogEntry {
+export interface LogEntry {
     level: string,
     message: string,
     data: any,

@@ -15,5 +15,5 @@ log:
   level: "trace"
 
 session:
-  cookie_name: "tt"
+  cookie_name: "tt_test"
   expiration: "25m"

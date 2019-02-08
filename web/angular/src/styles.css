@@ -70,3 +70,11 @@ body {
         max-width: 720px;
     }
 }
+
+.mat-tab-label {
+    width: 100%;
+}
+
+.mat-tab-body {
+    padding-top: 1em;
+}

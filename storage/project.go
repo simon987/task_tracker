@@ -132,7 +132,7 @@ func (database *Database) UpdateProject(project *Project) error {
 }
 
 func (database Database) GetAllProjects() *[]Project {
-	var projects []Project
+	projects := make([]Project, 0)
 
 	db := database.getDB()
 	rows, err := db.Query(`SELECT 

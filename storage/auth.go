@@ -62,13 +62,14 @@ func (database *Database) SaveManager(manager *Manager, password []byte) error {
 
 	hash := crypto.SHA512.New()
 	hash.Write(password)
+	hash.Write([]byte(manager.Username))
 	hashedPassword := hash.Sum(nil)
 
 	row := db.QueryRow(`INSERT INTO manager (username, password, website_admin) 
 			VALUES ($1,$2,$3) RETURNING ID`,
 		manager.Username, hashedPassword, manager.WebsiteAdmin)
 
-	err := row.Scan(manager.Id)
+	err := row.Scan(&manager.Id)
 	if err != nil {
 		logrus.WithError(err).WithFields(logrus.Fields{
 			"username": manager,
@@ -100,22 +101,23 @@ func (database *Database) UpdateManager(manager *Manager) {
 	}).Warning("Database.UpdateManager UPDATE")
 }
 
-func (database *Database) UpdateManagerPassword(id int64, newPassword []byte) {
+func (database *Database) UpdateManagerPassword(manager *Manager, newPassword []byte) {
 
 	hash := crypto.SHA512.New()
+	hash.Write([]byte(manager.Username))
 	hash.Write(newPassword)
 	hashedPassword := hash.Sum(nil)
 
 	db := database.getDB()
 
 	res, err := db.Exec(`UPDATE manager SET password=$1 WHERE id=$2`,
-		hashedPassword, id)
+		hashedPassword, manager.Id)
 	handleErr(err)
 
 	rowsAffected, _ := res.RowsAffected()
 
 	logrus.WithError(err).WithFields(logrus.Fields{
 		"rowsAffected": rowsAffected,
-		"id":           id,
+		"id":           manager.Id,
 	}).Warning("Database.UpdateManagerPassword UPDATE")
 }

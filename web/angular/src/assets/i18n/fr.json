@@ -4,7 +4,8 @@
         "langSelect": "Langue",
         "logs": "Journal",
         "project_list": "Projets",
-        "new_project": "Nouveau projet"
+        "new_project": "Nouveau projet",
+        "login": "Ouvrir un session"
     },
     "logs": {
         "filter": "Filtrer",
@@ -21,7 +22,8 @@
     },
     "projects": {
         "projects": "Projets",
-        "dashboard": "Tableau de bord"
+        "dashboard": "Tableau de bord",
+        "empty": "Pas de projets"
     },
     "title": {
         "": "Accueil",
@@ -31,7 +33,8 @@
         "new_project": "Nouveau projet",
         "update": "Modifier",
         "login": "Ouverture de session",
-        "new_account": "Création de compte"
+        "new_account": "Création de compte",
+        "account": "Compte"
     },
     "project": {
         "name": "Nom du projet",
@@ -52,14 +55,15 @@
         "metadata": "Métadonnés du projet"
     },
     "login": {
-        "title": "Identification - chef de projet",
+        "title": "Ouvrir un session",
         "login": "Ouvrir un session",
         "username": "Nom d'utilisateur",
         "password": "Mot de passe",
-        "repeat_password": "Répéter le mot de passe"
+        "repeat_password": "Répéter le mot de passe",
+        "create_account": "Créer un compte"
     },
     "create_account": {
-        "title": "Création d'un compte de chef de projet",
+        "title": "Créer un compte",
         "create": "Créer un compte"
     }
 }

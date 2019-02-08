@@ -76,8 +76,8 @@ CREATE TABLE log_entry
 CREATE TABLE manager
 (
   id            SERIAL PRIMARY KEY,
-  username      TEXT,
-  password      TEXT,
+  username      TEXT UNIQUE,
+  password      BYTEA,
   website_admin BOOLEAN
 );
 

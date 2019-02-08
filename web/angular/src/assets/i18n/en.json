@@ -4,7 +4,8 @@
         "langSelect": "Language",
         "logs": "Logs",
         "project_list": "Projects",
-        "new_project": "New Project"
+        "new_project": "New Project",
+        "login": "Login"
     },
     "logs": {
         "filter": "Filter",
@@ -21,7 +22,8 @@
     },
     "projects": {
         "projects": "Projects",
-        "dashboard": "Dashboard"
+        "dashboard": "Dashboard",
+        "empty": "No projects"
     },
     "title": {
         "": "Index",
@@ -30,7 +32,8 @@
         "log": "Logs",
         "new_project": "New project",
         "login": "Login",
-        "new_account": "Create account"
+        "new_account": "Create account",
+        "account": "Account details"
     },
     "project": {
         "name": "Project name",
@@ -51,14 +54,15 @@
         "metadata": "Project metadata"
     },
     "login": {
-        "title": "Manager login",
+        "title": "Login",
         "login": "Login",
         "username": "Username",
         "password": "Password",
-        "repeat_password": "Repeat password"
+        "repeat_password": "Repeat password",
+        "create_account": ""
     },
     "create_account": {
-        "title": "Create manager account",
+        "title": "Register",
         "create": "Create account"
     }
 }

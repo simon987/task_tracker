@@ -1,11 +1,10 @@
-export class Project {
-
-    public id: number;
-    public priority: number;
-    public motd: string;
-    public name: string;
-    public clone_url: string;
-    public git_repo: string;
-    public version: string;
-    public public: boolean;
+export interface Project {
+    id: number;
+    priority: number;
+    motd: string;
+    name: string;
+    clone_url: string;
+    git_repo: string;
+    version: string;
+    public: boolean;
 }

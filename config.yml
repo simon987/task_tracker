@@ -15,3 +15,7 @@ git:
 log:
   # panic, fatal, error, warn, info, debug, trace
   level: "trace"
+
+session:
+  cookie_name: "tt"
+  expiration: "25m"

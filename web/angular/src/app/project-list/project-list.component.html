@@ -19,6 +19,11 @@
                             <mat-icon>build</mat-icon>{{"project.update" | translate}}</button>
                     </div>
                 </mat-expansion-panel>
+                <span *ngIf="projects && projects.length == 0">
+                    {{"projects.empty" | translate}}
+                </span>
+                <mat-progress-bar mode="indeterminate"
+                                  *ngIf="projects == null"></mat-progress-bar>
             </mat-accordion>
         </mat-card-content>
     </mat-card>

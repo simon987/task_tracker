@@ -14,7 +14,8 @@ type WebAPI struct {
 	server        *fasthttp.Server
 	router        *fasthttprouter.Router
 	Database      *storage.Database
-	SessionConfig *sessions.Config
+	SessionConfig sessions.Config
+	Session       *sessions.Sessions
 }
 
 type Info struct {
@@ -38,10 +39,14 @@ func New() *WebAPI {
 
 	api.router = &fasthttprouter.Router{}
 
-	api.SessionConfig = &sessions.Config{
-		Cookie:  config.Cfg.SessionCookieName,
-		Expires: config.Cfg.SessionCookieExpiration,
+	api.SessionConfig = sessions.Config{
+		Cookie:                      config.Cfg.SessionCookieName,
+		Expires:                     config.Cfg.SessionCookieExpiration,
+		CookieSecureTLS:             false,
+		DisableSubdomainPersistence: false,
 	}
+
+	api.Session = sessions.New(api.SessionConfig)
 
 	api.server = &fasthttp.Server{
 		Handler: api.router.Handler,
@@ -75,6 +80,10 @@ func New() *WebAPI {
 	api.router.POST("/git/receivehook", LogRequestMiddleware(api.ReceiveGitWebHook))
 
 	api.router.POST("/logs", LogRequestMiddleware(api.GetLog))
+
+	api.router.POST("/register", LogRequestMiddleware(api.Register))
+	api.router.POST("/login", LogRequestMiddleware(api.Login))
+	api.router.GET("/account", LogRequestMiddleware(api.AccountDetails))
 
 	api.router.NotFound = func(ctx *fasthttp.RequestCtx) {
 

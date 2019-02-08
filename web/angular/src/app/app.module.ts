@@ -19,12 +19,14 @@ import {
     MatMenuModule,
     MatPaginatorIntl,
     MatPaginatorModule,
+    MatProgressBarModule,
     MatSelectModule,
     MatSliderModule,
     MatSlideToggleModule,
     MatSnackBarModule,
     MatSortModule,
     MatTableModule,
+    MatTabsModule,
     MatToolbarModule,
     MatTreeModule
 } from "@angular/material";
@@ -41,7 +43,7 @@ import {TranslateLoader, TranslateModule, TranslateService} from "@ngx-translate
 import {TranslateHttpLoader} from "@ngx-translate/http-loader";
 import {TranslatedPaginator} from "./TranslatedPaginatorConfiguration";
 import {LoginComponent} from './login/login.component';
-import {CreateAccountComponent} from './create-account/create-account.component';
+import {AccountDetailsComponent} from './account-details/account-details.component';
 
 
 export function createTranslateLoader(http: HttpClient) {
@@ -59,7 +61,7 @@ export function createTranslateLoader(http: HttpClient) {
         UpdateProjectComponent,
         SnackBarComponent,
         LoginComponent,
-        CreateAccountComponent,
+        AccountDetailsComponent,
     ],
     imports: [
         BrowserModule,
@@ -94,7 +96,9 @@ export function createTranslateLoader(http: HttpClient) {
                 }
             }
         ),
-        MatSelectModule
+        MatSelectModule,
+        MatProgressBarModule,
+        MatTabsModule
 
     ],
     exports: [],

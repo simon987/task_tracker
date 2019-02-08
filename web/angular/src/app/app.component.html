@@ -4,6 +4,8 @@
     <button mat-button [class.mat-accent]="router.url == '/projects'" class="nav-link" [routerLink]="'projects'">{{"nav.project_list" | translate}}</button>
     <button mat-button [class.mat-accent]="router.url == '/new_project'" class="nav-link" [routerLink]="'new_project'">{{"nav.new_project" | translate}}</button>
     <span class="nav-spacer"></span>
+    <button mat-button [class.mat-accent]="router.url == '/login'" class="nav-link"
+            [routerLink]="'login'">{{"nav.login" | translate}}</button>
     <mat-form-field [floatLabel]="'never'">
         <mat-select [placeholder]="'nav.langSelect' | translate" (selectionChange)="langChange($event)">
             <mat-option *ngFor="let lang of langList" [value]="lang.lang">

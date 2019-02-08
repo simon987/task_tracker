@@ -1,5 +1,6 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {ApiService} from "../api.service";
+import {LogEntry} from "../models/logentry";
 
 import _ from "lodash"
 import * as moment from "moment";
