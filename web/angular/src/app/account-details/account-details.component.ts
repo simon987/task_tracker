@@ -8,10 +8,13 @@ import {AuthService} from "../auth.service";
 })
 export class AccountDetailsComponent implements OnInit {
 
+    account: Manager;
+
     constructor(private authService: AuthService) {
     }
 
     ngOnInit() {
+        this.account = this.authService.account;
     }
 
 }

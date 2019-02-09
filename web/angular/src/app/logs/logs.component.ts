@@ -1,6 +1,6 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {ApiService} from "../api.service";
-import {LogEntry} from "../models/logentry";
+import {getLogLevel, LogEntry} from "../models/logentry";
 
 import _ from "lodash"
 import * as moment from "moment";
@@ -44,9 +44,9 @@ export class LogsComponent implements OnInit {
                 this.data.data = _.map(data["logs"], (entry) => {
                     return <LogEntry>{
                         message: entry.message,
-                        timestamp: moment.unix(entry.timestamp).toISOString(),
+                        timestamp: moment.unix(entry.timestamp).format("YYYY-MM-DD HH:mm:ss"),
                         data: JSON.stringify(JSON.parse(entry.data), null, 2),
-                        level: entry.level
+                        level: getLogLevel(entry.level),
                     }
                 });
             }

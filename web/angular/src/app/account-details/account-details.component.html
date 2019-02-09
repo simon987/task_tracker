@@ -1,3 +1,29 @@
-<pre>
-    {{authService.account | json}}
-</pre>
+<div class="container">
+    <mat-card class="mat-elevation-z8" *ngIf="account">
+
+        <mat-card-header>
+            <mat-card-title>{{"account.title" | translate}}</mat-card-title>
+            <mat-card-subtitle>{{"account.subtitle" | translate}}</mat-card-subtitle>
+        </mat-card-header>
+         
+        <mat-card-content>
+
+            <mat-list>
+                <mat-list-item>
+                    {{"account.username" | translate}}:&nbsp;
+                    <pre>{{account.username}}</pre>
+                </mat-list-item>
+            </mat-list>
+
+            <mat-expansion-panel>
+                <mat-expansion-panel-header>{{"account.metadata" | translate}}</mat-expansion-panel-header>
+                <pre> {{account | json}}</pre>
+            </mat-expansion-panel>
+        </mat-card-content>
+
+        <mat-card-actions>
+
+
+        </mat-card-actions>
+    </mat-card>
+</div>

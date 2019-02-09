@@ -49,6 +49,12 @@ type GetAllProjectsResponse struct {
 	Projects *[]storage.Project `json:"projects,omitempty"`
 }
 
+type GetAssigneeStatsResponse struct {
+	Ok        bool                     `json:"ok"`
+	Message   string                   `json:"message,omitempty"`
+	Assignees *[]storage.AssignedTasks `json:"assignees"`
+}
+
 func (api *WebAPI) ProjectCreate(r *Request) {
 
 	createReq := &CreateProjectRequest{}
@@ -201,5 +207,18 @@ func (api *WebAPI) ProjectGetAllProjects(r *Request) {
 	r.OkJson(GetAllProjectsResponse{
 		Ok:       true,
 		Projects: projects,
+	})
+}
+
+func (api *WebAPI) ProjectGetAssigneeStats(r *Request) {
+
+	id, err := strconv.ParseInt(r.Ctx.UserValue("id").(string), 10, 64)
+	handleErr(err, r) //todo handle invalid id
+
+	stats := api.Database.GetAssigneeStats(id, 16)
+
+	r.OkJson(GetAssigneeStatsResponse{
+		Ok:        true,
+		Assignees: stats,
 	})
 }

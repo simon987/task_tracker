@@ -1,22 +1,31 @@
 <div class="container">
     <div class="table-container">
-        <mat-form-field>
-            <input matInput (keyup)="applyFilter($event.target.value)" [placeholder]="'logs.filter' | translate">
-        </mat-form-field>
+        <div class="checkbox-wrapper">
+            <mat-form-field style="margin-right: 10px">
+                <input matInput (keyup)="applyFilter($event.target.value)" [placeholder]="'logs.filter' | translate">
+            </mat-form-field>
+            <mat-checkbox>{{"logs.fatal" | translate}}</mat-checkbox>
+            <mat-checkbox>{{"logs.panic" | translate}}</mat-checkbox>
+            <mat-checkbox>{{"logs.error" | translate}}</mat-checkbox>
+            <mat-checkbox>{{"logs.warn" | translate}}</mat-checkbox>
+            <mat-checkbox>{{"logs.info" | translate}}</mat-checkbox>
+            <mat-checkbox>{{"logs.debug" | translate}}</mat-checkbox>
+        </div>
         <div class="mat-elevation-z8">
 
             <mat-table [dataSource]="data" matSort matSortActive="timestamp"
                        matSortDirection="desc">
 
                 <ng-container matColumnDef="level">
-                    <mat-header-cell style="flex: 0 0 6em" mat-sort-header
+                    <mat-header-cell style="flex: 0 0 9em" mat-sort-header
                                      *matHeaderCellDef>{{"logs.level" | translate}}</mat-header-cell>
-                    <mat-cell style="flex: 0 0 6em" *matCellDef="let entry"> {{entry.level}} </mat-cell>
+                    <mat-cell style="flex: 0 0 8em"
+                              *matCellDef="let entry"> {{("logs." + entry.level) | translate}} </mat-cell>
                 </ng-container>
                 <ng-container matColumnDef="timestamp">
-                    <mat-header-cell style="flex: 0 0 21em" mat-sort-header
+                    <mat-header-cell style="flex: 0 0 15em" mat-sort-header
                                      *matHeaderCellDef>{{"logs.time" | translate}}</mat-header-cell>
-                    <mat-cell style="flex: 0 0 17em" *matCellDef="let entry"> {{entry.timestamp}} </mat-cell>
+                    <mat-cell style="flex: 0 0 12em" *matCellDef="let entry"> {{entry.timestamp}} </mat-cell>
                 </ng-container>
                 <ng-container matColumnDef="message">
                     <mat-header-cell mat-sort-header *matHeaderCellDef>{{"logs.message" | translate}}</mat-header-cell>

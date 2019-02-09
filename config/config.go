@@ -16,6 +16,8 @@ var Cfg struct {
 	DbLogLevels             []logrus.Level
 	SessionCookieName       string
 	SessionCookieExpiration time.Duration
+	MonitoringInterval      time.Duration
+	MonitoringHistory       time.Duration
 }
 
 func SetupConfig() {
@@ -40,5 +42,14 @@ func SetupConfig() {
 	}
 	Cfg.SessionCookieName = viper.GetString("session.cookie_name")
 	Cfg.SessionCookieExpiration, err = time.ParseDuration(viper.GetString("session.expiration"))
+	Cfg.MonitoringInterval, err = time.ParseDuration(viper.GetString("monitoring.snapshot_interval"))
+	handleErr(err)
+	Cfg.MonitoringHistory, err = time.ParseDuration(viper.GetString("monitoring.history_length"))
+	handleErr(err)
+}
 
+func handleErr(err error) {
+	if err != nil {
+		panic(err)
+	}
 }

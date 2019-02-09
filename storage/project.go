@@ -156,3 +156,31 @@ func (database Database) GetAllProjects() *[]Project {
 
 	return &projects
 }
+
+func (database *Database) GetAssigneeStats(pid int64, count int64) *[]AssignedTasks {
+
+	db := database.getDB()
+	assignees := make([]AssignedTasks, 0)
+
+	rows, err := db.Query(`SELECT worker.alias, COUNT(*) as wc FROM TASK
+  			LEFT JOIN worker ON TASK.assignee = worker.id WHERE project=$1 
+			GROUP BY worker.id ORDER BY wc LIMIT $2`, pid, count)
+	handleErr(err)
+
+	for rows.Next() {
+		assignee := AssignedTasks{}
+		var assigneeAlias sql.NullString
+		err = rows.Scan(&assigneeAlias, &assignee.TaskCount)
+		handleErr(err)
+
+		if assigneeAlias.Valid {
+			assignee.Assignee = assigneeAlias.String
+		} else {
+			assignee.Assignee = "unassigned"
+		}
+
+		assignees = append(assignees, assignee)
+	}
+
+	return &assignees
+}

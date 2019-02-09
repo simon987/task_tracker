@@ -78,3 +78,11 @@ body {
 .mat-tab-body {
     padding-top: 1em;
 }
+
+pre {
+    color: #616161;
+}
+
+.hidden {
+    display: none !important;
+}

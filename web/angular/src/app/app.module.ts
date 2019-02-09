@@ -16,6 +16,7 @@ import {
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
+    MatListModule,
     MatMenuModule,
     MatPaginatorIntl,
     MatPaginatorModule,
@@ -98,7 +99,8 @@ export function createTranslateLoader(http: HttpClient) {
         ),
         MatSelectModule,
         MatProgressBarModule,
-        MatTabsModule
+        MatTabsModule,
+        MatListModule
 
     ],
     exports: [],

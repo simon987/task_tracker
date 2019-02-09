@@ -10,3 +10,8 @@
 .mat-cell {
     text-align: left;
 }
+
+.checkbox-wrapper mat-checkbox {
+    margin: 3px 5px;
+    vertical-align: middle;
+}

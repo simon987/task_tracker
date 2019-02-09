@@ -9,7 +9,7 @@
     },
     "logs": {
         "filter": "Filter",
-        "time": "Time",
+        "time": "Time (UTC)",
         "level": "Level",
         "message": "Message",
         "data": "Details",
@@ -18,7 +18,14 @@
         "of": "of",
         "items_per_page": "Items per page",
         "next_page": "Next page",
-        "prev_page": "Previous page"
+        "prev_page": "Previous page",
+        "fatal": "Fatal",
+        "panic": "Panic",
+        "error": "Error",
+        "warn": "Warning",
+        "info": "Info",
+        "debug": "Debug",
+        "trace": "Trace"
     },
     "projects": {
         "projects": "Projects",
@@ -47,11 +54,13 @@
         "create": "Create",
         "git_repo": "Git repository name",
         "motd": "Message of the day",
-        "update": "Update"
+        "update": "Edit"
     },
     "dashboard": {
         "title": "Dashboard for",
-        "metadata": "Project metadata"
+        "metadata": "Project metadata",
+        "empty": "No tasks",
+        "refresh": "Refresh"
     },
     "login": {
         "title": "Login",
@@ -64,5 +73,11 @@
     "create_account": {
         "title": "Register",
         "create": "Create account"
+    },
+    "account": {
+        "metadata": "Account metadata",
+        "title": "Account details",
+        "subtitle": "toto: subtitle",
+        "username": "Username"
     }
 }

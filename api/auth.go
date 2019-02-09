@@ -67,10 +67,6 @@ func (api *WebAPI) Login(r *Request) {
 	sess := api.Session.StartFasthttp(r.Ctx)
 	sess.Set("manager", manager)
 
-	logrus.Debug("SET")
-	logrus.Debug(sess.ID())
-	logrus.Debug(manager)
-
 	r.OkJson(LoginResponse{
 		Manager: manager,
 		Ok:      true,
@@ -135,8 +131,6 @@ func (api *WebAPI) AccountDetails(r *Request) {
 
 	sess := api.Session.StartFasthttp(r.Ctx)
 	manager := sess.Get("manager")
-	logrus.Debug("GET")
-	logrus.Debug(sess.ID())
 
 	if manager == nil {
 		r.OkJson(AccountDetails{

@@ -47,7 +47,7 @@ func (database *Database) SaveTask(task *Task, project int64, hash64 int64) erro
 	if err != nil {
 		logrus.WithError(err).WithFields(logrus.Fields{
 			"task": task,
-		}).Warn("Database.saveTask INSERT task ERROR")
+		}).Trace("Database.saveTask INSERT task ERROR")
 		return err
 	}
 

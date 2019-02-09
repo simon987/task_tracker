@@ -3,6 +3,13 @@
         <mat-card-title *ngIf="project">{{"dashboard.title" | translate}} "{{project.name}}"</mat-card-title>
         <mat-card-content style="padding: 2em 0 1em">
 
+            <button mat-raised-button style="float: right"
+                    [title]="'dashboard.refresh' | translate"
+                    (click)="refresh()"
+            >
+                <mat-icon>refresh</mat-icon>
+            </button>
+
             <p *ngIf="project">
                 {{"project.git_repo" | translate}}:
                 <a target="_blank" [href]="project['clone_url']">{{project.git_repo}}</a>
@@ -10,12 +17,13 @@
             <p>{{"project.motd" | translate}}:</p>
             <pre *ngIf="project">{{project.motd}}</pre>
 
+
             <div style="display: flex; align-items: center; justify-content: center">
                 <div id="timeline-wrapper">
                     <canvas id="timeline"></canvas>
                 </div>
 
-                <div>
+                <div [class.hidden]="noTasks" id="side-charts">
                     <div id="status-pie-wrapper">
                         <canvas id="status-pie"></canvas>
                     </div>
@@ -23,6 +31,18 @@
                         <canvas id="assignees-pie"></canvas>
                     </div>
                 </div>
+
+                <div *ngIf="noTasks" id="no-tasks">
+                    <mat-icon>priority_high</mat-icon>
+                    <p>{{"dashboard.empty" | translate}}</p>
+                </div>
+            </div>
+            <div id="small-screen-stats">
+                <p>Small screen stats</p>
+                <p>Latest monitoring snapshot:</p>
+                <pre>{{ lastSnapshot | json }}</pre>
+                <p>Assignees</p>
+                <pre>{{ assignees | json }}</pre>
             </div>
 
             <mat-expansion-panel *ngIf="project" style="margin-top: 1em">

@@ -9,7 +9,7 @@
     },
     "logs": {
         "filter": "Filtrer",
-        "time": "Date",
+        "time": "Date (UTC)",
         "level": "Niveau",
         "message": "Message",
         "data": "Details",
@@ -18,7 +18,14 @@
         "of": "de",
         "items_per_page": "Items par page",
         "next_page": "Page suivante",
-        "prev_page": "Page précédante"
+        "prev_page": "Page précédante",
+        "fatal": "Fatal",
+        "panic": "Panique",
+        "error": "Erreur",
+        "warn": "Avertissement",
+        "info": "Information",
+        "debug": "Débugage",
+        "trace": "Trace"
     },
     "projects": {
         "projects": "Projets",
@@ -52,7 +59,9 @@
     },
     "dashboard": {
         "title": "Tableau de bord pour ",
-        "metadata": "Métadonnés du projet"
+        "metadata": "Métadonnés du projet",
+        "empty": "Aucune tâche",
+        "refresh": "Rafraîchir"
     },
     "login": {
         "title": "Ouvrir un session",
@@ -65,6 +74,12 @@
     "create_account": {
         "title": "Créer un compte",
         "create": "Créer un compte"
+    },
+    "account": {
+        "metadata": "Métadonnés du compte",
+        "title": "Détails du compte",
+        "subtitle": "toto: sous-titre",
+        "username": "Nom d'utilisateur"
     }
 }
 

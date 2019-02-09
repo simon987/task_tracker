@@ -1,5 +1,6 @@
 #timeline-wrapper {
     width: 100%;
+    display: none;
 }
 
 #status-pie-wrapper {
@@ -11,4 +12,29 @@
     margin-top: 1em;
     height: 50%;
     width: 400px;
+}
+
+#no-tasks {
+    width: 100%;
+    text-align: center;
+}
+
+#side-charts {
+    display: none;
+}
+
+@media (min-width: 992px) {
+    #side-charts {
+        display: initial;
+    }
+}
+
+@media (min-width: 576px) {
+    #timeline-wrapper {
+        display: initial;
+    }
+
+    #small-screen-stats {
+        display: none;
+    }
 }

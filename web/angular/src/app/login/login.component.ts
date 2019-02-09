@@ -28,16 +28,7 @@ export class LoginComponent implements OnInit {
     }
 
     register() {
-        this.apiService.register(this.credentials)
-            .subscribe(
-                () => {
-                    this.router.navigateByUrl("/account")
-                },
-                error => {
-                    console.log(error);
-                    this.messengerService.show(error.error.message);
-                }
-            )
+        this.authService.register(this.credentials)
     }
 
     canCreate(): boolean {

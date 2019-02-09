@@ -5,6 +5,7 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/buaazp/fasthttprouter"
 	"github.com/kataras/go-sessions"
+	"github.com/robfig/cron"
 	"github.com/simon987/task_tracker/config"
 	"github.com/simon987/task_tracker/storage"
 	"github.com/valyala/fasthttp"
@@ -16,6 +17,7 @@ type WebAPI struct {
 	Database      *storage.Database
 	SessionConfig sessions.Config
 	Session       *sessions.Sessions
+	Cron          *cron.Cron
 }
 
 type Info struct {
@@ -32,10 +34,23 @@ func Index(r *Request) {
 	r.OkJson(info)
 }
 
+func (api *WebAPI) setupMonitoring() {
+
+	api.Cron = cron.New()
+	schedule := cron.Every(config.Cfg.MonitoringInterval)
+	api.Cron.Schedule(schedule, cron.FuncJob(api.Database.MakeProjectSnapshots))
+	api.Cron.Start()
+
+	logrus.WithFields(logrus.Fields{
+		"every": config.Cfg.MonitoringInterval.String(),
+	}).Info("Started monitoring")
+}
+
 func New() *WebAPI {
 
 	api := new(WebAPI)
 	api.Database = &storage.Database{}
+	api.setupMonitoring()
 
 	api.router = &fasthttprouter.Router{}
 
@@ -71,6 +86,9 @@ func New() *WebAPI {
 	api.router.GET("/project/get/:id", LogRequestMiddleware(api.ProjectGet))
 	api.router.POST("/project/update/:id", LogRequestMiddleware(api.ProjectUpdate))
 	api.router.GET("/project/list", LogRequestMiddleware(api.ProjectGetAllProjects))
+	api.router.GET("/project/monitoring-between/:id", LogRequestMiddleware(api.GetSnapshotsBetween))
+	api.router.GET("/project/monitoring/:id", LogRequestMiddleware(api.GetNSnapshots))
+	api.router.GET("/project/assignees/:id", LogRequestMiddleware(api.ProjectGetAssigneeStats))
 
 	api.router.POST("/task/create", LogRequestMiddleware(api.TaskCreate))
 	api.router.GET("/task/get/:project", LogRequestMiddleware(api.TaskGetFromProject))
