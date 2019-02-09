@@ -19,6 +19,11 @@ type Worker struct {
 	Secret   []byte    `json:"secret"`
 }
 
+type WorkerStats struct {
+	Alias           string `json:"alias"`
+	ClosedTaskCount int64  `json:"closed_task_count"`
+}
+
 func (database *Database) SaveWorker(worker *Worker) {
 
 	db := database.getDB()
@@ -162,4 +167,20 @@ func (database *Database) UpdateWorker(worker *Worker) bool {
 	}).Trace("Database.UpdateWorker UPDATE worker")
 
 	return rowsAffected == 1
+}
+
+func (database *Database) GetAllWorkerStats() *[]WorkerStats {
+
+	db := database.getDB()
+	rows, err := db.Query(`SELECT alias, closed_task_count FROM worker WHERE closed_task_count>0 LIMIT 50`)
+	handleErr(err)
+
+	stats := make([]WorkerStats, 0)
+	for rows.Next() {
+		s := WorkerStats{}
+		_ = rows.Scan(&s.Alias, &s.ClosedTaskCount)
+		stats = append(stats, s)
+	}
+
+	return &stats
 }

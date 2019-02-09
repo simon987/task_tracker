@@ -11,7 +11,7 @@
     text-align: left;
 }
 
-.checkbox-wrapper mat-checkbox {
+mat-button-toggle-group {
     margin: 3px 5px;
     vertical-align: middle;
 }

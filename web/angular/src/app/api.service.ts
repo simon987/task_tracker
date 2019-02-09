@@ -17,8 +17,8 @@ export class ApiService {
     ) {
     }
 
-    getLogs() {
-        return this.http.post(this.url + "/logs", "{\"level\":4, \"since\":1}", this.options);
+    getLogs(level: number) {
+        return this.http.post(this.url + "/logs", {level: level, since: 1}, this.options);
     }
 
     getProjects() {
@@ -55,6 +55,10 @@ export class ApiService {
 
     getAssigneeStats(project: number) {
         return this.http.get(this.url + `/project/assignees/${project}`, this.options)
+    }
+
+    getWorkerStats() {
+        return this.http.get(this.url + `/worker/stats`, this.options)
     }
 
 }

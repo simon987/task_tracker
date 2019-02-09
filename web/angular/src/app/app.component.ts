@@ -1,7 +1,6 @@
 import {Component} from '@angular/core';
 import {Router} from '@angular/router';
 import {TranslateService} from "@ngx-translate/core";
-import {MatSelectChange} from "@angular/material";
 
 @Component({
     selector: 'app-root',
@@ -10,8 +9,8 @@ import {MatSelectChange} from "@angular/material";
 })
 export class AppComponent {
 
-    langChange(event: MatSelectChange) {
-        this.translate.use(event.value)
+    langChange(lang: any) {
+        this.translate.use(lang.lang)
     }
 
     langList: any[] = [

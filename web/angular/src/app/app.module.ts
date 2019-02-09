@@ -9,6 +9,7 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {
     MatAutocompleteModule,
     MatButtonModule,
+    MatButtonToggleModule,
     MatCardModule,
     MatCheckboxModule,
     MatDividerModule,
@@ -45,6 +46,7 @@ import {TranslateHttpLoader} from "@ngx-translate/http-loader";
 import {TranslatedPaginator} from "./TranslatedPaginatorConfiguration";
 import {LoginComponent} from './login/login.component';
 import {AccountDetailsComponent} from './account-details/account-details.component';
+import {WorkerDashboardComponent} from './worker-dashboard/worker-dashboard.component';
 
 
 export function createTranslateLoader(http: HttpClient) {
@@ -63,6 +65,7 @@ export function createTranslateLoader(http: HttpClient) {
         SnackBarComponent,
         LoginComponent,
         AccountDetailsComponent,
+        WorkerDashboardComponent,
     ],
     imports: [
         BrowserModule,
@@ -100,7 +103,8 @@ export function createTranslateLoader(http: HttpClient) {
         MatSelectModule,
         MatProgressBarModule,
         MatTabsModule,
-        MatListModule
+        MatListModule,
+        MatButtonToggleModule
 
     ],
     exports: [],

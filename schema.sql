@@ -15,11 +15,12 @@ CREATE TABLE worker_identity
 
 CREATE TABLE worker
 (
-  id       SERIAL PRIMARY KEY,
-  alias    TEXT,
-  created  INTEGER,
-  identity INTEGER REFERENCES worker_identity (id),
-  secret   BYTEA
+  id                SERIAL PRIMARY KEY,
+  alias             TEXT,
+  created           INTEGER,
+  identity          INTEGER REFERENCES worker_identity (id),
+  secret            BYTEA,
+  closed_task_count INTEGER DEFAULT 0
 );
 
 CREATE TABLE project
@@ -103,6 +104,7 @@ CREATE OR REPLACE FUNCTION on_task_delete_proc() RETURNS TRIGGER AS
 $$
 BEGIN
   UPDATE project SET closed_task_count=closed_task_count + 1 WHERE id = OLD.project;
+  UPDATE worker SET closed_task_count=closed_task_count + 1 WHERE id = OLD.assignee;
   RETURN OLD;
 END;
 $$ LANGUAGE 'plpgsql';

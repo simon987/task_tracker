@@ -1,18 +1,47 @@
 <mat-toolbar color="primary">
-    <button mat-button [class.mat-accent]="router.url == '/'" class="nav-title" [routerLink]="''">{{"nav.title" | translate}}</button>
-    <button mat-button [class.mat-accent]="router.url == '/log'" class="nav-link" [routerLink]="'log'">{{"nav.logs" | translate}}</button>
-    <button mat-button [class.mat-accent]="router.url == '/projects'" class="nav-link" [routerLink]="'projects'">{{"nav.project_list" | translate}}</button>
-    <button mat-button [class.mat-accent]="router.url == '/new_project'" class="nav-link" [routerLink]="'new_project'">{{"nav.new_project" | translate}}</button>
+    <div class="large-nav">
+        <button mat-button [class.mat-accent]="router.url == '/'" class="nav-title"
+                [routerLink]="''">{{"nav.title" | translate}}</button>
+        <button mat-button [class.mat-accent]="router.url == '/log'" class="nav-link"
+                [routerLink]="'log'">{{"nav.logs" | translate}}</button>
+        <button mat-button [class.mat-accent]="router.url == '/projects'" class="nav-link"
+                [routerLink]="'projects'">{{"nav.project_list" | translate}}</button>
+        <button mat-button [class.mat-accent]="router.url == '/new_project'" class="nav-link"
+                [routerLink]="'new_project'">{{"nav.new_project" | translate}}</button>
+        <button mat-button [class.mat-accent]="router.url == '/workers'" class="nav-link"
+                [routerLink]="'workers'">{{"nav.worker_dashboard" | translate}}</button>
+    </div>
+    <div class="small-nav">
+        <button mat-button [matMenuTriggerFor]="smallNav">
+            <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #smallNav>
+            <button mat-menu-item [class.mat-accent]="router.url == '/'" class="nav-title"
+                    [routerLink]="''">{{"nav.title" | translate}}</button>
+            <button mat-menu-item [class.mat-accent]="router.url == '/log'" class="nav-link"
+                    [routerLink]="'log'">{{"nav.logs" | translate}}</button>
+            <button mat-menu-item [class.mat-accent]="router.url == '/projects'" class="nav-link"
+                    [routerLink]="'projects'">{{"nav.project_list" | translate}}</button>
+            <button mat-menu-item [class.mat-accent]="router.url == '/new_project'" class="nav-link"
+                    [routerLink]="'new_project'">{{"nav.new_project" | translate}}</button>
+            <button mat-menu-item [class.mat-accent]="router.url == '/workers'" class="nav-link"
+                    [routerLink]="'workers'">{{"nav.worker_dashboard" | translate}}</button>
+        </mat-menu>
+    </div>
     <span class="nav-spacer"></span>
     <button mat-button [class.mat-accent]="router.url == '/login'" class="nav-link"
             [routerLink]="'login'">{{"nav.login" | translate}}</button>
-    <mat-form-field [floatLabel]="'never'">
-        <mat-select [placeholder]="'nav.langSelect' | translate" (selectionChange)="langChange($event)">
-            <mat-option *ngFor="let lang of langList" [value]="lang.lang">
-                {{lang.display}}
-            </mat-option>
-        </mat-select>
-    </mat-form-field>
+
+    <button mat-button [matMenuTriggerFor]="langMenu">
+        {{"nav.lang_select" | translate}}
+        <mat-icon>arrow_drop_down</mat-icon>
+    </button>
+    <mat-menu #langMenu>
+        <button mat-menu-item *ngFor="let lang of langList" (click)="langChange(lang)">
+            {{lang.display}}
+        </button>
+    </mat-menu>
+
 
 </mat-toolbar>
 

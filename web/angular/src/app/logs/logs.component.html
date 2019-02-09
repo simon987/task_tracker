@@ -1,16 +1,23 @@
 <div class="container">
     <div class="table-container">
-        <div class="checkbox-wrapper">
-            <mat-form-field style="margin-right: 10px">
-                <input matInput (keyup)="applyFilter($event.target.value)" [placeholder]="'logs.filter' | translate">
-            </mat-form-field>
-            <mat-checkbox>{{"logs.fatal" | translate}}</mat-checkbox>
-            <mat-checkbox>{{"logs.panic" | translate}}</mat-checkbox>
-            <mat-checkbox>{{"logs.error" | translate}}</mat-checkbox>
-            <mat-checkbox>{{"logs.warn" | translate}}</mat-checkbox>
-            <mat-checkbox>{{"logs.info" | translate}}</mat-checkbox>
-            <mat-checkbox>{{"logs.debug" | translate}}</mat-checkbox>
-        </div>
+        <mat-form-field style="margin-right: 10px">
+            <input matInput (keyup)="applyFilter($event.target.value)" [placeholder]="'logs.filter' | translate">
+        </mat-form-field>
+        <mat-button-toggle-group name="level" aria-label="Font Style" (change)="filterLevelChange($event)">
+            <mat-button-toggle value="1">{{"logs.fatal" | translate}}</mat-button-toggle>
+            <mat-button-toggle value="2">{{"logs.panic" | translate}}</mat-button-toggle>
+            <mat-button-toggle value="3">{{"logs.error" | translate}}</mat-button-toggle>
+            <mat-button-toggle value="4">{{"logs.warn" | translate}}</mat-button-toggle>
+            <mat-button-toggle value="5">{{"logs.info" | translate}}</mat-button-toggle>
+            <mat-button-toggle value="6">{{"logs.debug" | translate}}</mat-button-toggle>
+            <mat-button-toggle value="7">{{"logs.trace" | translate}}</mat-button-toggle>
+        </mat-button-toggle-group>
+
+        <button mat-raised-button style="float: right"
+                [title]="'dashboard.refresh' | translate"
+                (click)="refresh()">
+            <mat-icon>refresh</mat-icon>
+        </button>
         <div class="mat-elevation-z8">
 
             <mat-table [dataSource]="data" matSort matSortActive="timestamp"

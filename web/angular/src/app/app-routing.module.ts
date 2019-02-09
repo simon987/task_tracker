@@ -10,6 +10,7 @@ import {filter} from "rxjs/operators";
 import {TranslateService} from "@ngx-translate/core";
 import {LoginComponent} from "./login/login.component";
 import {AccountDetailsComponent} from "./account-details/account-details.component";
+import {WorkerDashboardComponent} from "./worker-dashboard/worker-dashboard.component";
 
 const routes: Routes = [
     {path: "log", component: LogsComponent},
@@ -18,7 +19,8 @@ const routes: Routes = [
     {path: "projects", component: ProjectListComponent},
     {path: "project/:id", component: ProjectDashboardComponent},
     {path: "project/:id/update", component: UpdateProjectComponent},
-    {path: "new_project", component: CreateProjectComponent}
+    {path: "new_project", component: CreateProjectComponent},
+    {path: "workers", component: WorkerDashboardComponent}
 ];
 
 @NgModule({

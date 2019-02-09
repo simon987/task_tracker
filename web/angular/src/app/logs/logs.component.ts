@@ -4,7 +4,7 @@ import {getLogLevel, LogEntry} from "../models/logentry";
 
 import _ from "lodash"
 import * as moment from "moment";
-import {MatPaginator, MatSort, MatTableDataSource} from "@angular/material";
+import {MatButtonToggleChange, MatPaginator, MatSort, MatTableDataSource} from "@angular/material";
 
 @Component({
     selector: 'app-logs',
@@ -15,6 +15,7 @@ export class LogsComponent implements OnInit {
 
     logs: LogEntry[] = [];
     data: MatTableDataSource<LogEntry>;
+    filterLevel: number = 1;
     logsCols: string[] = ["level", "timestamp", "message", "data"];
 
     @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -25,21 +26,25 @@ export class LogsComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.getLogs();
-
         this.data.paginator = this.paginator;
         this.data.sort = this.sort;
-        // interval(5000).subscribe(() => {
-        //     this.getLogs();
-        // })
     }
 
     applyFilter(filter: string) {
         this.data.filter = filter.trim().toLowerCase();
     }
 
-    private getLogs() {
-        this.apiService.getLogs().subscribe(
+    filterLevelChange(event: MatButtonToggleChange) {
+        this.filterLevel = Number(event.value);
+        this.getLogs(Number(event.value))
+    }
+
+    private refresh() {
+        this.getLogs(this.filterLevel)
+    }
+
+    private getLogs(level: number) {
+        this.apiService.getLogs(level).subscribe(
             data => {
                 this.data.data = _.map(data["logs"], (entry) => {
                     return <LogEntry>{

@@ -1,0 +1,18 @@
+<div class="container">
+    <mat-card class="mat-elevation-z8">
+        <mat-card-header style="float:left">
+            <mat-card-title>{{"workers.title" | translate}}</mat-card-title>
+            <mat-card-subtitle>{{"workers.subtitle" | translate}}</mat-card-subtitle>
+        </mat-card-header>
+
+        <button mat-raised-button style="float: right"
+                [title]="'dashboard.refresh' | translate"
+                (click)="refresh()"
+        >
+            <mat-icon>refresh</mat-icon>
+        </button>
+        <mat-card-content>
+            <canvas id="worker-stats"></canvas>
+        </mat-card-content>
+    </mat-card>
+</div>

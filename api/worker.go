@@ -44,6 +44,12 @@ type WorkerAccessResponse struct {
 	Message string `json:"message"`
 }
 
+type GetAllWorkerStatsResponse struct {
+	Ok      bool                   `json:"ok"`
+	Message string                 `json:"message,omitempty"`
+	Stats   *[]storage.WorkerStats `json:"stats"`
+}
+
 func (api *WebAPI) WorkerCreate(r *Request) {
 
 	workerReq := &CreateWorkerRequest{}
@@ -206,6 +212,16 @@ func (api *WebAPI) WorkerUpdate(r *Request) {
 			Message: "Could not update worker",
 		})
 	}
+}
+
+func (api *WebAPI) GetAllWorkerStats(r *Request) {
+
+	stats := api.Database.GetAllWorkerStats()
+
+	r.OkJson(GetAllWorkerStatsResponse{
+		Ok:    true,
+		Stats: stats,
+	})
 }
 
 func (api *WebAPI) workerCreate(request *CreateWorkerRequest, identity *storage.Identity) (*storage.Worker, error) {

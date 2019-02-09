@@ -1,11 +1,12 @@
 {
     "nav": {
         "title": "task_tracker (fr)",
-        "langSelect": "Langue",
+        "lang_select": "Langue",
         "logs": "Journal",
         "project_list": "Projets",
         "new_project": "Nouveau projet",
-        "login": "Ouvrir un session"
+        "login": "Ouvrir un session",
+        "worker_dashboard": "Workers"
     },
     "logs": {
         "filter": "Filtrer",
@@ -41,7 +42,8 @@
         "update": "Modifier",
         "login": "Ouverture de session",
         "new_account": "Création de compte",
-        "account": "Compte"
+        "account": "Compte",
+        "workers": "Workers"
     },
     "project": {
         "name": "Nom du projet",
@@ -80,6 +82,10 @@
         "title": "Détails du compte",
         "subtitle": "toto: sous-titre",
         "username": "Nom d'utilisateur"
+    },
+    "workers": {
+        "title": "Tâches complétés par worker",
+        "subtitle": "Données en temps réél pour tous les projets"
     }
 }
 
