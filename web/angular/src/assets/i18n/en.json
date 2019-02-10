@@ -6,7 +6,8 @@
         "project_list": "Projects",
         "new_project": "New Project",
         "login": "Login",
-        "worker_dashboard": "Workers"
+        "worker_dashboard": "Workers",
+        "account": "Account"
     },
     "logs": {
         "filter": "Filter",
@@ -79,7 +80,8 @@
         "metadata": "Account metadata",
         "title": "Account details",
         "subtitle": "toto: subtitle",
-        "username": "Username"
+        "username": "Username",
+        "logout": "Logout"
     },
     "workers": {
         "title": "Completed tasks per worker",

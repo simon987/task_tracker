@@ -6,7 +6,8 @@
         "project_list": "Projets",
         "new_project": "Nouveau projet",
         "login": "Ouvrir un session",
-        "worker_dashboard": "Workers"
+        "worker_dashboard": "Workers",
+        "account": "Compte"
     },
     "logs": {
         "filter": "Filtrer",
@@ -81,7 +82,8 @@
         "metadata": "Métadonnés du compte",
         "title": "Détails du compte",
         "subtitle": "toto: sous-titre",
-        "username": "Nom d'utilisateur"
+        "username": "Nom d'utilisateur",
+        "logout": "Fermer la session"
     },
     "workers": {
         "title": "Tâches complétés par worker",

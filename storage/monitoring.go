@@ -2,6 +2,7 @@ package storage
 
 import (
 	"github.com/Sirupsen/logrus"
+	"github.com/simon987/task_tracker/config"
 	"time"
 )
 
@@ -19,7 +20,7 @@ func (database *Database) MakeProjectSnapshots() {
 	startTime := time.Now()
 	db := database.getDB()
 
-	_, err := db.Exec(`
+	insertRes, err := db.Exec(`
 		INSERT INTO project_monitoring_snapshot
 		  (project, new_task_count, failed_task_count, closed_task_count, worker_access_count,
 		   awaiting_verification_task_count, timestamp)
@@ -35,9 +36,17 @@ func (database *Database) MakeProjectSnapshots() {
 			   extract(epoch from now() at time zone 'utc')
 		FROM project`)
 	handleErr(err)
+	inserted, _ := insertRes.RowsAffected()
+
+	res, err := db.Exec(`DELETE FROM project_monitoring_snapshot WHERE timestamp < $1`,
+		int64(time.Now().Unix())-int64(config.Cfg.MonitoringHistory.Seconds()))
+	handleErr(err)
+	deleted, _ := res.RowsAffected()
 
 	logrus.WithFields(logrus.Fields{
-		"took": time.Now().Sub(startTime),
+		"took":   time.Now().Sub(startTime),
+		"add":    inserted,
+		"remove": deleted,
 	}).Trace("Took monitoring snapshot")
 }
 

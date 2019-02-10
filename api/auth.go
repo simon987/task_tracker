@@ -77,6 +77,13 @@ func (api *WebAPI) Login(r *Request) {
 	}).Info("Logged in")
 }
 
+func (api *WebAPI) Logout(r *Request) {
+
+	sess := api.Session.StartFasthttp(r.Ctx)
+	sess.Clear()
+	r.Ctx.Response.SetStatusCode(204)
+}
+
 func (api *WebAPI) Register(r *Request) {
 
 	req := &RegisterRequest{}

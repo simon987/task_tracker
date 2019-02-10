@@ -1,5 +1,5 @@
 <div class="container">
-    <mat-card class="mat-elevation-z8" *ngIf="account">
+    <mat-card class="mat-elevation-z8" *ngIf="authService.account">
 
         <mat-card-header>
             <mat-card-title>{{"account.title" | translate}}</mat-card-title>
@@ -11,19 +11,22 @@
             <mat-list>
                 <mat-list-item>
                     {{"account.username" | translate}}:&nbsp;
-                    <pre>{{account.username}}</pre>
+                    <pre>{{authService.account.username}}</pre>
                 </mat-list-item>
             </mat-list>
 
             <mat-expansion-panel>
                 <mat-expansion-panel-header>{{"account.metadata" | translate}}</mat-expansion-panel-header>
-                <pre> {{account | json}}</pre>
+                <pre> {{authService.account | json}}</pre>
             </mat-expansion-panel>
+
+            <mat-divider class="divider" [inset]="true"></mat-divider>
+
         </mat-card-content>
 
         <mat-card-actions>
-
-
+            <button mat-raised-button color="primary" (click)="logout()">{{"account.logout" | translate}}</button>
         </mat-card-actions>
     </mat-card>
 </div>
+

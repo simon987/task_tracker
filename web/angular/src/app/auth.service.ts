@@ -14,6 +14,10 @@ export class AuthService {
     constructor(private apiService: ApiService,
                 private messengerService: MessengerService,
                 private router: Router) {
+        this.apiService.getAccountDetails()
+            .subscribe((data: any) => {
+                this.account = data.manager;
+            })
     }
 
     public login(credentials: Credentials) {
@@ -25,6 +29,20 @@ export class AuthService {
                             this.account = data.manager;
                             this.router.navigateByUrl("/account");
                         })
+                },
+                error => {
+                    console.log(error);
+                    this.messengerService.show(error.error.message);
+                }
+            )
+    }
+
+    public logout() {
+        return this.apiService.logout()
+            .subscribe(
+                () => {
+                    this.account = null;
+                    this.router.navigateByUrl("");
                 },
                 error => {
                     console.log(error);

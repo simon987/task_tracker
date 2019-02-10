@@ -1,6 +1,7 @@
 import {Component} from '@angular/core';
 import {Router} from '@angular/router';
 import {TranslateService} from "@ngx-translate/core";
+import {AuthService} from "./auth.service";
 
 @Component({
     selector: 'app-root',
@@ -18,7 +19,9 @@ export class AppComponent {
         {lang: "en", display: "English"},
     ];
 
-    constructor(private translate: TranslateService, private router: Router) {
+    constructor(private translate: TranslateService,
+                private router: Router,
+                public authService: AuthService) {
 
         translate.addLangs([
             "en",

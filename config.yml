@@ -21,5 +21,5 @@ session:
   expiration: "25m"
 
 monitoring:
-  snapshot_interval: "10s"
-  history_length: "3000h"
+  snapshot_interval: "60s"
+  history_length: "4h"

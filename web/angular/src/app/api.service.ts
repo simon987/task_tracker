@@ -45,6 +45,10 @@ export class ApiService {
         return this.http.post(this.url + "/login", credentials, this.options)
     }
 
+    logout() {
+        return this.http.get(this.url + "/logout", this.options)
+    }
+
     getAccountDetails() {
         return this.http.get(this.url + "/account", this.options)
     }

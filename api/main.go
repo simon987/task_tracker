@@ -102,6 +102,7 @@ func New() *WebAPI {
 
 	api.router.POST("/register", LogRequestMiddleware(api.Register))
 	api.router.POST("/login", LogRequestMiddleware(api.Login))
+	api.router.GET("/logout", LogRequestMiddleware(api.Logout))
 	api.router.GET("/account", LogRequestMiddleware(api.AccountDetails))
 
 	api.router.NotFound = func(ctx *fasthttp.RequestCtx) {
