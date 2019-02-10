@@ -43,7 +43,6 @@ func Get(path string, worker *storage.Worker) *http.Response {
 
 	url := "http://" + config.Cfg.ServerAddr + path
 	req, err := http.NewRequest("GET", url, nil)
-	handleErr(err)
 
 	if worker != nil {
 

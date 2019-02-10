@@ -6,6 +6,8 @@ import (
 	"github.com/simon987/task_tracker/storage"
 )
 
+const MinPasswordLength = 8
+const MinUsernameLength = 3
 const MaxUsernameLength = 16
 
 type LoginRequest struct {
@@ -30,7 +32,9 @@ type AccountDetails struct {
 }
 
 func (r *RegisterRequest) isValid() bool {
-	return len(r.Username) <= MaxUsernameLength
+	return MinUsernameLength <= len(r.Username) &&
+		len(r.Username) <= MaxUsernameLength &&
+		MinPasswordLength <= len(r.Password)
 }
 
 type RegisterResponse struct {
@@ -138,6 +142,11 @@ func (api *WebAPI) AccountDetails(r *Request) {
 
 	sess := api.Session.StartFasthttp(r.Ctx)
 	manager := sess.Get("manager")
+
+	logrus.WithFields(logrus.Fields{
+		"manager": manager,
+		"session": sess,
+	}).Trace("Account details request")
 
 	if manager == nil {
 		r.OkJson(AccountDetails{
