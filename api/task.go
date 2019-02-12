@@ -156,11 +156,20 @@ func (api *WebAPI) TaskGet(r *Request) {
 	}
 
 	task := api.Database.GetTask(worker)
+	if task == nil {
 
-	r.OkJson(GetTaskResponse{
-		Ok:   true,
-		Task: task,
-	})
+		r.OkJson(GetTaskResponse{
+			Ok:      false,
+			Message: "No task available",
+		})
+
+	} else {
+
+		r.OkJson(GetTaskResponse{
+			Ok:   true,
+			Task: task,
+		})
+	}
 }
 
 func (api WebAPI) validateSignature(r *Request) (*storage.Worker, error) {

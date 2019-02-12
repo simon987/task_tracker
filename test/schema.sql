@@ -113,3 +113,36 @@ CREATE TRIGGER on_task_delete
   ON task
   FOR EACH ROW
 EXECUTE PROCEDURE on_task_delete_proc();
+
+CREATE OR REPLACE FUNCTION release_task_ok(wid INT, tid INT, ver INT) RETURNS BOOLEAN AS
+$$
+DECLARE
+  res INT = NULL;
+BEGIN
+  DELETE FROM task WHERE id = tid AND assignee = wid AND verification_count < 2 RETURNING project INTO res;
+
+  IF res IS NULL THEN
+    INSERT INTO worker_verifies_task (worker, verification_hash, task)
+    SELECT wid, ver, task.id
+    FROM task
+    WHERE assignee = wid;
+
+    DELETE
+    FROM task
+    WHERE id = tid
+      AND assignee = wid
+      AND (SELECT COUNT(*) as vcnt
+           FROM worker_verifies_task wvt
+           WHERE task = tid
+           GROUP BY wvt.verification_hash
+           ORDER BY vcnt DESC
+           LIMIT 1) >= task.verification_count RETURNING task.id INTO res;
+
+    IF res IS NULL THEN
+      UPDATE task SET assignee= NULL WHERE id = tid AND assignee = wid;
+    end if;
+  end if;
+
+  RETURN res IS NOT NULL;
+END;
+$$ LANGUAGE 'plpgsql';

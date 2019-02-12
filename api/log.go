@@ -30,6 +30,11 @@ type GetLogResponse struct {
 	Logs    *[]storage.LogEntry `json:"logs"`
 }
 
+type LogResponse struct {
+	Ok      bool   `json:"ok"`
+	Message string `json:"message"`
+}
+
 func (e *LogRequest) Time() time.Time {
 
 	t := time.Unix(e.TimeStamp, 0)
@@ -89,7 +94,7 @@ func (api *WebAPI) LogTrace(r *Request) {
 
 	entry, err := api.parseLogEntry(r)
 	if err != nil {
-		r.Json(GetLogResponse{
+		r.Json(LogResponse{
 			Ok:      false,
 			Message: "Could not parse request",
 		}, 400)
@@ -106,7 +111,7 @@ func (api *WebAPI) LogInfo(r *Request) {
 
 	entry, err := api.parseLogEntry(r)
 	if err != nil {
-		r.Json(GetLogResponse{
+		r.Json(LogResponse{
 			Ok:      false,
 			Message: "Could not parse request",
 		}, 400)
@@ -123,7 +128,7 @@ func (api *WebAPI) LogWarn(r *Request) {
 
 	entry, err := api.parseLogEntry(r)
 	if err != nil {
-		r.Json(GetLogResponse{
+		r.Json(LogResponse{
 			Ok:      false,
 			Message: "Could not parse request",
 		}, 400)
@@ -140,7 +145,7 @@ func (api *WebAPI) LogError(r *Request) {
 
 	entry, err := api.parseLogEntry(r)
 	if err != nil {
-		r.Json(GetLogResponse{
+		r.Json(LogResponse{
 			Ok:      false,
 			Message: "Could not parse request",
 		}, 400)

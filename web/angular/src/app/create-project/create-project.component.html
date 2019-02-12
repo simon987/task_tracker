@@ -4,35 +4,31 @@
 	    <mat-card-subtitle>{{"project.create_subtitle" | translate}}</mat-card-subtitle>
 
 	    <mat-card-content>
-		<form (ngSubmit)="onSubmit()">
 		    <mat-form-field appearance="outline">
 			    <mat-label>{{"project.name" | translate}}</mat-label>
-			<input type="text" matInput [(ngModel)]="project.name" name="name" [placeholder]="'project.name' | translate">
+                <input type="text" matInput [(ngModel)]="project.name" [placeholder]="'project.name' | translate">
 		    </mat-form-field>
 
 		    <mat-form-field appearance="outline">
 			    <mat-label>{{ "project.clone_url" | translate}}</mat-label>
-			<input type="text" matInput [(ngModel)]="project.clone_url" name="clone_url"
-			       [placeholder]="'project.clone_url_placeholder' | translate">
+                <input type="text" matInput [(ngModel)]="project.clone_url"
+                       [placeholder]="'project.clone_url_placeholder' | translate">
 		    </mat-form-field>
 		    <mat-form-field appearance="outline">
 			    <mat-label>{{ "project.git_repo" | translate }}</mat-label>
-			<input type="text" matInput [(ngModel)]="project.git_repo" name="git_repo"
-			       [placeholder]="'project.git_repo_placeholder' | translate">
+                <input type="text" matInput [(ngModel)]="project.git_repo"
+                       [placeholder]="'project.git_repo_placeholder' | translate">
 			<mat-hint align="start">
 				{{"project.git_repo_hint" | translate}}
 			</mat-hint>
 		    </mat-form-field>
 
-		    <mat-checkbox matInput [(ngModel)]="project.public" name="public" style="padding-top: 1em">
+            <mat-checkbox matInput [(ngModel)]="project.public" style="padding-top: 1em">
 			    {{"project.public" | translate}}</mat-checkbox>
 
-		    <input type="hidden" name="version" value="{{project.version}}">
-
-		</form>
 	    </mat-card-content>
         <mat-card-actions>
-            <button mat-raised-button color="primary" type="submit">{{'project.create' | translate}}</button>
+            <button mat-raised-button color="primary" (click)="onSubmit()">{{'project.create' | translate}}</button>
         </mat-card-actions>
 	</mat-card>
 </div>

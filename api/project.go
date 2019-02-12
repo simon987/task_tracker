@@ -202,7 +202,15 @@ func (api *WebAPI) ProjectGet(r *Request) {
 
 func (api *WebAPI) ProjectGetAllProjects(r *Request) {
 
-	projects := api.Database.GetAllProjects()
+	worker, _ := api.validateSignature(r)
+
+	var id int64
+	if worker == nil {
+		id = 0
+	} else {
+		id = worker.Id
+	}
+	projects := api.Database.GetAllProjects(id)
 
 	r.OkJson(GetAllProjectsResponse{
 		Ok:       true,

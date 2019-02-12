@@ -104,8 +104,8 @@ func (database *Database) UpdateManager(manager *Manager) {
 func (database *Database) UpdateManagerPassword(manager *Manager, newPassword []byte) {
 
 	hash := crypto.SHA512.New()
-	hash.Write([]byte(manager.Username))
 	hash.Write(newPassword)
+	hash.Write([]byte(manager.Username))
 	hashedPassword := hash.Sum(nil)
 
 	db := database.getDB()

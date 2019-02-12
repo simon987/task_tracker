@@ -134,52 +134,34 @@ func (database Database) ReleaseTask(id int64, workerId int64, result TaskResult
 
 	db := database.getDB()
 
-	var rowsAffected int64
+	var taskUpdated bool
 	if result == TR_OK {
-		var pid int64
+		row := db.QueryRow(`SELECT release_task_ok($1,$2,$3)`, workerId, id, verification)
 
-		//If no verification is required
-		row := db.QueryRow(`DELETE FROM task WHERE id=$1 AND assignee=$2 AND verification_count < 2
-                       			  	RETURNING project`, id, workerId)
-		err := row.Scan(&pid)
-		if err == nil {
-			rowsAffected = 1
-		} else {
-			//If verification is required
-			_, err = db.Exec(`INSERT INTO worker_verifies_task (worker, verification_hash, task)
-									SELECT $1,$2,task.id FROM task WHERE assignee=$1`, workerId, verification)
-			handleErr(err)
-
-			res, _ := db.Exec(`DELETE FROM task WHERE id=$1 AND assignee=$2 AND 
-            	(SELECT COUNT(*) as vcnt FROM worker_verifies_task wvt WHERE task=$1 
-            		GROUP BY wvt.verification_hash ORDER BY vcnt DESC LIMIT 1) >= task.verification_count`,
-				id, workerId)
-			rowsAffected, _ = res.RowsAffected()
-
-			_, _ = db.Exec(`UPDATE task SET assignee=NULL WHERE id=$1 AND assignee=$2`, id, workerId)
-		}
-
+		_ = row.Scan(&taskUpdated)
 	} else if result == TR_FAIL {
 		res, err := db.Exec(`UPDATE task SET (status, assignee, retries) = 
 			(CASE WHEN retries+1 >= max_retries THEN 2 ELSE 1 END, NULL, retries+1)
 			WHERE id=$1 AND assignee=$2`, id, workerId)
 		handleErr(err)
-		rowsAffected, _ = res.RowsAffected()
+		rowsAffected, _ := res.RowsAffected()
+		taskUpdated = rowsAffected == 1
 	} else if result == TR_SKIP {
 		res, err := db.Exec(`UPDATE task SET (status, assignee) = (1, NULL)
 			WHERE id=$1 AND assignee=$2`, id, workerId)
 		handleErr(err)
-		rowsAffected, _ = res.RowsAffected()
+		rowsAffected, _ := res.RowsAffected()
+		taskUpdated = rowsAffected == 1
 	}
 
 	logrus.WithFields(logrus.Fields{
-		"rowsAffected": rowsAffected,
+		"taskUpdated":  taskUpdated,
 		"taskId":       id,
 		"workerId":     workerId,
 		"verification": verification,
 	}).Trace("Database.ReleaseTask")
 
-	return rowsAffected == 1
+	return taskUpdated
 }
 
 func (database *Database) GetTaskFromProject(worker *Worker, projectId int64) *Task {

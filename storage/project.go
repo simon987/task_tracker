@@ -131,14 +131,27 @@ func (database *Database) UpdateProject(project *Project) error {
 	return nil
 }
 
-func (database Database) GetAllProjects() *[]Project {
+func (database Database) GetAllProjects(workerId int64) *[]Project {
 	projects := make([]Project, 0)
 
 	db := database.getDB()
-	rows, err := db.Query(`SELECT 
+	var rows *sql.Rows
+	var err error
+	if workerId == 0 {
+		rows, err = db.Query(`SELECT 
        	Id, priority, name, clone_url, git_repo, version, motd, public
 		FROM project
+		LEFT JOIN worker_has_access_to_project whatp ON whatp.project = id
+		WHERE public
 		ORDER BY name`)
+	} else {
+		rows, err = db.Query(`SELECT 
+       	Id, priority, name, clone_url, git_repo, version, motd, public
+		FROM project
+		LEFT JOIN worker_has_access_to_project whatp ON whatp.project = id
+		WHERE public OR whatp.worker = $1
+		ORDER BY name`, workerId)
+	}
 	handleErr(err)
 
 	for rows.Next() {

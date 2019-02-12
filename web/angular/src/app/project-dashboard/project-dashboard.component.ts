@@ -71,7 +71,7 @@ export class ProjectDashboardComponent implements OnInit {
                 }
                 this.noTasks = false;
 
-                this.timeline.data.labels = this.snapshots.map(s => s.time_stamp as any);
+                this.timeline.data.labels = this.snapshots.map(s => s.time_stamp * 1000 as any);
                 this.timeline.data.datasets = this.makeTimelineDataset(this.snapshots);
                 this.timeline.update();
                 this.statusPie.data.datasets = [
@@ -164,7 +164,7 @@ export class ProjectDashboardComponent implements OnInit {
         this.timeline = new Chart(ctx, {
             type: "bar",
             data: {
-                labels: this.snapshots.map(s => s.time_stamp as any),
+                labels: this.snapshots.map(s => s.time_stamp * 1000 as any),
                 datasets: this.makeTimelineDataset(this.snapshots),
             },
             options: {
@@ -198,11 +198,16 @@ export class ProjectDashboardComponent implements OnInit {
 
     private setupStatusPie() {
 
-        if (this.lastSnapshot == null || (this.lastSnapshot.awaiting_verification_count == 0 &&
+        if (this.lastSnapshot == undefined || (this.lastSnapshot.awaiting_verification_count == 0 &&
             this.lastSnapshot.closed_task_count == 0 &&
             this.lastSnapshot.new_task_count == 0 &&
             this.lastSnapshot.failed_task_count == 0)) {
             this.noTasks = true;
+
+            this.lastSnapshot = {
+                closed_task_count: 0, time_stamp: 0, failed_task_count: 0,
+                new_task_count: 0, awaiting_verification_count: 0
+            }
         }
 
         let elem = document.getElementById("status-pie") as any;

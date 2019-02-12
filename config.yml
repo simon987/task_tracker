@@ -8,9 +8,9 @@ database:
 git:
   webhook_secret: "very_secret_secret"
   # Github: sha1, Gogs: sha256
-  webhook_hash: "sha1"
+  webhook_hash: "sha256"
   # Github: 'X-Hub-Signature', Gogs: 'X-Gogs-Signature'
-  webhook_sig_header: "X-Hub-Signature"
+  webhook_sig_header: "X-Gogs-Signature"
 
 log:
   # panic, fatal, error, warn, info, debug, trace
