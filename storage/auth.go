@@ -10,9 +10,10 @@ import (
 type ManagerRole int
 
 const (
+	ROLE_NONE          ManagerRole = 0
 	ROLE_READ          ManagerRole = 1
 	ROLE_EDIT          ManagerRole = 2
-	ROLE_MANAGE_ACCESS ManagerRole = 3
+	ROLE_MANAGE_ACCESS ManagerRole = 4
 )
 
 type Manager struct {
@@ -65,8 +66,8 @@ func (database *Database) SaveManager(manager *Manager, password []byte) error {
 	hash.Write([]byte(manager.Username))
 	hashedPassword := hash.Sum(nil)
 
-	row := db.QueryRow(`INSERT INTO manager (username, password, website_admin) 
-			VALUES ($1,$2,$3) RETURNING ID`,
+	row := db.QueryRow(`INSERT INTO manager (username, password, website_admin, register_time) 
+			VALUES ($1,$2,$3, extract(epoch from now() at time zone 'utc')) RETURNING ID`,
 		manager.Username, hashedPassword, manager.WebsiteAdmin)
 
 	err := row.Scan(&manager.Id)
@@ -77,6 +78,8 @@ func (database *Database) SaveManager(manager *Manager, password []byte) error {
 
 		return err
 	}
+
+	manager.WebsiteAdmin = manager.Id == 1
 
 	logrus.WithFields(logrus.Fields{
 		"manager": manager,
@@ -120,4 +123,20 @@ func (database *Database) UpdateManagerPassword(manager *Manager, newPassword []
 		"rowsAffected": rowsAffected,
 		"id":           manager.Id,
 	}).Warning("Database.UpdateManagerPassword UPDATE")
+}
+
+func (database *Database) ManagerHasRoleOn(manager *Manager, projectId int64) ManagerRole {
+
+	db := database.getDB()
+
+	row := db.QueryRow(`SELECT role FROM manager_has_role_on_project 
+		WHERE project=$1 AND manager=$2`, projectId, manager.Id)
+
+	var role ManagerRole
+	err := row.Scan(&role)
+	if err != nil {
+		return ROLE_NONE
+	}
+
+	return role
 }

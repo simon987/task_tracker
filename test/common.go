@@ -15,6 +15,11 @@ import (
 	"strconv"
 )
 
+type SessionContext struct {
+	Manager       *storage.Manager
+	SessionCookie *http.Cookie
+}
+
 func Post(path string, x interface{}, worker *storage.Worker) *http.Response {
 
 	body, err := json.Marshal(x)

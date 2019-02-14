@@ -47,7 +47,7 @@ func (database *Database) MakeProjectSnapshots() {
 		"took":   time.Now().Sub(startTime),
 		"add":    inserted,
 		"remove": deleted,
-	}).Trace("Took monitoring snapshot")
+	}).Trace("Took project monitoring snapshot")
 }
 
 func (database *Database) GetMonitoringSnapshotsBetween(pid int64, from int, to int) (ss *[]ProjectMonitoringSnapshot) {

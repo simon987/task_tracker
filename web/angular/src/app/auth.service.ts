@@ -10,6 +10,7 @@ import {Router} from "@angular/router";
 export class AuthService {
 
     account: Manager;
+    logged: boolean;
 
     constructor(private apiService: ApiService,
                 private messengerService: MessengerService,
@@ -17,6 +18,7 @@ export class AuthService {
         this.apiService.getAccountDetails()
             .subscribe((data: any) => {
                 this.account = data.manager;
+                this.logged = data.logged_in;
             })
     }
 
@@ -27,6 +29,7 @@ export class AuthService {
                     this.apiService.getAccountDetails()
                         .subscribe((data: any) => {
                             this.account = data.manager;
+                            this.logged = true;
                             this.router.navigateByUrl("/account");
                         })
                 },
@@ -42,7 +45,8 @@ export class AuthService {
             .subscribe(
                 () => {
                     this.account = null;
-                    this.router.navigateByUrl("");
+                    this.logged = false;
+                    this.router.navigateByUrl("login");
                 },
                 error => {
                     console.log(error);

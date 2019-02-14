@@ -1,0 +1,37 @@
+<div class="container">
+    <mat-card class="mat-elevation-z8">
+        <button mat-button [title]="'perms.refresh' | translate" style="float:right"
+                (click)="refresh()">
+            <mat-icon>refresh</mat-icon>
+        </button>
+        <mat-card-header>
+            <mat-card-title>{{"perms.title" | translate}}</mat-card-title>
+            <mat-card-subtitle>{{"perms.subtitle" | translate}}</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+            <mat-list *ngIf="!unauthorized">
+                <mat-list-item *ngFor="let w of requests">
+                    <mat-icon mat-list-icon>person_add</mat-icon>
+                    <h4 mat-line>{{w.alias}}</h4>
+                    <div mat-line>
+                        Id=<span class="text-mono">{{w.id}}</span>, {{"perms.created" | translate}}
+                        <span class="text-mono">{{moment.unix(w.created).format("YYYY-MM-DD HH:mm:ss UTC")}}</span>
+                    </div>
+                    <span style="flex: 1 1 auto;"></span>
+                    <button mat-raised-button color="primary" [title]="'perms.grant' | translate">
+                        <mat-icon>check</mat-icon>
+                    </button>
+                    <button mat-raised-button color="warn" [title]="'perms.reject' | translate">
+                        <mat-icon>close</mat-icon>
+                    </button>
+                </mat-list-item>
+            </mat-list>
+            <p *ngIf="unauthorized" class="unauthorized">
+                <mat-icon>block</mat-icon>
+                {{"perms.unauthorized" | translate}}
+            </p>
+        </mat-card-content>
+
+    </mat-card>
+</div>

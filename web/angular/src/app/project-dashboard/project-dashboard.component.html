@@ -56,6 +56,8 @@
         <mat-card-actions>
             <button mat-raised-button color="primary" *ngIf="project"
                     [routerLink]="'/project/' + project.id + '/update'">{{"project.update" | translate}}</button>
+            <button mat-raised-button color="primary" *ngIf="project"
+                    [routerLink]="'/project/' + project.id + '/perms'">{{"project.perms" | translate}}</button>
         </mat-card-actions>
     </mat-card>
 </div>

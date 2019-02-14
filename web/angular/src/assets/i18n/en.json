@@ -57,7 +57,8 @@
         "create": "Create",
         "git_repo": "Git repository name",
         "motd": "Message of the day",
-        "update": "Edit"
+        "update": "Edit",
+        "perms": "Permissions"
     },
     "dashboard": {
         "title": "Dashboard for",
@@ -86,5 +87,18 @@
     "workers": {
         "title": "Completed tasks per worker",
         "subtitle": "Real-time data for all projects"
+    },
+    "perms": {
+        "title": "Project permissions",
+        "subtitle": "Workers need to request access to work on private projects",
+        "unauthorized": "You need ROLE_MANAGE_ACCESS on this project to access this page",
+        "created": "Created on",
+        "grant": "Accept request",
+        "reject": "Deny request",
+        "refresh": "Refresh"
+    },
+    "messenger": {
+        "close": "Close",
+        "unauthorized": "Unauthorized"
     }
 }

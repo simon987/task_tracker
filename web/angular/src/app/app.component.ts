@@ -20,7 +20,7 @@ export class AppComponent {
     ];
 
     constructor(private translate: TranslateService,
-                private router: Router,
+                public router: Router,
                 public authService: AuthService) {
 
         translate.addLangs([

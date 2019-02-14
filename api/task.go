@@ -177,6 +177,10 @@ func (api WebAPI) validateSignature(r *Request) (*storage.Worker, error) {
 	widStr := string(r.Ctx.Request.Header.Peek("X-Worker-Id"))
 	signature := r.Ctx.Request.Header.Peek("X-Signature")
 
+	if widStr == "" {
+		return nil, errors.New("worker id not specified")
+	}
+
 	wid, err := strconv.ParseInt(widStr, 10, 64)
 	if err != nil {
 		logrus.WithError(err).WithFields(logrus.Fields{

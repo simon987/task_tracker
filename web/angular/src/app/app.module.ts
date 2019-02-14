@@ -47,6 +47,7 @@ import {TranslatedPaginator} from "./TranslatedPaginatorConfiguration";
 import {LoginComponent} from './login/login.component';
 import {AccountDetailsComponent} from './account-details/account-details.component';
 import {WorkerDashboardComponent} from './worker-dashboard/worker-dashboard.component';
+import {ProjectPermsComponent} from './project-perms/project-perms.component';
 
 
 export function createTranslateLoader(http: HttpClient) {
@@ -66,6 +67,7 @@ export function createTranslateLoader(http: HttpClient) {
         LoginComponent,
         AccountDetailsComponent,
         WorkerDashboardComponent,
+        ProjectPermsComponent,
     ],
     imports: [
         BrowserModule,

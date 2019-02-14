@@ -163,3 +163,7 @@ func login(request *api.LoginRequest) (*api.LoginResponse, *http.Response) {
 
 	return resp, r
 }
+
+func getSessionCtx(username string, password string, admin bool) {
+
+}

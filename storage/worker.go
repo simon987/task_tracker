@@ -1,22 +1,14 @@
 package storage
 
 import (
-	"database/sql"
-	"errors"
 	"github.com/Sirupsen/logrus"
 )
 
-type Identity struct {
-	RemoteAddr string `json:"remote_addr"`
-	UserAgent  string `json:"user_agent"`
-}
-
 type Worker struct {
-	Id       int64     `json:"id"`
-	Created  int64     `json:"created"`
-	Identity *Identity `json:"identity"`
-	Alias    string    `json:"alias,omitempty"`
-	Secret   []byte    `json:"secret"`
+	Id      int64  `json:"id"`
+	Created int64  `json:"created"`
+	Alias   string `json:"alias,omitempty"`
+	Secret  []byte `json:"secret"`
 }
 
 type WorkerStats struct {
@@ -28,10 +20,8 @@ func (database *Database) SaveWorker(worker *Worker) {
 
 	db := database.getDB()
 
-	identityId := getOrCreateIdentity(worker.Identity, db)
-
-	row := db.QueryRow("INSERT INTO worker (created, identity, secret, alias) VALUES ($1,$2,$3,$4) RETURNING id",
-		worker.Created, identityId, worker.Secret, worker.Alias)
+	row := db.QueryRow("INSERT INTO worker (created, secret, alias) VALUES ($1,$2,$3) RETURNING id",
+		worker.Created, worker.Secret, worker.Alias)
 
 	err := row.Scan(&worker.Id)
 	handleErr(err)
@@ -46,10 +36,9 @@ func (database *Database) GetWorker(id int64) *Worker {
 	db := database.getDB()
 
 	worker := &Worker{}
-	var identityId int64
 
-	row := db.QueryRow("SELECT id, created, identity, secret, alias FROM worker WHERE id=$1", id)
-	err := row.Scan(&worker.Id, &worker.Created, &identityId, &worker.Secret, &worker.Alias)
+	row := db.QueryRow("SELECT id, created, secret, alias FROM worker WHERE id=$1", id)
+	err := row.Scan(&worker.Id, &worker.Created, &worker.Secret, &worker.Alias)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"id": id,
@@ -57,56 +46,11 @@ func (database *Database) GetWorker(id int64) *Worker {
 		return nil
 	}
 
-	worker.Identity, err = getIdentity(identityId, db)
-	handleErr(err)
-
 	logrus.WithFields(logrus.Fields{
 		"worker": worker,
 	}).Trace("Database.getWorker SELECT worker")
 
 	return worker
-}
-
-func getIdentity(id int64, db *sql.DB) (*Identity, error) {
-
-	identity := &Identity{}
-
-	row := db.QueryRow("SELECT remote_addr, user_agent FROM worker_identity WHERE id=$1", id)
-	err := row.Scan(&identity.RemoteAddr, &identity.UserAgent)
-
-	if err != nil {
-		return nil, errors.New("identity not found")
-	}
-
-	logrus.WithFields(logrus.Fields{
-		"identity": identity,
-	}).Trace("Database.getIdentity SELECT workerIdentity")
-
-	return identity, nil
-}
-
-func getOrCreateIdentity(identity *Identity, db *sql.DB) int64 {
-
-	res, err := db.Exec("INSERT INTO worker_identity (remote_addr, user_agent) VALUES ($1,$2) ON CONFLICT DO NOTHING",
-		identity.RemoteAddr, identity.UserAgent)
-	handleErr(err)
-
-	rowsAffected, err := res.RowsAffected()
-	logrus.WithFields(logrus.Fields{
-		"rowsAffected": rowsAffected,
-	}).Trace("Database.saveWorker INSERT workerIdentity")
-
-	row := db.QueryRow("SELECT (id) FROM worker_identity WHERE remote_addr=$1", identity.RemoteAddr)
-
-	var rowId int64
-	err = row.Scan(&rowId)
-	handleErr(err)
-
-	logrus.WithFields(logrus.Fields{
-		"rowId": rowId,
-	}).Trace("Database.saveWorker SELECT workerIdentity")
-
-	return rowId
 }
 
 func (database *Database) GrantAccess(workerId int64, projectId int64) bool {
@@ -167,6 +111,88 @@ func (database *Database) UpdateWorker(worker *Worker) bool {
 	}).Trace("Database.UpdateWorker UPDATE worker")
 
 	return rowsAffected == 1
+}
+
+func (database *Database) SaveAccessRequest(worker *Worker, projectId int64) bool {
+
+	db := database.getDB()
+
+	res, err := db.Exec(`INSERT INTO worker_requests_access_to_project 
+  		SELECT $1, id FROM project WHERE id=$2 AND NOT project.public 
+		AND NOT EXISTS(SELECT * FROM worker_has_access_to_project WHERE worker=$1 AND project=$2)`,
+		worker.Id, projectId)
+	if err != nil {
+		return false
+	}
+
+	rowsAffected, _ := res.RowsAffected()
+
+	logrus.WithFields(logrus.Fields{
+		"rowsAffected": rowsAffected,
+	}).Trace("Database.SaveAccessRequest INSERT")
+
+	return rowsAffected == 1
+}
+
+func (database *Database) AcceptAccessRequest(worker *Worker, projectId int64) bool {
+
+	db := database.getDB()
+
+	res, err := db.Exec(`DELETE FROM worker_requests_access_to_project 
+		WHERE worker=$1 AND project=$2`)
+	handleErr(err)
+
+	rowsAffected, _ := res.RowsAffected()
+	if rowsAffected == 1 {
+		_, err := db.Exec(`INSERT INTO worker_has_access_to_project 
+  			(worker, project) VALUES ($1,$2)`,
+			worker.Id, projectId)
+		handleErr(err)
+	}
+
+	logrus.WithFields(logrus.Fields{
+		"rowsAffected": rowsAffected,
+	}).Trace("Database.AcceptAccessRequest")
+
+	return rowsAffected == 1
+}
+
+func (database *Database) RejectAccessRequest(worker *Worker, projectId int64) bool {
+
+	db := database.getDB()
+
+	res, err := db.Exec(`DELETE FROM worker_requests_access_to_project 
+		  WHERE worker=$1 AND project=$2`, worker.Id, projectId)
+	handleErr(err)
+
+	rowsAffected, _ := res.RowsAffected()
+
+	logrus.WithFields(logrus.Fields{
+		"rowsAffected": rowsAffected,
+	}).Trace("Database.AcceptAccessRequest")
+
+	return rowsAffected == 1
+}
+
+func (database *Database) GetAllAccessRequests(projectId int64) *[]Worker {
+
+	db := database.getDB()
+
+	rows, err := db.Query(`SELECT id, alias, created FROM worker_requests_access_to_project
+		INNER JOIN worker w on worker_requests_access_to_project.worker = w.id
+		WHERE project=$1`,
+		projectId)
+	handleErr(err)
+
+	requests := make([]Worker, 0)
+
+	for rows.Next() {
+		w := Worker{}
+		_ = rows.Scan(&w.Id, &w.Alias, &w.Created)
+		requests = append(requests, w)
+	}
+
+	return &requests
 }
 
 func (database *Database) GetAllWorkerStats() *[]WorkerStats {

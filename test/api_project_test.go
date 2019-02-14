@@ -19,6 +19,7 @@ func TestCreateGetProject(t *testing.T) {
 		Priority: 123,
 		Motd:     "motd",
 		Public:   true,
+		Hidden:   true,
 	})
 
 	id := resp.Id
@@ -57,6 +58,9 @@ func TestCreateGetProject(t *testing.T) {
 		t.Error()
 	}
 	if getResp.Project.Public != true {
+		t.Error()
+	}
+	if getResp.Project.Hidden != true {
 		t.Error()
 	}
 }
@@ -141,6 +145,7 @@ func TestUpdateProjectValid(t *testing.T) {
 		Name:     "NameB",
 		Motd:     "MotdB",
 		Public:   false,
+		Hidden:   true,
 	}, pid)
 
 	if updateResp.Ok != true {
@@ -162,6 +167,9 @@ func TestUpdateProjectValid(t *testing.T) {
 		t.Error()
 	}
 	if proj.Project.Priority != 2 {
+		t.Error()
+	}
+	if proj.Project.Hidden != true {
 		t.Error()
 	}
 }

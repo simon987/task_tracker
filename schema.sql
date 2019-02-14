@@ -1,39 +1,30 @@
-DROP TABLE IF EXISTS worker_identity, worker, project, task, log_entry,
+DROP TABLE IF EXISTS worker, project, task, log_entry,
   worker_has_access_to_project, manager, manager_has_role_on_project, project_monitoring_snapshot,
-  worker_verifies_task;
+  worker_verifies_task, worker_requests_access_to_project;
 DROP TYPE IF EXISTS status;
 DROP TYPE IF EXISTS log_level;
 
-CREATE TABLE worker_identity
-(
-  id          SERIAL PRIMARY KEY,
-  remote_addr TEXT,
-  user_agent  TEXT,
-
-  UNIQUE (remote_addr)
-);
-
 CREATE TABLE worker
 (
-  id                SERIAL PRIMARY KEY,
-  alias             TEXT,
-  created           INTEGER,
-  identity          INTEGER REFERENCES worker_identity (id),
-  secret            BYTEA,
-  closed_task_count INTEGER DEFAULT 0
+  id                SERIAL PRIMARY KEY NOT NULL,
+  alias             TEXT               NOT NULL,
+  created           INTEGER            NOT NULL,
+  secret            BYTEA              NOT NULL,
+  closed_task_count INTEGER DEFAULT 0  NOT NULL
 );
 
 CREATE TABLE project
 (
-  id                SERIAL PRIMARY KEY,
-  priority          INTEGER DEFAULT 0,
-  name              TEXT UNIQUE,
-  clone_url         TEXT,
-  git_repo          TEXT UNIQUE,
-  version           TEXT,
-  motd              TEXT,
-  public            boolean,
-  closed_task_count INT     DEFAULT 0
+  id                SERIAL PRIMARY KEY NOT NULL,
+  priority          INTEGER DEFAULT 0  NOT NULL,
+  closed_task_count INT     DEFAULT 0  NOT NULL,
+  public            boolean            NOT NULL,
+  hidden            boolean            NOT NULL,
+  name              TEXT UNIQUE        NOT NULL,
+  clone_url         TEXT               NOT NULL,
+  git_repo          TEXT UNIQUE        NOT NULL,
+  version           TEXT               NOT NULL,
+  motd              TEXT               NOT NULL
 );
 
 CREATE TABLE worker_has_access_to_project
@@ -61,43 +52,51 @@ CREATE TABLE task
 
 CREATE TABLE worker_verifies_task
 (
-  verification_hash BIGINT,
-  task              BIGINT REFERENCES task (id) ON DELETE CASCADE,
-  worker            INT REFERENCES worker (id)
+  verification_hash BIGINT                                        NOT NULL,
+  task              BIGINT REFERENCES task (id) ON DELETE CASCADE NOT NULL,
+  worker            INT REFERENCES worker (id)                    NOT NULL
 );
 
 CREATE TABLE log_entry
 (
-  level        INTEGER,
-  message      TEXT,
-  message_data TEXT,
-  timestamp    INTEGER
+  level        INTEGER NOT NULL,
+  message      TEXT    NOT NULL,
+  message_data TEXT    NOT NULL,
+  timestamp    INTEGER NOT NULL
 );
 
 CREATE TABLE manager
 (
   id            SERIAL PRIMARY KEY,
-  username      TEXT UNIQUE,
-  password      BYTEA,
-  website_admin BOOLEAN
+  register_time INTEGER     NOT NULL,
+  website_admin BOOLEAN     NOT NULL,
+  username      TEXT UNIQUE NOT NULL,
+  password      BYTEA       NOT NULL
 );
 
 CREATE TABLE manager_has_role_on_project
 (
-  manager INTEGER REFERENCES manager (id),
-  role    SMALLINT,
-  project INTEGER REFERENCES project (id)
+  manager INTEGER REFERENCES manager (id) NOT NULL,
+  role    SMALLINT                        NOT NULl,
+  project INTEGER REFERENCES project (id) NOT NULL
 );
 
 CREATE TABLE project_monitoring_snapshot
 (
-  project                          INT REFERENCES project (id),
-  new_task_count                   INT,
-  failed_task_count                INT,
-  closed_task_count                INT,
-  awaiting_verification_task_count INT,
-  worker_access_count              INT,
-  timestamp                        INT
+  project                          INT REFERENCES project (id) NOT NULL,
+  new_task_count                   INT                         NOT NULL,
+  failed_task_count                INT                         NOT NULL,
+  closed_task_count                INT                         NOT NULL,
+  awaiting_verification_task_count INT                         NOT NULL,
+  worker_access_count              INT                         NOT NULL,
+  timestamp                        INT                         NOT NULL
+);
+
+CREATE TABLE worker_requests_access_to_project
+(
+  worker  INT REFERENCES worker (id),
+  project INT REFERENCES project (id),
+  PRIMARY KEY (worker, project)
 );
 
 CREATE OR REPLACE FUNCTION on_task_delete_proc() RETURNS TRIGGER AS
@@ -113,6 +112,21 @@ CREATE TRIGGER on_task_delete
   ON task
   FOR EACH ROW
 EXECUTE PROCEDURE on_task_delete_proc();
+
+CREATE OR REPLACE FUNCTION on_manager_insert() RETURNS TRIGGER AS
+$$
+BEGIN
+  IF NEW.id = 1 THEN
+    UPDATE manager SET website_admin= TRUE WHERE id = 1;
+  end if;
+  RETURN NEW;
+END;
+$$ LANGUAGE 'plpgsql';
+CREATE TRIGGER on_manager_insert
+  AFTER INSERT
+  ON manager
+  FOR EACH ROW
+EXECUTE PROCEDURE on_manager_insert();
 
 CREATE OR REPLACE FUNCTION release_task_ok(wid INT, tid INT, ver INT) RETURNS BOOLEAN AS
 $$

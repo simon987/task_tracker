@@ -1,0 +1,15 @@
+.unauthorized {
+    text-align: center;
+    color: #616161;
+    min-height: 3em;
+    margin-top: 2em !important;
+}
+
+.text-mono {
+    font-family: Hack, Courier, "Courier New", monospace;
+    color: #ff4081;
+}
+
+button {
+    margin-left: 15px;
+}

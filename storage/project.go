@@ -15,6 +15,7 @@ type Project struct {
 	Version  string `json:"version"`
 	Motd     string `json:"motd"`
 	Public   bool   `json:"public"`
+	Hidden   bool   `json:"hidden"`
 }
 
 type AssignedTasks struct {
@@ -31,9 +32,10 @@ func (database *Database) SaveProject(project *Project) (int64, error) {
 
 func saveProject(project *Project, db *sql.DB) (int64, error) {
 
-	row := db.QueryRow(`INSERT INTO project (name, git_repo, clone_url, version, priority, motd, public)
-		VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id`,
-		project.Name, project.GitRepo, project.CloneUrl, project.Version, project.Priority, project.Motd, project.Public)
+	row := db.QueryRow(`INSERT INTO project (name, git_repo, clone_url, version, priority, motd, public, hidden)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id`,
+		project.Name, project.GitRepo, project.CloneUrl, project.Version, project.Priority, project.Motd,
+		project.Public, project.Hidden)
 
 	var id int64
 	err := row.Scan(&id)
@@ -64,7 +66,7 @@ func (database *Database) GetProject(id int64) *Project {
 
 func getProject(id int64, db *sql.DB) *Project {
 
-	row := db.QueryRow(`SELECT id, priority, name, clone_url, git_repo, version, motd, public
+	row := db.QueryRow(`SELECT id, priority, name, clone_url, git_repo, version, motd, public, hidden
 		FROM project WHERE id=$1`, id)
 
 	project, err := scanProject(row)
@@ -87,7 +89,7 @@ func scanProject(row *sql.Row) (*Project, error) {
 
 	project := &Project{}
 	err := row.Scan(&project.Id, &project.Priority, &project.Name, &project.CloneUrl,
-		&project.GitRepo, &project.Version, &project.Motd, &project.Public)
+		&project.GitRepo, &project.Version, &project.Motd, &project.Public, &project.Hidden)
 
 	return project, err
 }
@@ -95,7 +97,7 @@ func scanProject(row *sql.Row) (*Project, error) {
 func (database *Database) GetProjectWithRepoName(repoName string) *Project {
 
 	db := database.getDB()
-	row := db.QueryRow(`SELECT id, priority, name, clone_url, git_repo, version, motd, public 
+	row := db.QueryRow(`SELECT id, priority, name, clone_url, git_repo, version, motd, public, hidden 
 			FROM project WHERE LOWER(git_repo)=$1`,
 		strings.ToLower(repoName))
 
@@ -115,8 +117,9 @@ func (database *Database) UpdateProject(project *Project) error {
 	db := database.getDB()
 
 	res, err := db.Exec(`UPDATE project 
-		SET (priority, name, clone_url, git_repo, version, motd, public) = ($1,$2,$3,$4,$5,$6,$7) WHERE id=$8`,
-		project.Priority, project.Name, project.CloneUrl, project.GitRepo, project.Version, project.Motd, project.Public, project.Id)
+		SET (priority, name, clone_url, git_repo, version, motd, public, hidden) = ($1,$2,$3,$4,$5,$6,$7,$8) WHERE id=$9`,
+		project.Priority, project.Name, project.CloneUrl, project.GitRepo, project.Version, project.Motd,
+		project.Public, project.Hidden, project.Id)
 	if err != nil {
 		return err
 	}
@@ -139,26 +142,24 @@ func (database Database) GetAllProjects(workerId int64) *[]Project {
 	var err error
 	if workerId == 0 {
 		rows, err = db.Query(`SELECT 
-       	Id, priority, name, clone_url, git_repo, version, motd, public
+       	Id, priority, name, clone_url, git_repo, version, motd, public, hidden
 		FROM project
-		LEFT JOIN worker_has_access_to_project whatp ON whatp.project = id
-		WHERE public
+		WHERE NOT hidden
 		ORDER BY name`)
 	} else {
 		rows, err = db.Query(`SELECT 
-       	Id, priority, name, clone_url, git_repo, version, motd, public
+       	Id, priority, name, clone_url, git_repo, version, motd, public, hidden
 		FROM project
 		LEFT JOIN worker_has_access_to_project whatp ON whatp.project = id
-		WHERE public OR whatp.worker = $1
+		WHERE NOT hidden OR whatp.worker = $1
 		ORDER BY name`, workerId)
 	}
 	handleErr(err)
 
 	for rows.Next() {
-
 		p := Project{}
 		err := rows.Scan(&p.Id, &p.Priority, &p.Name, &p.CloneUrl,
-			&p.GitRepo, &p.Version, &p.Motd, &p.Public)
+			&p.GitRepo, &p.Version, &p.Motd, &p.Public, &p.Hidden)
 		handleErr(err)
 		projects = append(projects, p)
 	}

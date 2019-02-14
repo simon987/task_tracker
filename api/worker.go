@@ -58,11 +58,9 @@ func (api *WebAPI) WorkerCreate(r *Request) {
 		return
 	}
 
-	identity := getIdentity(r)
-	if !canCreateWorker(r, workerReq, identity) {
+	if !canCreateWorker(r, workerReq) {
 
 		logrus.WithFields(logrus.Fields{
-			"identity":            identity,
 			"createWorkerRequest": workerReq,
 		}).Warn("Failed CreateWorkerRequest")
 
@@ -73,7 +71,7 @@ func (api *WebAPI) WorkerCreate(r *Request) {
 		return
 	}
 
-	worker, err := api.workerCreate(workerReq, getIdentity(r))
+	worker, err := api.workerCreate(workerReq)
 	if err != nil {
 		handleErr(err, r)
 	} else {
@@ -185,7 +183,7 @@ func (api *WebAPI) WorkerUpdate(r *Request) {
 		r.Json(GetTaskResponse{
 			Ok:      false,
 			Message: err.Error(),
-		}, 403)
+		}, 401)
 		return
 	}
 
@@ -224,24 +222,23 @@ func (api *WebAPI) GetAllWorkerStats(r *Request) {
 	})
 }
 
-func (api *WebAPI) workerCreate(request *CreateWorkerRequest, identity *storage.Identity) (*storage.Worker, error) {
+func (api *WebAPI) workerCreate(request *CreateWorkerRequest) (*storage.Worker, error) {
 
 	if request.Alias == "" {
 		request.Alias = "default_alias"
 	}
 
 	worker := storage.Worker{
-		Created:  time.Now().Unix(),
-		Identity: identity,
-		Secret:   makeSecret(),
-		Alias:    request.Alias,
+		Created: time.Now().Unix(),
+		Secret:  makeSecret(),
+		Alias:   request.Alias,
 	}
 
 	api.Database.SaveWorker(&worker)
 	return &worker, nil
 }
 
-func canCreateWorker(r *Request, cwr *CreateWorkerRequest, identity *storage.Identity) bool {
+func canCreateWorker(r *Request, cwr *CreateWorkerRequest) bool {
 
 	if cwr.Alias == "unassigned" {
 		//Reserved alias
@@ -259,14 +256,4 @@ func makeSecret() []byte {
 	}
 
 	return secret
-}
-
-func getIdentity(r *Request) *storage.Identity {
-
-	identity := storage.Identity{
-		RemoteAddr: r.Ctx.RemoteAddr().String(),
-		UserAgent:  string(r.Ctx.UserAgent()),
-	}
-
-	return &identity
 }

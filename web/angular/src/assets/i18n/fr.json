@@ -58,7 +58,8 @@
         "public": "Publique",
         "create": "Créer",
         "motd": "Message du jour",
-        "update": "Mettre à jour"
+        "update": "Mettre à jour",
+        "perms": "Permissions"
     },
     "dashboard": {
         "title": "Tableau de bord pour ",
@@ -88,6 +89,19 @@
     "workers": {
         "title": "Tâches complétés par worker",
         "subtitle": "Données en temps réél pour tous les projets"
+    },
+    "perms": {
+        "title": "Permissions du projet",
+        "subtitle": "Les Workers doivent faire un requête d'acces pour pouvoir travailler sur les projets privés",
+        "unauthorized": "Vous devez avoir ROLE_GESTION_ACCES sur ce project pour accéder à cette page",
+        "created": "Créé le",
+        "grant": "Accepter la requête",
+        "reject": "Rejeter la requête",
+        "refresh": "Refraichir"
+    },
+    "messenger": {
+        "close": "Fermer",
+        "unauthorized": "Non autorisé"
     }
 }
 

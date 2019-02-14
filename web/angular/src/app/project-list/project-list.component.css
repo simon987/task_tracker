@@ -1,3 +1,7 @@
 button {
     margin-right: 15px;
 }
+
+mat-panel-title > mat-icon {
+    margin-right: 1em;
+}

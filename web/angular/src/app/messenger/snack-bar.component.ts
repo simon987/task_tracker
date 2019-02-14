@@ -3,6 +3,7 @@ import {MessengerService} from "../messenger.service";
 import {MessengerState} from "./messenger";
 import {Subscription} from "rxjs";
 import {MatSnackBar, MatSnackBarConfig} from "@angular/material";
+import {TranslateService} from "@ngx-translate/core";
 
 @Component({
     selector: 'messenger-snack-bar',
@@ -13,7 +14,10 @@ export class SnackBarComponent implements OnInit {
 
     private subscription: Subscription;
 
-    constructor(private messengerService: MessengerService, private snackBar: MatSnackBar) {
+    constructor(
+        private messengerService: MessengerService,
+        private snackBar: MatSnackBar,
+        private translate: TranslateService) {
 
     }
 
@@ -23,9 +27,11 @@ export class SnackBarComponent implements OnInit {
                 if (state.hidden) {
                     this.snackBar.dismiss();
                 } else {
-                    this.snackBar.open(state.message, "Close", <MatSnackBarConfig>{
-                        duration: 10 * 1000,
-                    })
+                    this.translate.get("messenger.close")
+                        .subscribe(t =>
+                            this.snackBar.open(state.message, t, <MatSnackBarConfig>{
+                                duration: 10 * 1000,
+                            }))
                 }
             });
     }

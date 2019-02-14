@@ -145,7 +145,6 @@ func (api *WebAPI) AccountDetails(r *Request) {
 
 	logrus.WithFields(logrus.Fields{
 		"manager": manager,
-		"session": sess,
 	}).Trace("Account details request")
 
 	if manager == nil {

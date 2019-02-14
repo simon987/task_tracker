@@ -3,40 +3,47 @@
 
         <mat-tab-group>
             <mat-tab [label]="'login.title' | translate" class="pad">
-                <mat-form-field appearance="outline">
-                    <mat-label>{{"login.username" | translate}}</mat-label>
-                    <input type="text" matInput [(ngModel)]="credentials.username">
-                </mat-form-field>
+                <form (ngSubmit)="login()">
+                    <mat-form-field appearance="outline">
+                        <mat-label>{{"login.username" | translate}}</mat-label>
+                        <input type="text" matInput [(ngModel)]="credentials.username"
+                               [ngModelOptions]="{standalone: true}">
+                    </mat-form-field>
 
-                <mat-form-field appearance="outline">
-                    <mat-label>{{ "login.password" | translate}}</mat-label>
-                    <input type="password" matInput [(ngModel)]="credentials.password">
-                </mat-form-field>
+                    <mat-form-field appearance="outline">
+                        <mat-label>{{ "login.password" | translate}}</mat-label>
+                        <input type="password" matInput [(ngModel)]="credentials.password"
+                               [ngModelOptions]="{standalone: true}">
+                    </mat-form-field>
 
-                <button mat-raised-button color="primary"
-                        (click)="login()">{{"login.login" | translate}}</button>
+                    <button mat-raised-button color="primary"
+                            type="submit">{{"login.login" | translate}}</button>
+                </form>
             </mat-tab>
             <mat-tab [label]="'create_account.title' | translate" class="pad">
-                <mat-form-field appearance="outline" [hideRequiredMarker]="true">
-                    <mat-label>{{"login.username" | translate}}</mat-label>
-                    <mat-hint align="end">{{credentials.username?.length || 0}}/16</mat-hint>
-                    <input maxlength="16" type="text" matInput [(ngModel)]="credentials.username" name="username"
-                           required>
-                </mat-form-field>
+                <form (ngSubmit)="register()">
+                    <mat-form-field appearance="outline" [hideRequiredMarker]="true">
+                        <mat-label>{{"login.username" | translate}}</mat-label>
+                        <mat-hint align="end">{{credentials.username?.length || 0}}/16</mat-hint>
+                        <input maxlength="16" type="text" matInput [(ngModel)]="credentials.username" name="username"
+                               [ngModelOptions]="{standalone: true}" required>
+                    </mat-form-field>
 
-                <mat-form-field appearance="outline" [hideRequiredMarker]="true">
-                    <mat-label>{{ "login.password" | translate}}</mat-label>
-                    <input type="password" matInput [(ngModel)]="credentials.password" name="password" required>
-                </mat-form-field>
+                    <mat-form-field appearance="outline" [hideRequiredMarker]="true">
+                        <mat-label>{{ "login.password" | translate}}</mat-label>
+                        <input type="password" matInput [(ngModel)]="credentials.password" name="password"
+                               [ngModelOptions]="{standalone: true}">
+                    </mat-form-field>
 
-                <mat-form-field appearance="outline">
-                    <mat-label>{{ "login.repeat_password" | translate}}</mat-label>
-                    <input type="password" matInput [(ngModel)]="credentials.repeatPassword" name="password2"
-                    >
-                </mat-form-field>
+                    <mat-form-field appearance="outline">
+                        <mat-label>{{ "login.repeat_password" | translate}}</mat-label>
+                        <input type="password" matInput [(ngModel)]="credentials.repeatPassword" name="password2"
+                               [ngModelOptions]="{standalone: true}" required>
+                    </mat-form-field>
 
-                <button mat-raised-button color="primary" [disabled]="!canCreate()"
-                        (click)="register()">{{"create_account.create" | translate}}</button>
+                    <button mat-raised-button color="primary" [disabled]="!canCreate()"
+                            type="submit">{{"create_account.create" | translate}}</button>
+                </form>
             </mat-tab>
         </mat-tab-group>
     </mat-card>

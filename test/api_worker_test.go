@@ -33,12 +33,6 @@ func TestCreateGetWorker(t *testing.T) {
 		t.Error()
 	}
 
-	if len(getResp.Worker.Identity.RemoteAddr) <= 0 {
-		t.Error()
-	}
-	if len(getResp.Worker.Identity.UserAgent) <= 0 {
-		t.Error()
-	}
 	if resp.Worker.Alias != "my_worker_alias" {
 		t.Error()
 	}

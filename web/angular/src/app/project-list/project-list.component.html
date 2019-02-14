@@ -7,16 +7,22 @@
             <mat-accordion>
                 <mat-expansion-panel *ngFor="let project of projects">
                     <mat-expansion-panel-header>
-                        <mat-panel-title><span style="width: 3em">{{project.id}}</span>{{project.name}}
+                        <mat-panel-title>
+                            <mat-icon *ngIf="project.public">public</mat-icon>
+                            <mat-icon *ngIf="!project.public">lock</mat-icon>
+                            <span style="width: 3em">{{project.id}}</span>{{project.name}}
                         </mat-panel-title>
                         <mat-panel-description>{{project.motd}}</mat-panel-description>
                     </mat-expansion-panel-header>
                     <pre>{{project | json}}</pre>
                     <div>
-                        <button mat-raised-button [routerLink]="'/project/' + project.id">
+                        <button mat-raised-button color="primary" [routerLink]="'/project/' + project.id">
                             <mat-icon>timeline</mat-icon>{{"projects.dashboard" | translate}}</button>
-                        <button mat-raised-button [routerLink]="'/project/' + project.id + '/update'">
+                        <button mat-raised-button color="primary" [routerLink]="'/project/' + project.id + '/update'">
                             <mat-icon>build</mat-icon>{{"project.update" | translate}}</button>
+                        <button mat-raised-button color="primary" [routerLink]="'/project/' + project.id + '/perms'">
+                            <mat-icon>perm_identity</mat-icon>
+                            {{"project.perms" | translate}}</button>
                     </div>
                 </mat-expansion-panel>
                 <span *ngIf="projects && projects.length == 0">
