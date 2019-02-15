@@ -18,9 +18,11 @@
                     <div>
                         <button mat-raised-button color="primary" [routerLink]="'/project/' + project.id">
                             <mat-icon>timeline</mat-icon>{{"projects.dashboard" | translate}}</button>
-                        <button mat-raised-button color="primary" [routerLink]="'/project/' + project.id + '/update'">
+                        <button mat-raised-button color="primary" [routerLink]="'/project/' + project.id + '/update'"
+                                *ngIf="authService.logged">
                             <mat-icon>build</mat-icon>{{"project.update" | translate}}</button>
-                        <button mat-raised-button color="primary" [routerLink]="'/project/' + project.id + '/perms'">
+                        <button mat-raised-button color="primary" [routerLink]="'/project/' + project.id + '/perms'"
+                                *ngIf="authService.logged">
                             <mat-icon>perm_identity</mat-icon>
                             {{"project.perms" | translate}}</button>
                     </div>

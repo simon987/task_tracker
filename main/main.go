@@ -3,15 +3,14 @@ package main
 import (
 	"github.com/simon987/task_tracker/api"
 	"github.com/simon987/task_tracker/config"
-	"github.com/simon987/task_tracker/storage"
 	"math/rand"
 	"time"
 )
 
 func tmpDebugSetup() {
 
-	db := storage.Database{}
-	db.Reset()
+	//db := storage.Database{}
+	//db.Reset()
 
 }
 

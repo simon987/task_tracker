@@ -69,4 +69,16 @@ export class ApiService {
         return this.http.get(this.url + `/project/requests/${project}`)
     }
 
+    getAllManagers() {
+        return this.http.get(this.url + "/manager/list")
+    }
+
+    promote(managerId: number) {
+        return this.http.get(this.url + `/manager/promote/${managerId}`)
+    }
+
+    demote(managerId: number) {
+        return this.http.get(this.url + `/manager/demote/${managerId}`)
+    }
+
 }

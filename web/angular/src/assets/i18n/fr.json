@@ -2,14 +2,17 @@
     "nav": {
         "title": "task_tracker (fr)",
         "lang_select": "Langue",
-        "logs": "Journal",
+        "logs": "Journaux",
         "project_list": "Projets",
         "new_project": "Nouveau projet",
         "login": "Ouvrir un session",
         "worker_dashboard": "Workers",
-        "account": "Compte"
+        "account": "Compte",
+        "manager_list": "Managers"
     },
     "logs": {
+        "title": "Journaux",
+        "subtitle": "",
         "filter": "Filtrer",
         "time": "Date (UTC)",
         "level": "Niveau",
@@ -44,7 +47,8 @@
         "login": "Ouverture de session",
         "new_account": "Création de compte",
         "account": "Compte",
-        "workers": "Workers"
+        "workers": "Workers",
+        "manager_list": "Managers"
     },
     "project": {
         "name": "Nom du projet",
@@ -84,7 +88,8 @@
         "title": "Détails du compte",
         "subtitle": "toto: sous-titre",
         "username": "Nom d'utilisateur",
-        "logout": "Fermer la session"
+        "logout": "Fermer la session",
+        "register_time": "Date de création"
     },
     "workers": {
         "title": "Tâches complétés par worker",
@@ -102,6 +107,18 @@
     "messenger": {
         "close": "Fermer",
         "unauthorized": "Non autorisé"
+    },
+    "manager_list": {
+        "title": "Liste ",
+        "subtitle": "",
+        "username": "Nom d'utilisateur",
+        "role": "Rôle",
+        "tracker_admin": "Administrateur",
+        "actions": "Actions",
+        "unauthorized": "Vou n'êtes pas authorisé à accéder à cette page",
+        "promote": "Promouvoir",
+        "demote": "Rétrograder",
+        "register_time": "Date d'inscription"
     }
 }
 

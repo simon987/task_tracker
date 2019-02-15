@@ -54,7 +54,7 @@ export class ProjectPermsComponent implements OnInit {
             })
     }
 
-    private refresh() {
+    public refresh() {
         this.getProjectRequests()
     }
 }

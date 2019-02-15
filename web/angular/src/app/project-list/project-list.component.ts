@@ -1,6 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {ApiService} from "../api.service";
 import {Project} from "../models/project";
+import {AuthService} from "../auth.service";
 
 @Component({
     selector: 'app-project-list',
@@ -9,7 +10,8 @@ import {Project} from "../models/project";
 })
 export class ProjectListComponent implements OnInit {
 
-    constructor(private apiService: ApiService) {
+    constructor(private apiService: ApiService,
+                public authService: AuthService) {
     }
 
     projects: Project[];

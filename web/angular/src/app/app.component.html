@@ -11,6 +11,10 @@
         <button mat-button [class.mat-accent]="router.url == '/new_project'" class="nav-link"
                 [routerLink]="'new_project'"
                 *ngIf="authService.logged">{{"nav.new_project" | translate}}</button>
+        <button mat-button [class.mat-accent]="router.url == '/manager_list'" class="nav-link"
+                [routerLink]="'manager_list'"
+                *ngIf="authService.logged && authService.account.tracker_admin"
+        >{{"nav.manager_list" | translate}}</button>
     </div>
     <div class="small-nav">
         <button mat-button [matMenuTriggerFor]="smallNav">
@@ -28,6 +32,10 @@
             <button mat-menu-item [class.mat-accent]="router.url == '/new_project'" class="nav-link"
                     [routerLink]="'new_project'"
                     *ngIf="authService.logged">{{"nav.new_project" | translate}}</button>
+            <button mat-button [class.mat-accent]="router.url == '/manager_list'" class="nav-link"
+                    [routerLink]="'manager_list'"
+                    *ngIf="authService.logged && authService.account.tracker_admin"
+            >{{"nav.manager_list" | translate}}</button>
         </mat-menu>
     </div>
     <span class="nav-spacer"></span>

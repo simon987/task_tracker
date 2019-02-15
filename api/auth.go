@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/Sirupsen/logrus"
 	"github.com/simon987/task_tracker/storage"
+	"strconv"
 )
 
 const MinPasswordLength = 8
@@ -29,6 +30,12 @@ type RegisterRequest struct {
 type AccountDetails struct {
 	LoggedIn bool             `json:"logged_in"`
 	Manager  *storage.Manager `json:"manager,omitempty"`
+}
+
+type GetAllManagersResponse struct {
+	Ok       bool               `json:"ok"`
+	Message  string             `json:"message,omitempty"`
+	Managers *[]storage.Manager `json:"managers"`
 }
 
 func (r *RegisterRequest) isValid() bool {
@@ -157,4 +164,101 @@ func (api *WebAPI) AccountDetails(r *Request) {
 			Manager:  manager.(*storage.Manager),
 		})
 	}
+}
+
+func (api *WebAPI) GetAllManagers(r *Request) {
+
+	sess := api.Session.StartFasthttp(r.Ctx)
+	manager := sess.Get("manager")
+
+	if manager == nil {
+		r.Json(GetAllManagersResponse{
+			Ok:      false,
+			Message: "Unauthorized",
+		}, 401)
+		return
+	}
+
+	managers := api.Database.GetAllManagers()
+
+	r.OkJson(GetAllManagersResponse{
+		Ok:       true,
+		Managers: managers,
+	})
+}
+
+func (api *WebAPI) PromoteManager(r *Request) {
+
+	id, err := strconv.ParseInt(r.Ctx.UserValue("id").(string), 10, 64)
+	if err != nil || id <= 0 {
+		r.Json(CreateProjectResponse{
+			Ok:      false,
+			Message: "Invalid manager id",
+		}, 400)
+		return
+	}
+
+	sess := api.Session.StartFasthttp(r.Ctx)
+	manager := sess.Get("manager")
+
+	if !manager.(*storage.Manager).WebsiteAdmin || manager.(*storage.Manager).Id == id {
+		r.Json(GetAllManagersResponse{
+			Ok:      false,
+			Message: "Unauthorized",
+		}, 401)
+		return
+	}
+
+	if !manager.(*storage.Manager).WebsiteAdmin {
+		r.Json(GetAllManagersResponse{
+			Ok:      false,
+			Message: "Unauthorized",
+		}, 403)
+		return
+	}
+
+	api.Database.UpdateManager(&storage.Manager{
+		Id:           id,
+		WebsiteAdmin: true,
+	})
+
+	r.Ctx.Response.SetStatusCode(204)
+}
+
+func (api *WebAPI) DemoteManager(r *Request) {
+
+	id, err := strconv.ParseInt(r.Ctx.UserValue("id").(string), 10, 64)
+	if err != nil || id <= 0 {
+		r.Json(CreateProjectResponse{
+			Ok:      false,
+			Message: "Invalid manager id",
+		}, 400)
+		return
+	}
+
+	sess := api.Session.StartFasthttp(r.Ctx)
+	manager := sess.Get("manager")
+
+	if manager == nil {
+		r.Json(GetAllManagersResponse{
+			Ok:      false,
+			Message: "Unauthorized",
+		}, 401)
+		return
+	}
+
+	if !manager.(*storage.Manager).WebsiteAdmin || manager.(*storage.Manager).Id == id {
+		r.Json(GetAllManagersResponse{
+			Ok:      false,
+			Message: "Unauthorized",
+		}, 403)
+		return
+	}
+
+	api.Database.UpdateManager(&storage.Manager{
+		Id:           id,
+		WebsiteAdmin: false,
+	})
+
+	r.Ctx.Response.SetStatusCode(204)
 }

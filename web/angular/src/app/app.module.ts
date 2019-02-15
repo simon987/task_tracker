@@ -48,6 +48,7 @@ import {LoginComponent} from './login/login.component';
 import {AccountDetailsComponent} from './account-details/account-details.component';
 import {WorkerDashboardComponent} from './worker-dashboard/worker-dashboard.component';
 import {ProjectPermsComponent} from './project-perms/project-perms.component';
+import {ManagerListComponent} from './manager-list/manager-list.component';
 
 
 export function createTranslateLoader(http: HttpClient) {
@@ -68,6 +69,7 @@ export function createTranslateLoader(http: HttpClient) {
         AccountDetailsComponent,
         WorkerDashboardComponent,
         ProjectPermsComponent,
+        ManagerListComponent,
     ],
     imports: [
         BrowserModule,

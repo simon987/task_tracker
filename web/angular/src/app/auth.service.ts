@@ -60,6 +60,7 @@ export class AuthService {
             .subscribe(() =>
                     this.apiService.getAccountDetails()
                         .subscribe((data: any) => {
+                            this.logged = true;
                             this.account = data.manager;
                             this.router.navigateByUrl("/account");
                         }),

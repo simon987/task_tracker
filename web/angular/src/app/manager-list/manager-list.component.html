@@ -1,0 +1,53 @@
+<div class="container">
+    <mat-card class="mat-elevation-z8">
+        <mat-card-header>
+            <mat-card-title>{{"manager_list.title" | translate}}</mat-card-title>
+            <mat-card-subtitle>{{"manager_list.subtitle" | translate}}</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+
+            <mat-table [dataSource]="data" matSort matSortActive="username" matSortDirection="asc">
+
+                <ng-container matColumnDef="username">
+                    <mat-header-cell mat-sort-header
+                                     *matHeaderCellDef>{{"manager_list.username" | translate}}</mat-header-cell>
+                    <mat-cell *matCellDef="let manager"> {{manager.username}} </mat-cell>
+                </ng-container>
+                <ng-container matColumnDef="tracker_admin">
+                    <mat-header-cell *matHeaderCellDef
+                                     mat-sort-header>{{"manager_list.role" | translate}}</mat-header-cell>
+                    <mat-cell *matCellDef="let manager">
+                        <mat-icon *ngIf="manager.tracker_admin" [title]="'manager_list.tracker_admin' | translate">
+                            supervisor_account
+                        </mat-icon>
+                    </mat-cell>
+                </ng-container>
+                <ng-container matColumnDef="register_time">
+                    <mat-header-cell *matHeaderCellDef>{{"manager_list.register_time" | translate}}</mat-header-cell>
+                    <mat-cell *matCellDef="let manager">
+                        {{moment.unix(manager.register_time).utc().format("UTC YYYY-MM-DD HH:mm:ss")}}
+                    </mat-cell>
+                </ng-container>
+                <ng-container matColumnDef="actions">
+                    <mat-header-cell *matHeaderCellDef>{{"manager_list.actions" | translate}}</mat-header-cell>
+                    <mat-cell *matCellDef="let manager">
+                        <button mat-raised-button color="primary"
+                                *ngIf="canPromote(manager)"
+                                (click)="promote(manager)">{{"manager_list.promote" | translate}}</button>
+                        <button mat-raised-button color="warn"
+                                *ngIf="canDemote(manager)"
+                                (click)="demote(manager)">{{"manager_list.demote" | translate}}</button>
+                    </mat-cell>
+                </ng-container>
+
+                <mat-header-row *matHeaderRowDef="cols"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: cols;"></mat-row>
+            </mat-table>
+
+            <mat-paginator [class.hidden]="managers.length<25" [length]="managers.length"
+                           [pageSizeOptions]="[25,50,100]" [pageSize]="25"></mat-paginator>
+
+        </mat-card-content>
+    </mat-card>
+</div>

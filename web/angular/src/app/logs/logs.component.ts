@@ -39,7 +39,7 @@ export class LogsComponent implements OnInit {
         this.getLogs(Number(event.value))
     }
 
-    private refresh() {
+    public refresh() {
         this.getLogs(this.filterLevel)
     }
 

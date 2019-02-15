@@ -1,5 +1,6 @@
 interface Manager {
     id: number;
     username: string
-    website_admin: boolean;
+    tracker_admin: boolean
+    register_time: number
 }

@@ -1,56 +1,63 @@
 <div class="container">
-    <div class="table-container">
-        <mat-form-field style="margin-right: 10px">
-            <input matInput (keyup)="applyFilter($event.target.value)" [placeholder]="'logs.filter' | translate">
-        </mat-form-field>
-        <mat-button-toggle-group name="level" aria-label="Font Style" (change)="filterLevelChange($event)">
-            <mat-button-toggle value="1">{{"logs.fatal" | translate}}</mat-button-toggle>
-            <mat-button-toggle value="2">{{"logs.panic" | translate}}</mat-button-toggle>
-            <mat-button-toggle value="3">{{"logs.error" | translate}}</mat-button-toggle>
-            <mat-button-toggle value="4">{{"logs.warn" | translate}}</mat-button-toggle>
-            <mat-button-toggle value="5">{{"logs.info" | translate}}</mat-button-toggle>
-            <mat-button-toggle value="6">{{"logs.debug" | translate}}</mat-button-toggle>
-            <mat-button-toggle value="7">{{"logs.trace" | translate}}</mat-button-toggle>
-        </mat-button-toggle-group>
+    <mat-card class="table-container">
+        <mat-card-header>
+            <mat-card-title>{{"logs.title" | translate}}</mat-card-title>
+            <mat-card-subtitle>{{"logs.subtitle" | translate}}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+            <mat-form-field style="margin-right: 10px">
+                <input matInput (keyup)="applyFilter($event.target.value)" [placeholder]="'logs.filter' | translate">
+            </mat-form-field>
+            <mat-button-toggle-group name="level" aria-label="Font Style" (change)="filterLevelChange($event)">
+                <mat-button-toggle value="1">{{"logs.fatal" | translate}}</mat-button-toggle>
+                <mat-button-toggle value="2">{{"logs.panic" | translate}}</mat-button-toggle>
+                <mat-button-toggle value="3">{{"logs.error" | translate}}</mat-button-toggle>
+                <mat-button-toggle value="4">{{"logs.warn" | translate}}</mat-button-toggle>
+                <mat-button-toggle value="5">{{"logs.info" | translate}}</mat-button-toggle>
+                <mat-button-toggle value="6">{{"logs.debug" | translate}}</mat-button-toggle>
+                <mat-button-toggle value="7">{{"logs.trace" | translate}}</mat-button-toggle>
+            </mat-button-toggle-group>
 
-        <button mat-raised-button style="float: right"
-                [title]="'dashboard.refresh' | translate"
-                (click)="refresh()">
-            <mat-icon>refresh</mat-icon>
-        </button>
-        <div class="mat-elevation-z8">
+            <button mat-raised-button style="float: right"
+                    [title]="'dashboard.refresh' | translate"
+                    (click)="refresh()">
+                <mat-icon>refresh</mat-icon>
+            </button>
+            <div class="mat-elevation-z8">
 
-            <mat-table [dataSource]="data" matSort matSortActive="timestamp"
-                       matSortDirection="desc">
+                <mat-table [dataSource]="data" matSort matSortActive="timestamp"
+                           matSortDirection="desc">
 
-                <ng-container matColumnDef="level">
-                    <mat-header-cell style="flex: 0 0 9em" mat-sort-header
-                                     *matHeaderCellDef>{{"logs.level" | translate}}</mat-header-cell>
-                    <mat-cell style="flex: 0 0 8em"
-                              *matCellDef="let entry"> {{("logs." + entry.level) | translate}} </mat-cell>
-                </ng-container>
-                <ng-container matColumnDef="timestamp">
-                    <mat-header-cell style="flex: 0 0 15em" mat-sort-header
-                                     *matHeaderCellDef>{{"logs.time" | translate}}</mat-header-cell>
-                    <mat-cell style="flex: 0 0 12em" *matCellDef="let entry"> {{entry.timestamp}} </mat-cell>
-                </ng-container>
-                <ng-container matColumnDef="message">
-                    <mat-header-cell mat-sort-header *matHeaderCellDef>{{"logs.message" | translate}}</mat-header-cell>
-                    <mat-cell style="flex: 0 0 30em" *matCellDef="let entry"> {{entry.message}} </mat-cell>
-                </ng-container>
-                <ng-container matColumnDef="data">
-                    <mat-header-cell mat-sort-header *matHeaderCellDef>{{"logs.data" | translate}}</mat-header-cell>
-                    <mat-cell *matCellDef="let entry">
-                        <pre>{{entry.data}}</pre>
-                    </mat-cell>
-                </ng-container>
+                    <ng-container matColumnDef="level">
+                        <mat-header-cell style="flex: 0 0 9em" mat-sort-header
+                                         *matHeaderCellDef>{{"logs.level" | translate}}</mat-header-cell>
+                        <mat-cell style="flex: 0 0 8em"
+                                  *matCellDef="let entry"> {{("logs." + entry.level) | translate}} </mat-cell>
+                    </ng-container>
+                    <ng-container matColumnDef="timestamp">
+                        <mat-header-cell style="flex: 0 0 15em" mat-sort-header
+                                         *matHeaderCellDef>{{"logs.time" | translate}}</mat-header-cell>
+                        <mat-cell style="flex: 0 0 12em" *matCellDef="let entry"> {{entry.timestamp}} </mat-cell>
+                    </ng-container>
+                    <ng-container matColumnDef="message">
+                        <mat-header-cell mat-sort-header
+                                         *matHeaderCellDef>{{"logs.message" | translate}}</mat-header-cell>
+                        <mat-cell style="flex: 0 0 30em" *matCellDef="let entry"> {{entry.message}} </mat-cell>
+                    </ng-container>
+                    <ng-container matColumnDef="data">
+                        <mat-header-cell mat-sort-header *matHeaderCellDef>{{"logs.data" | translate}}</mat-header-cell>
+                        <mat-cell *matCellDef="let entry">
+                            <pre>{{entry.data}}</pre>
+                        </mat-cell>
+                    </ng-container>
 
-                <mat-header-row *matHeaderRowDef="logsCols"></mat-header-row>
-                <mat-row *matRowDef="let row; columns: logsCols;"></mat-row>
-            </mat-table>
+                    <mat-header-row *matHeaderRowDef="logsCols"></mat-header-row>
+                    <mat-row *matRowDef="let row; columns: logsCols;"></mat-row>
+                </mat-table>
 
-            <mat-paginator [length]="logs.length" [pageSizeOptions]="[5,10,25,100]" [pageSize]="5"></mat-paginator>
-        </div>
-    </div>
+                <mat-paginator [length]="logs.length" [pageSizeOptions]="[5,10,25,100]" [pageSize]="5"></mat-paginator>
+            </div>
+        </mat-card-content>
+    </mat-card>
 </div>
 

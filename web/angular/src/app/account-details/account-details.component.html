@@ -13,6 +13,10 @@
                     {{"account.username" | translate}}:&nbsp;
                     <pre>{{authService.account.username}}</pre>
                 </mat-list-item>
+                <mat-list-item>
+                    {{"account.register_time" | translate}}:&nbsp;
+                    <pre>{{moment.unix(authService.account.register_time).utc().format("YYYY-MM-DD HH:mm:ss UTC")}}</pre>
+                </mat-list-item>
             </mat-list>
 
             <mat-expansion-panel>

@@ -3,6 +3,7 @@ import {Project} from "../models/project";
 import {ApiService} from "../api.service";
 import {MessengerService} from "../messenger.service";
 import {Router} from "@angular/router";
+import {AuthService} from "../auth.service";
 
 
 @Component({
@@ -16,12 +17,19 @@ export class CreateProjectComponent implements OnInit {
 
     constructor(private apiService: ApiService,
                 private messengerService: MessengerService,
+                public authService: AuthService,
                 private router: Router) {
-        this.project.name = "test";
-        this.project.public = true;
     }
 
     ngOnInit() {
+    }
+
+    cloneUrlChange() {
+        let tokens = this.project.clone_url.split("/");
+
+        if (tokens.length > 2) {
+            this.project.git_repo = tokens[tokens.length - 2] + "/" + tokens[tokens.length - 1]
+        }
     }
 
     onSubmit() {

@@ -16,7 +16,8 @@
                     <h4 mat-line>{{w.alias}}</h4>
                     <div mat-line>
                         Id=<span class="text-mono">{{w.id}}</span>, {{"perms.created" | translate}}
-                        <span class="text-mono">{{moment.unix(w.created).format("YYYY-MM-DD HH:mm:ss UTC")}}</span>
+                        <span
+                            class="text-mono">{{moment.unix(w.created).utc().format("UTC YYYY-MM-DD HH:mm:ss")}}</span>
                     </div>
                     <span style="flex: 1 1 auto;"></span>
                     <button mat-raised-button color="primary" [title]="'perms.grant' | translate">

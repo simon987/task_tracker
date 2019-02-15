@@ -69,7 +69,7 @@ CREATE TABLE manager
 (
   id            SERIAL PRIMARY KEY,
   register_time INTEGER     NOT NULL,
-  website_admin BOOLEAN     NOT NULL,
+  tracker_admin BOOLEAN     NOT NULL,
   username      TEXT UNIQUE NOT NULL,
   password      BYTEA       NOT NULL
 );
@@ -117,7 +117,7 @@ CREATE OR REPLACE FUNCTION on_manager_insert() RETURNS TRIGGER AS
 $$
 BEGIN
   IF NEW.id = 1 THEN
-    UPDATE manager SET website_admin= TRUE WHERE id = 1;
+    UPDATE manager SET tracker_admin= TRUE WHERE id = 1;
   end if;
   RETURN NEW;
 END;

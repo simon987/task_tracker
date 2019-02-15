@@ -17,21 +17,22 @@ const (
 )
 
 type Manager struct {
-	Id           int    `json:"id"`
+	Id           int64  `json:"id"`
 	Username     string `json:"username"`
-	WebsiteAdmin bool   `json:"website_admin"`
+	WebsiteAdmin bool   `json:"tracker_admin"`
+	RegisterTime int64  `json:"register_time"`
 }
 
 func (database *Database) ValidateCredentials(username []byte, password []byte) (*Manager, error) {
 
 	db := database.getDB()
 
-	row := db.QueryRow(`SELECT id, password, website_admin FROM manager WHERE username=$1`,
+	row := db.QueryRow(`SELECT id, password, tracker_admin, register_time FROM manager WHERE username=$1`,
 		username)
 
 	manager := &Manager{}
 	var passwordHash []byte
-	err := row.Scan(&manager.Id, &passwordHash, &manager.WebsiteAdmin)
+	err := row.Scan(&manager.Id, &passwordHash, &manager.WebsiteAdmin, &manager.RegisterTime)
 	if err != nil {
 		logrus.WithError(err).WithFields(logrus.Fields{
 			"username": username,
@@ -66,11 +67,11 @@ func (database *Database) SaveManager(manager *Manager, password []byte) error {
 	hash.Write([]byte(manager.Username))
 	hashedPassword := hash.Sum(nil)
 
-	row := db.QueryRow(`INSERT INTO manager (username, password, website_admin, register_time) 
-			VALUES ($1,$2,$3, extract(epoch from now() at time zone 'utc')) RETURNING ID`,
+	row := db.QueryRow(`INSERT INTO manager (username, password, tracker_admin, register_time) 
+			VALUES ($1,$2,$3, extract(epoch from now() at time zone 'utc')) RETURNING ID, register_time`,
 		manager.Username, hashedPassword, manager.WebsiteAdmin)
 
-	err := row.Scan(&manager.Id)
+	err := row.Scan(&manager.Id, &manager.RegisterTime)
 	if err != nil {
 		logrus.WithError(err).WithFields(logrus.Fields{
 			"username": manager,
@@ -92,16 +93,16 @@ func (database *Database) UpdateManager(manager *Manager) {
 
 	db := database.getDB()
 
-	res, err := db.Exec(`UPDATE manager SET website_admin=$1 WHERE id=$2`,
+	res, err := db.Exec(`UPDATE manager SET tracker_admin=$1 WHERE id=$2`,
 		manager.WebsiteAdmin, manager.Id)
 	handleErr(err)
 
 	rowsAffected, _ := res.RowsAffected()
 
-	logrus.WithError(err).WithFields(logrus.Fields{
+	logrus.WithFields(logrus.Fields{
 		"rowsAffected": rowsAffected,
 		"manager":      manager,
-	}).Warning("Database.UpdateManager UPDATE")
+	}).Trace("Database.UpdateManager UPDATE")
 }
 
 func (database *Database) UpdateManagerPassword(manager *Manager, newPassword []byte) {
@@ -119,10 +120,10 @@ func (database *Database) UpdateManagerPassword(manager *Manager, newPassword []
 
 	rowsAffected, _ := res.RowsAffected()
 
-	logrus.WithError(err).WithFields(logrus.Fields{
+	logrus.WithFields(logrus.Fields{
 		"rowsAffected": rowsAffected,
 		"id":           manager.Id,
-	}).Warning("Database.UpdateManagerPassword UPDATE")
+	}).Trace("Database.UpdateManagerPassword UPDATE")
 }
 
 func (database *Database) ManagerHasRoleOn(manager *Manager, projectId int64) ManagerRole {
@@ -139,4 +140,21 @@ func (database *Database) ManagerHasRoleOn(manager *Manager, projectId int64) Ma
 	}
 
 	return role
+}
+
+func (database *Database) GetAllManagers() *[]Manager {
+
+	db := database.getDB()
+
+	rows, _ := db.Query(`SELECT id, register_time, tracker_admin, username FROM manager`)
+
+	managers := make([]Manager, 0)
+
+	for rows.Next() {
+		m := Manager{}
+		_ = rows.Scan(&m.Id, &m.RegisterTime, &m.WebsiteAdmin, &m.Username)
+		managers = append(managers, m)
+	}
+
+	return &managers
 }

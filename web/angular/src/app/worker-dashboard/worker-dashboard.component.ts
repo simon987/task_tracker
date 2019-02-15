@@ -20,7 +20,7 @@ export class WorkerDashboardComponent implements OnInit {
         this.refresh()
     }
 
-    private refresh() {
+    public refresh() {
         this.apiService.getWorkerStats()
             .subscribe((data: any) => {
                     this.updateChart(data.stats)

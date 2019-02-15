@@ -7,9 +7,12 @@
         "new_project": "New Project",
         "login": "Login",
         "worker_dashboard": "Workers",
-        "account": "Account"
+        "account": "Account",
+        "manager_list": "Managers"
     },
     "logs": {
+        "title": "Logs",
+        "subtitle": "",
         "filter": "Filter",
         "time": "Time (UTC)",
         "level": "Level",
@@ -43,7 +46,8 @@
         "login": "Login",
         "new_account": "Create account",
         "account": "Account details",
-        "workers": "Workers"
+        "workers": "Workers",
+        "manager_list": "Managers"
     },
     "project": {
         "name": "Project name",
@@ -82,7 +86,8 @@
         "title": "Account details",
         "subtitle": "toto: subtitle",
         "username": "Username",
-        "logout": "Logout"
+        "logout": "Logout",
+        "register_time": "Register date"
     },
     "workers": {
         "title": "Completed tasks per worker",
@@ -100,5 +105,17 @@
     "messenger": {
         "close": "Close",
         "unauthorized": "Unauthorized"
+    },
+    "manager_list": {
+        "title": "Manager list",
+        "subtitle": "",
+        "username": "Username",
+        "role": "Role",
+        "tracker_admin": "Tracker administrator",
+        "actions": "Actions",
+        "unauthorized": "You are not authorized to access this page",
+        "promote": "Promote",
+        "demote": "Demote",
+        "register_time": "Register date"
     }
 }
