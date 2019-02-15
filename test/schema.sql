@@ -36,7 +36,7 @@ CREATE TABLE worker_has_access_to_project
 
 CREATE TABLE task
 (
-  hash64             BIGINT   DEFAULT NULL UNIQUE,
+  hash64             BIGINT   DEFAULT NULL,
   id                 SERIAL PRIMARY KEY,
   project            INTEGER REFERENCES project (id),
   assignee           INTEGER REFERENCES worker (id),
@@ -47,7 +47,8 @@ CREATE TABLE task
   retries            SMALLINT DEFAULT 0,
   max_retries        SMALLINT,
   status             SMALLINT DEFAULT 1,
-  recipe             TEXT
+  recipe             TEXT,
+  UNIQUE (project, hash64)
 );
 
 CREATE TABLE worker_verifies_task

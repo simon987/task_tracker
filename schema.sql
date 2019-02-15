@@ -36,7 +36,7 @@ CREATE TABLE worker_has_access_to_project
 
 CREATE TABLE task
 (
-  hash64             BIGINT   DEFAULT NULL UNIQUE,
+  hash64             BIGINT   DEFAULT NULL,
   id                 SERIAL PRIMARY KEY,
   project            INTEGER REFERENCES project (id),
   assignee           INTEGER REFERENCES worker (id),
@@ -47,7 +47,8 @@ CREATE TABLE task
   retries            SMALLINT DEFAULT 0,
   max_retries        SMALLINT,
   status             SMALLINT DEFAULT 1,
-  recipe             TEXT
+  recipe             TEXT,
+  UNIQUE (project, hash64)
 );
 
 CREATE TABLE worker_verifies_task
@@ -94,9 +95,8 @@ CREATE TABLE project_monitoring_snapshot
 
 CREATE TABLE worker_requests_access_to_project
 (
-  worker  INT REFERENCES worker (id),
-  project INT REFERENCES project (id),
-  PRIMARY KEY (worker, project)
+  worker  INT REFERENCES worker (id)  NOT NULL,
+  project INT REFERENCES project (id) NOT NULL
 );
 
 CREATE OR REPLACE FUNCTION on_task_delete_proc() RETURNS TRIGGER AS
