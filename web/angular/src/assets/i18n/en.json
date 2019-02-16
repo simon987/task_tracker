@@ -58,6 +58,8 @@
         "create_title": "Create new project",
         "create_subtitle": "Todo: subtitle",
         "public": "Public",
+        "private": "Private",
+        "hidden": "Hidden",
         "create": "Create",
         "git_repo": "Git repository name",
         "motd": "Message of the day",

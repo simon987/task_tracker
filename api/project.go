@@ -128,6 +128,9 @@ func (api *WebAPI) ProjectCreate(r *Request) {
 		}, 500)
 		return
 	}
+
+	api.Database.SetManagerRoleOn(manager.(*storage.Manager), id,
+		storage.ROLE_MANAGE_ACCESS|storage.ROLE_READ|storage.ROLE_EDIT)
 	r.OkJson(CreateProjectResponse{
 		Ok: true,
 		Id: id,
@@ -169,29 +172,7 @@ func (api *WebAPI) ProjectUpdate(r *Request) {
 		Chain:    updateReq.Chain,
 	}
 
-	if isValidProject(project) {
-		err := api.Database.UpdateProject(project)
-
-		if err != nil {
-			r.Json(CreateProjectResponse{
-				Ok:      false,
-				Message: err.Error(),
-			}, 500)
-
-			logrus.WithError(err).WithFields(logrus.Fields{
-				"project": project,
-			}).Warn("Error during project update")
-		} else {
-			r.OkJson(UpdateProjectResponse{
-				Ok: true,
-			})
-
-			logrus.WithFields(logrus.Fields{
-				"project": project,
-			}).Debug("Updated project")
-		}
-
-	} else {
+	if !isValidProject(project) {
 		logrus.WithFields(logrus.Fields{
 			"project": project,
 		}).Warn("Invalid project")
@@ -200,6 +181,41 @@ func (api *WebAPI) ProjectUpdate(r *Request) {
 			Ok:      false,
 			Message: "Invalid project",
 		}, 400)
+		return
+	}
+
+	sess := api.Session.StartFasthttp(r.Ctx)
+	manager := sess.Get("manager")
+
+	if !isProjectUpdateAuthorized(project, manager, api.Database) {
+		r.Json(CreateProjectResponse{
+			Ok:      false,
+			Message: "Unauthorized",
+		}, 403)
+		logrus.WithError(err).WithFields(logrus.Fields{
+			"project": project,
+		}).Warn("Unauthorized project update")
+		return
+	}
+
+	err = api.Database.UpdateProject(project)
+	if err != nil {
+		r.Json(CreateProjectResponse{
+			Ok:      false,
+			Message: err.Error(),
+		}, 500)
+
+		logrus.WithError(err).WithFields(logrus.Fields{
+			"project": project,
+		}).Warn("Error during project update")
+	} else {
+		r.OkJson(UpdateProjectResponse{
+			Ok: true,
+		})
+
+		logrus.WithFields(logrus.Fields{
+			"project": project,
+		}).Debug("Updated project")
 	}
 }
 
@@ -210,18 +226,20 @@ func isValidProject(project *storage.Project) bool {
 	if project.Priority < 0 {
 		return false
 	}
+	if project.Hidden && project.Public {
+		return false
+	}
 
 	return true
 }
 
 func isProjectCreationAuthorized(project *storage.Project, manager interface{}) bool {
 
-	return true
 	if manager == nil {
 		return false
 	}
 
-	if project.Public && manager.(*storage.Manager).WebsiteAdmin {
+	if project.Public && !manager.(*storage.Manager).WebsiteAdmin {
 		return false
 	}
 	return true
@@ -229,17 +247,35 @@ func isProjectCreationAuthorized(project *storage.Project, manager interface{}) 
 
 func isProjectUpdateAuthorized(project *storage.Project, manager interface{}, db *storage.Database) bool {
 
-	var man storage.Manager
-	if manager != nil {
-		man = manager.(storage.Manager)
+	if manager == nil {
+		return false
 	}
 
-	if man.WebsiteAdmin {
+	if manager.(*storage.Manager).WebsiteAdmin {
 		return true
 	}
 
-	role := db.ManagerHasRoleOn(&man, project.Id)
+	role := db.GetManagerRoleOn(manager.(*storage.Manager), project.Id)
 	if role&storage.ROLE_EDIT == 1 {
+		return true
+	}
+
+	return false
+}
+
+func isProjectReadAuthorized(project *storage.Project, manager interface{}, db *storage.Database) bool {
+
+	if project.Public || !project.Hidden {
+		return true
+	}
+	if manager == nil {
+		return false
+	}
+	if manager.(*storage.Manager).WebsiteAdmin {
+		return true
+	}
+	role := db.GetManagerRoleOn(manager.(*storage.Manager), project.Id)
+	if role&storage.ROLE_READ == 1 {
 		return true
 	}
 
@@ -251,31 +287,45 @@ func (api *WebAPI) ProjectGet(r *Request) {
 	id, err := strconv.ParseInt(r.Ctx.UserValue("id").(string), 10, 64)
 	handleErr(err, r) //todo handle invalid id
 
+	sess := api.Session.StartFasthttp(r.Ctx)
+	manager := sess.Get("manager")
+
 	project := api.Database.GetProject(id)
 
-	if project != nil {
-		r.OkJson(GetProjectResponse{
-			Ok:      true,
-			Project: project,
-		})
-	} else {
+	if project == nil {
 		r.Json(GetProjectResponse{
 			Ok:      false,
 			Message: "Project not found",
 		}, 404)
+		return
 	}
+
+	if !isProjectReadAuthorized(project, manager, api.Database) {
+		r.Json(GetProjectResponse{
+			Ok:      false,
+			Message: "Unauthorized",
+		}, 403)
+		return
+	}
+
+	r.OkJson(GetProjectResponse{
+		Ok:      true,
+		Project: project,
+	})
 }
 
 func (api *WebAPI) ProjectGetAllProjects(r *Request) {
 
-	worker, _ := api.validateSignature(r)
+	sess := api.Session.StartFasthttp(r.Ctx)
+	manager := sess.Get("manager")
 
 	var id int64
-	if worker == nil {
+	if manager == nil {
 		id = 0
 	} else {
-		id = worker.Id
+		id = manager.(*storage.Manager).Id
 	}
+
 	projects := api.Database.GetAllProjects(id)
 
 	r.OkJson(GetAllProjectsResponse{
@@ -314,7 +364,7 @@ func (api *WebAPI) ProjectGetAccessRequests(r *Request) {
 	}
 
 	if !manager.(*storage.Manager).WebsiteAdmin &&
-		api.Database.ManagerHasRoleOn(manager.(*storage.Manager), 1)&
+		api.Database.GetManagerRoleOn(manager.(*storage.Manager), 1)&
 			storage.ROLE_MANAGE_ACCESS == 0 {
 		r.Json(ProjectGetAccessRequestsResponse{
 			Ok:      false,

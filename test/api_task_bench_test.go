@@ -10,7 +10,7 @@ import (
 
 func BenchmarkCreateTaskRemote(b *testing.B) {
 
-	resp := createProject(api.CreateProjectRequest{
+	resp := createProjectAsAdmin(api.CreateProjectRequest{
 		Name:     "BenchmarkCreateTask" + strconv.Itoa(b.N),
 		GitRepo:  "benchmark_test" + strconv.Itoa(b.N),
 		Version:  "f09e8c9r0w839x0c43",

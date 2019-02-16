@@ -8,4 +8,5 @@ export interface Project {
     version: string;
     public: boolean;
     chain: number;
+    hidden: boolean;
 }

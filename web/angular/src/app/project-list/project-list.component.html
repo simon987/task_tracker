@@ -13,8 +13,11 @@
                 <mat-expansion-panel *ngFor="let project of projects" style="margin-top: 1em">
                     <mat-expansion-panel-header>
                         <mat-panel-title>
-                            <mat-icon *ngIf="project.public">public</mat-icon>
-                            <mat-icon *ngIf="!project.public">lock</mat-icon>
+                            <mat-icon *ngIf="project.public" [title]="'project.public' | translate">public</mat-icon>
+                            <mat-icon *ngIf="!project.public && !project.hidden" [title]="'project.private'|translate">
+                                lock
+                            </mat-icon>
+                            <mat-icon *ngIf="project.hidden" [title]="'project.hidden'|translate">block</mat-icon>
                             <span style="width: 3em">{{project.id}}</span>{{project.name}}
                         </mat-panel-title>
                         <mat-panel-description>{{project.motd}}</mat-panel-description>

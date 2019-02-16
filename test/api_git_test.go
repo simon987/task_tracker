@@ -13,7 +13,7 @@ import (
 
 func TestWebHookNoSignature(t *testing.T) {
 
-	r := Post("/git/receivehook", api.GitPayload{}, nil)
+	r := Post("/git/receivehook", api.GitPayload{}, nil, nil)
 
 	if r.StatusCode != 403 {
 		t.Error()
@@ -35,7 +35,7 @@ func TestWebHookInvalidSignature(t *testing.T) {
 
 func TestWebHookDontUpdateVersion(t *testing.T) {
 
-	resp := createProject(api.CreateProjectRequest{
+	resp := createProjectAsAdmin(api.CreateProjectRequest{
 		Name:    "My version should not be updated",
 		Version: "old",
 		GitRepo: "username/not_this_one",
@@ -59,7 +59,7 @@ func TestWebHookDontUpdateVersion(t *testing.T) {
 		t.Error()
 	}
 
-	getResp, _ := getProject(resp.Id)
+	getResp, _ := getProjectAsAdmin(resp.Id)
 
 	if getResp.Project.Version != "old" {
 		t.Error()
@@ -67,7 +67,7 @@ func TestWebHookDontUpdateVersion(t *testing.T) {
 }
 func TestWebHookUpdateVersion(t *testing.T) {
 
-	resp := createProject(api.CreateProjectRequest{
+	resp := createProjectAsAdmin(api.CreateProjectRequest{
 		Name:    "My version should be updated",
 		Version: "old",
 		GitRepo: "username/repo_name",
@@ -91,7 +91,7 @@ func TestWebHookUpdateVersion(t *testing.T) {
 		t.Error()
 	}
 
-	getResp, _ := getProject(resp.Id)
+	getResp, _ := getProjectAsAdmin(resp.Id)
 
 	if getResp.Project.Version != "new" {
 		t.Error()

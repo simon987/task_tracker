@@ -60,6 +60,8 @@
         "create_title": "Créer un nouveau projet",
         "create_subtitle": "todo: sous-titre",
         "public": "Publique",
+        "private": "Privé",
+        "hidden": "Caché",
         "create": "Créer",
         "motd": "Message du jour",
         "update": "Mettre à jour",

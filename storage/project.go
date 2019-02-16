@@ -127,13 +127,13 @@ func (database *Database) UpdateProject(project *Project) error {
 	return nil
 }
 
-func (database Database) GetAllProjects(workerId int64) *[]Project {
+func (database Database) GetAllProjects(managerId int64) *[]Project {
 	projects := make([]Project, 0)
 
 	db := database.getDB()
 	var rows *sql.Rows
 	var err error
-	if workerId == 0 {
+	if managerId == 0 {
 		rows, err = db.Query(`SELECT 
        	Id, priority, name, clone_url, git_repo, version, motd, public, hidden, COALESCE(chain,0)
 		FROM project
@@ -143,9 +143,9 @@ func (database Database) GetAllProjects(workerId int64) *[]Project {
 		rows, err = db.Query(`SELECT 
        	Id, priority, name, clone_url, git_repo, version, motd, public, hidden, COALESCE(chain,0)
 		FROM project
-		LEFT JOIN worker_has_access_to_project whatp ON whatp.project = id
-		WHERE NOT hidden OR whatp.worker = $1
-		ORDER BY name`, workerId)
+		LEFT JOIN manager_has_role_on_project mhrop ON mhrop.project = id AND mhrop.manager=$1
+		WHERE NOT hidden OR mhrop.role & 1 = 1 OR (SELECT tracker_admin FROM manager WHERE id=$1)
+		ORDER BY name`, managerId)
 	}
 	handleErr(err)
 

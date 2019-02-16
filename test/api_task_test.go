@@ -12,7 +12,7 @@ import (
 func TestCreateTaskValid(t *testing.T) {
 
 	//Make sure there is always a project for id:1
-	createProject(api.CreateProjectRequest{
+	createProjectAsAdmin(api.CreateProjectRequest{
 		Name:     "Some Test name",
 		Version:  "Test Version",
 		CloneUrl: "http://github.com/test/test",
@@ -133,7 +133,7 @@ func TestCreateTaskInvalidRecipe(t *testing.T) {
 func TestCreateGetTask(t *testing.T) {
 
 	//Make sure there is always a project for id:1
-	resp := createProject(api.CreateProjectRequest{
+	resp := createProjectAsAdmin(api.CreateProjectRequest{
 		Name:     "My project",
 		Version:  "1.0",
 		CloneUrl: "http://github.com/test/test",
@@ -194,7 +194,7 @@ func TestCreateGetTask(t *testing.T) {
 
 func createTasks(prefix string) (int64, int64) {
 
-	lowP := createProject(api.CreateProjectRequest{
+	lowP := createProjectAsAdmin(api.CreateProjectRequest{
 		Name:     prefix + "low",
 		Version:  "1.0",
 		CloneUrl: "http://github.com/test/test",
@@ -202,7 +202,7 @@ func createTasks(prefix string) (int64, int64) {
 		Priority: 1,
 		Public:   true,
 	})
-	highP := createProject(api.CreateProjectRequest{
+	highP := createProjectAsAdmin(api.CreateProjectRequest{
 		Name:     prefix + "high",
 		Version:  "1.0",
 		CloneUrl: "http://github.com/test/test",
@@ -293,7 +293,7 @@ func TestTaskNoAccess(t *testing.T) {
 
 	worker := genWid()
 
-	pid := createProject(api.CreateProjectRequest{
+	pid := createProjectAsAdmin(api.CreateProjectRequest{
 		Name:     "This is a private proj",
 		Motd:     "private",
 		Version:  "private",
@@ -335,7 +335,7 @@ func TestTaskHasAccess(t *testing.T) {
 
 	worker := genWid()
 
-	pid := createProject(api.CreateProjectRequest{
+	pid := createProjectAsAdmin(api.CreateProjectRequest{
 		Name:     "This is a private proj1",
 		Motd:     "private1",
 		Version:  "private1",
@@ -382,7 +382,7 @@ func TestReleaseTaskSuccess(t *testing.T) {
 
 	worker := genWid()
 
-	pid := createProject(api.CreateProjectRequest{
+	pid := createProjectAsAdmin(api.CreateProjectRequest{
 		Priority: 0,
 		GitRepo:  "testreleasetask",
 		CloneUrl: "lllllllll",
@@ -420,7 +420,7 @@ func TestReleaseTaskSuccess(t *testing.T) {
 
 func TestCreateIntCollision(t *testing.T) {
 
-	pid := createProject(api.CreateProjectRequest{
+	pid := createProjectAsAdmin(api.CreateProjectRequest{
 		Priority: 1,
 		GitRepo:  "testcreateintcollision",
 		CloneUrl: "testcreateintcollision",
@@ -460,7 +460,7 @@ func TestCreateIntCollision(t *testing.T) {
 
 func TestCreateStringCollision(t *testing.T) {
 
-	pid := createProject(api.CreateProjectRequest{
+	pid := createProjectAsAdmin(api.CreateProjectRequest{
 		Priority: 1,
 		GitRepo:  "testcreatestringcollision",
 		CloneUrl: "testcreatestringcollision",
@@ -509,7 +509,7 @@ func TestCreateStringCollision(t *testing.T) {
 
 func TestCannotVerifySameTaskTwice(t *testing.T) {
 
-	pid := createProject(api.CreateProjectRequest{
+	pid := createProjectAsAdmin(api.CreateProjectRequest{
 		Priority: 1,
 		GitRepo:  "verifysametasktwice",
 		CloneUrl: "verifysametasktwice",
@@ -547,7 +547,7 @@ func TestCannotVerifySameTaskTwice(t *testing.T) {
 
 func TestVerification2(t *testing.T) {
 
-	pid := createProject(api.CreateProjectRequest{
+	pid := createProjectAsAdmin(api.CreateProjectRequest{
 		Priority: 1,
 		GitRepo:  "verify2",
 		CloneUrl: "verify2",
@@ -603,7 +603,7 @@ func TestVerification2(t *testing.T) {
 
 func TestReleaseTaskFail(t *testing.T) {
 
-	pid := createProject(api.CreateProjectRequest{
+	pid := createProjectAsAdmin(api.CreateProjectRequest{
 		Priority: 1,
 		GitRepo:  "releasefail",
 		CloneUrl: "releasefail",
@@ -643,14 +643,14 @@ func TestTaskChain(t *testing.T) {
 
 	w := genWid()
 
-	p1 := createProject(api.CreateProjectRequest{
+	p1 := createProjectAsAdmin(api.CreateProjectRequest{
 		Name:     "testtaskchain1",
 		Public:   true,
 		GitRepo:  "testtaskchain1",
 		CloneUrl: "testtaskchain1",
 	}).Id
 
-	p2 := createProject(api.CreateProjectRequest{
+	p2 := createProjectAsAdmin(api.CreateProjectRequest{
 		Name:     "testtaskchain2",
 		Public:   true,
 		GitRepo:  "testtaskchain2",
@@ -692,7 +692,7 @@ func TestTaskChain(t *testing.T) {
 
 func createTask(request api.CreateTaskRequest, worker *storage.Worker) *api.CreateTaskResponse {
 
-	r := Post("/task/create", request, worker)
+	r := Post("/task/create", request, worker, nil)
 
 	var resp api.CreateTaskResponse
 	data, _ := ioutil.ReadAll(r.Body)
@@ -704,7 +704,7 @@ func createTask(request api.CreateTaskRequest, worker *storage.Worker) *api.Crea
 
 func getTask(worker *storage.Worker) *api.GetTaskResponse {
 
-	r := Get(fmt.Sprintf("/task/get"), worker)
+	r := Get(fmt.Sprintf("/task/get"), worker, nil)
 
 	var resp api.GetTaskResponse
 	data, _ := ioutil.ReadAll(r.Body)
@@ -716,7 +716,7 @@ func getTask(worker *storage.Worker) *api.GetTaskResponse {
 
 func getTaskFromProject(project int64, worker *storage.Worker) *api.GetTaskResponse {
 
-	r := Get(fmt.Sprintf("/task/get/%d", project), worker)
+	r := Get(fmt.Sprintf("/task/get/%d", project), worker, nil)
 
 	var resp api.GetTaskResponse
 	data, _ := ioutil.ReadAll(r.Body)
@@ -728,7 +728,7 @@ func getTaskFromProject(project int64, worker *storage.Worker) *api.GetTaskRespo
 
 func releaseTask(request api.ReleaseTaskRequest, worker *storage.Worker) *api.ReleaseTaskResponse {
 
-	r := Post("/task/release", request, worker)
+	r := Post("/task/release", request, worker, nil)
 
 	var resp api.ReleaseTaskResponse
 	data, _ := ioutil.ReadAll(r.Body)

@@ -126,7 +126,7 @@ func (database *Database) UpdateManagerPassword(manager *Manager, newPassword []
 	}).Trace("Database.UpdateManagerPassword UPDATE")
 }
 
-func (database *Database) ManagerHasRoleOn(manager *Manager, projectId int64) ManagerRole {
+func (database *Database) GetManagerRoleOn(manager *Manager, projectId int64) ManagerRole {
 
 	db := database.getDB()
 
@@ -140,6 +140,25 @@ func (database *Database) ManagerHasRoleOn(manager *Manager, projectId int64) Ma
 	}
 
 	return role
+}
+
+func (database *Database) SetManagerRoleOn(manager *Manager, projectId int64, role ManagerRole) {
+
+	db := database.getDB()
+
+	res, err := db.Exec(`INSERT INTO manager_has_role_on_project (manager, role, project) 
+		VALUES ($1,$2,$3) ON CONFLICT (manager, project) DO UPDATE SET role=$2`,
+		manager.Id, role, projectId)
+	handleErr(err)
+
+	rowsAffected, _ := res.RowsAffected()
+
+	logrus.WithFields(logrus.Fields{
+		"role":         role,
+		"manager":      manager.Username,
+		"rowsAffected": rowsAffected,
+		"project":      projectId,
+	}).Info("Set manager role on project")
 }
 
 func (database *Database) GetAllManagers() *[]Manager {

@@ -1,11 +1,14 @@
 package test
 
 import (
+	"bytes"
 	"encoding/json"
 	"github.com/simon987/task_tracker/api"
 	"github.com/simon987/task_tracker/config"
+	"golang.org/x/net/publicsuffix"
 	"io/ioutil"
 	"net/http"
+	"net/http/cookiejar"
 	"testing"
 )
 
@@ -142,7 +145,7 @@ func TestInvalidCredentialsLogin(t *testing.T) {
 
 func register(request *api.RegisterRequest) *api.RegisterResponse {
 
-	r := Post("/register", request, nil)
+	r := Post("/register", request, nil, nil)
 
 	resp := &api.RegisterResponse{}
 	data, _ := ioutil.ReadAll(r.Body)
@@ -154,7 +157,7 @@ func register(request *api.RegisterRequest) *api.RegisterResponse {
 
 func login(request *api.LoginRequest) (*api.LoginResponse, *http.Response) {
 
-	r := Post("/login", request, nil)
+	r := Post("/login", request, nil, nil)
 
 	resp := &api.LoginResponse{}
 	data, _ := ioutil.ReadAll(r.Body)
@@ -164,6 +167,34 @@ func login(request *api.LoginRequest) (*api.LoginResponse, *http.Response) {
 	return resp, r
 }
 
-func getSessionCtx(username string, password string, admin bool) {
+func getSessionCtx(username string, password string, admin bool) *http.Client {
 
+	register(&api.RegisterRequest{
+		Username: username,
+		Password: password,
+	})
+
+	if admin {
+		manager, _ := testApi.Database.ValidateCredentials([]byte(username), []byte(password))
+		manager.WebsiteAdmin = true
+		testApi.Database.UpdateManager(manager)
+	}
+
+	body, err := json.Marshal(api.LoginRequest{
+		Username: username,
+		Password: password,
+	})
+	buf := bytes.NewBuffer(body)
+
+	req, err := http.NewRequest("POST", "http://"+config.Cfg.ServerAddr+"/login", buf)
+	handleErr(err)
+
+	jar, err := cookiejar.New(&cookiejar.Options{PublicSuffixList: publicsuffix.List})
+	client := &http.Client{
+		Jar: jar,
+	}
+	_, err = client.Do(req)
+	handleErr(err)
+
+	return client
 }

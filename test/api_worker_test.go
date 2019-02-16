@@ -95,7 +95,7 @@ func TestRemoveAccessFailedProjectConstraint(t *testing.T) {
 
 func TestRemoveAccessFailedWorkerConstraint(t *testing.T) {
 
-	pid := createProject(api.CreateProjectRequest{
+	pid := createProjectAsAdmin(api.CreateProjectRequest{
 		Priority: 1,
 		GitRepo:  "dfffffffffff",
 		CloneUrl: "fffffffffff23r",
@@ -117,7 +117,7 @@ func TestRemoveAccessFailedWorkerConstraint(t *testing.T) {
 
 func TestGrantAccessFailedWorkerConstraint(t *testing.T) {
 
-	pid := createProject(api.CreateProjectRequest{
+	pid := createProjectAsAdmin(api.CreateProjectRequest{
 		Priority: 1,
 		GitRepo:  "dfffffffffff1",
 		CloneUrl: "fffffffffff23r1",
@@ -173,7 +173,7 @@ func TestCreateWorkerAliasInvalid(t *testing.T) {
 }
 
 func createWorker(req api.CreateWorkerRequest) (*api.CreateWorkerResponse, *http.Response) {
-	r := Post("/worker/create", req, nil)
+	r := Post("/worker/create", req, nil, nil)
 
 	var resp *api.CreateWorkerResponse
 	data, _ := ioutil.ReadAll(r.Body)
@@ -185,7 +185,7 @@ func createWorker(req api.CreateWorkerRequest) (*api.CreateWorkerResponse, *http
 
 func getWorker(id int64) (*api.GetWorkerResponse, *http.Response) {
 
-	r := Get(fmt.Sprintf("/worker/get/%d", id), nil)
+	r := Get(fmt.Sprintf("/worker/get/%d", id), nil, nil)
 
 	var resp *api.GetWorkerResponse
 	data, _ := ioutil.ReadAll(r.Body)
@@ -206,7 +206,7 @@ func grantAccess(wid int64, project int64) *api.WorkerAccessResponse {
 	r := Post("/access/grant", api.WorkerAccessRequest{
 		WorkerId:  wid,
 		ProjectId: project,
-	}, nil)
+	}, nil, nil)
 
 	var resp *api.WorkerAccessResponse
 	data, _ := ioutil.ReadAll(r.Body)
@@ -221,7 +221,7 @@ func removeAccess(wid int64, project int64) *api.WorkerAccessResponse {
 	r := Post("/access/remove", api.WorkerAccessRequest{
 		WorkerId:  wid,
 		ProjectId: project,
-	}, nil)
+	}, nil, nil)
 
 	var resp *api.WorkerAccessResponse
 	data, _ := ioutil.ReadAll(r.Body)
@@ -233,7 +233,7 @@ func removeAccess(wid int64, project int64) *api.WorkerAccessResponse {
 
 func updateWorker(request api.UpdateWorkerRequest, w *storage.Worker) *api.UpdateWorkerResponse {
 
-	r := Post("/worker/update", request, w)
+	r := Post("/worker/update", request, w, nil)
 
 	var resp *api.UpdateWorkerResponse
 	data, _ := ioutil.ReadAll(r.Body)

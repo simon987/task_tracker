@@ -79,8 +79,9 @@ CREATE TABLE manager
 CREATE TABLE manager_has_role_on_project
 (
   manager INTEGER REFERENCES manager (id) NOT NULL,
-  role    SMALLINT                        NOT NULl,
-  project INTEGER REFERENCES project (id) NOT NULL
+  role    SMALLINT                        NOT NULL,
+  project INTEGER REFERENCES project (id) NOT NULL,
+  primary key (manager, project)
 );
 
 CREATE TABLE project_monitoring_snapshot

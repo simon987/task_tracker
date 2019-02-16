@@ -19,7 +19,11 @@ type SessionContext struct {
 	SessionCookie *http.Cookie
 }
 
-func Post(path string, x interface{}, worker *storage.Worker) *http.Response {
+func Post(path string, x interface{}, worker *storage.Worker, s *http.Client) *http.Response {
+
+	if s == nil {
+		s = &http.Client{}
+	}
 
 	body, err := json.Marshal(x)
 	buf := bytes.NewBuffer(body)
@@ -36,14 +40,17 @@ func Post(path string, x interface{}, worker *storage.Worker) *http.Response {
 		req.Header.Add("X-Signature", sig)
 	}
 
-	client := http.Client{}
-	r, err := client.Do(req)
+	r, err := s.Do(req)
 	handleErr(err)
 
 	return r
 }
 
-func Get(path string, worker *storage.Worker) *http.Response {
+func Get(path string, worker *storage.Worker, s *http.Client) *http.Response {
+
+	if s == nil {
+		s = &http.Client{}
+	}
 
 	url := "http://" + config.Cfg.ServerAddr + path
 	req, err := http.NewRequest("GET", url, nil)
@@ -58,8 +65,7 @@ func Get(path string, worker *storage.Worker) *http.Response {
 		req.Header.Add("X-Signature", sig)
 	}
 
-	client := http.Client{}
-	r, err := client.Do(req)
+	r, err := s.Do(req)
 	handleErr(err)
 
 	return r
