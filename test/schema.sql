@@ -18,6 +18,7 @@ CREATE TABLE project
   id                SERIAL PRIMARY KEY NOT NULL,
   priority          INTEGER DEFAULT 0  NOT NULL,
   closed_task_count INT     DEFAULT 0  NOT NULL,
+  chain             INT     DEFAULT NULL REFERENCES project (id),
   public            boolean            NOT NULL,
   hidden            boolean            NOT NULL,
   name              TEXT UNIQUE        NOT NULL,
@@ -101,9 +102,18 @@ CREATE TABLE worker_requests_access_to_project
 
 CREATE OR REPLACE FUNCTION on_task_delete_proc() RETURNS TRIGGER AS
 $$
+DECLARE
+  chain INTEGER;
 BEGIN
-  UPDATE project SET closed_task_count=closed_task_count + 1 WHERE id = OLD.project;
+  UPDATE project SET closed_task_count=closed_task_count + 1 WHERE id = OLD.project returning project.chain into chain;
   UPDATE worker SET closed_task_count=closed_task_count + 1 WHERE id = OLD.assignee;
+  IF chain != 0 THEN
+    INSERT into task (hash64, project, assignee, max_assign_time, assign_time, verification_count,
+                      priority, retries, max_retries, status, recipe)
+    VALUES (old.hash64, chain, NULL, old.max_assign_time, NULL,
+            old.verification_count, old.priority, 0, old.max_retries, 1,
+            old.recipe);
+  end if;
   RETURN OLD;
 END;
 $$ LANGUAGE 'plpgsql';

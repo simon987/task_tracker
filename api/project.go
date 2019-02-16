@@ -16,6 +16,7 @@ type CreateProjectRequest struct {
 	Motd     string `json:"motd"`
 	Public   bool   `json:"public"`
 	Hidden   bool   `json:"hidden"`
+	Chain    int64  `json:"chain"`
 }
 
 type UpdateProjectRequest struct {
@@ -26,6 +27,7 @@ type UpdateProjectRequest struct {
 	Motd     string `json:"motd"`
 	Public   bool   `json:"public"`
 	Hidden   bool   `json:"hidden"`
+	Chain    int64  `json:"chain"`
 }
 
 type UpdateProjectResponse struct {
@@ -42,7 +44,7 @@ type CreateProjectResponse struct {
 type GetProjectResponse struct {
 	Ok      bool             `json:"ok"`
 	Message string           `json:"message,omitempty"`
-	Project *storage.Project `json:"project,omitempty"`
+	Project *storage.Project `json:"projectChange,omitempty"`
 }
 
 type GetAllProjectsResponse struct {
@@ -91,28 +93,29 @@ func (api *WebAPI) ProjectCreate(r *Request) {
 		Motd:     createReq.Motd,
 		Public:   createReq.Public,
 		Hidden:   createReq.Hidden,
+		Chain:    createReq.Chain,
 	}
 
 	if !isValidProject(project) {
 		logrus.WithFields(logrus.Fields{
-			"project": project,
-		}).Warn("Invalid project")
+			"projectChange": project,
+		}).Warn("Invalid projectChange")
 
 		r.Json(CreateProjectResponse{
 			Ok:      false,
-			Message: "Invalid project",
+			Message: "Invalid projectChange",
 		}, 400)
 		return
 	}
 
 	if !isProjectCreationAuthorized(project, manager) {
 		logrus.WithFields(logrus.Fields{
-			"project": project,
-		}).Warn("Unauthorized project creation")
+			"projectChange": project,
+		}).Warn("Unauthorized projectChange creation")
 
 		r.Json(CreateProjectResponse{
 			Ok:      false,
-			Message: "You are not permitted to create a project with this configuration",
+			Message: "You are not permitted to create a projectChange with this configuration",
 		}, 400)
 		return
 	}
@@ -130,8 +133,8 @@ func (api *WebAPI) ProjectCreate(r *Request) {
 		Id: id,
 	})
 	logrus.WithFields(logrus.Fields{
-		"project": project,
-	}).Debug("Created project")
+		"projectChange": project,
+	}).Debug("Created projectChange")
 }
 
 func (api *WebAPI) ProjectUpdate(r *Request) {
@@ -140,7 +143,7 @@ func (api *WebAPI) ProjectUpdate(r *Request) {
 	if err != nil || id <= 0 {
 		r.Json(CreateProjectResponse{
 			Ok:      false,
-			Message: "Invalid project id",
+			Message: "Invalid projectChange id",
 		}, 400)
 		return
 	}
@@ -163,6 +166,7 @@ func (api *WebAPI) ProjectUpdate(r *Request) {
 		Motd:     updateReq.Motd,
 		Public:   updateReq.Public,
 		Hidden:   updateReq.Hidden,
+		Chain:    updateReq.Chain,
 	}
 
 	if isValidProject(project) {
@@ -175,26 +179,26 @@ func (api *WebAPI) ProjectUpdate(r *Request) {
 			}, 500)
 
 			logrus.WithError(err).WithFields(logrus.Fields{
-				"project": project,
-			}).Warn("Error during project update")
+				"projectChange": project,
+			}).Warn("Error during projectChange update")
 		} else {
 			r.OkJson(UpdateProjectResponse{
 				Ok: true,
 			})
 
 			logrus.WithFields(logrus.Fields{
-				"project": project,
-			}).Debug("Updated project")
+				"projectChange": project,
+			}).Debug("Updated projectChange")
 		}
 
 	} else {
 		logrus.WithFields(logrus.Fields{
-			"project": project,
-		}).Warn("Invalid project")
+			"projectChange": project,
+		}).Warn("Invalid projectChange")
 
 		r.Json(CreateProjectResponse{
 			Ok:      false,
-			Message: "Invalid project",
+			Message: "Invalid projectChange",
 		}, 400)
 	}
 }
@@ -349,7 +353,7 @@ func (api *WebAPI) WorkerRequestAccess(r *Request) {
 		r.Json(WorkerRequestAccessResponse{
 			Ok: false,
 			Message: "Project is public, you already have " +
-				"an active request or you already have access to this project",
+				"an active request or you already have access to this projectChange",
 		}, 400)
 	}
 }

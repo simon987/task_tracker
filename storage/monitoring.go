@@ -22,19 +22,19 @@ func (database *Database) MakeProjectSnapshots() {
 
 	insertRes, err := db.Exec(`
 		INSERT INTO project_monitoring_snapshot
-		  (project, new_task_count, failed_task_count, closed_task_count, worker_access_count,
+		  (projectChange, new_task_count, failed_task_count, closed_task_count, worker_access_count,
 		   awaiting_verification_task_count, timestamp)
 		SELECT id,
 			   (SELECT COUNT(*) FROM task 
 					LEFT JOIN worker_verifies_task wvt on task.id = wvt.task
-			   		WHERE task.project = project.id AND status = 1 AND wvt.task IS NULL),
-			   (SELECT COUNT(*) FROM task WHERE task.project = project.id AND status = 2),
+			   		WHERE task.projectChange = projectChange.id AND status = 1 AND wvt.task IS NULL),
+			   (SELECT COUNT(*) FROM task WHERE task.projectChange = projectChange.id AND status = 2),
 			   closed_task_count,
-			   (SELECT COUNT(*) FROM worker_has_access_to_project wa WHERE wa.project = project.id),
+			   (SELECT COUNT(*) FROM worker_has_access_to_project wa WHERE wa.projectChange = projectChange.id),
 			   (SELECT COUNT(*) FROM worker_verifies_task INNER JOIN task t on worker_verifies_task.task = t.id
-			  		WHERE t.project = project.id),
+			  		WHERE t.projectChange = projectChange.id),
 			   extract(epoch from now() at time zone 'utc')
-		FROM project`)
+		FROM projectChange`)
 	handleErr(err)
 	inserted, _ := insertRes.RowsAffected()
 
@@ -47,7 +47,7 @@ func (database *Database) MakeProjectSnapshots() {
 		"took":   time.Now().Sub(startTime),
 		"add":    inserted,
 		"remove": deleted,
-	}).Trace("Took project monitoring snapshot")
+	}).Trace("Took projectChange monitoring snapshot")
 }
 
 func (database *Database) GetMonitoringSnapshotsBetween(pid int64, from int, to int) (ss *[]ProjectMonitoringSnapshot) {
@@ -58,7 +58,7 @@ func (database *Database) GetMonitoringSnapshotsBetween(pid int64, from int, to 
 
 	rows, err := db.Query(`SELECT new_task_count, failed_task_count, closed_task_count,
 		worker_access_count, awaiting_verification_task_count, timestamp FROM project_monitoring_snapshot 
-		WHERE project=$1 AND timestamp BETWEEN $2 AND $3 ORDER BY TIMESTAMP DESC `, pid, from, to)
+		WHERE projectChange=$1 AND timestamp BETWEEN $2 AND $3 ORDER BY TIMESTAMP DESC `, pid, from, to)
 	handleErr(err)
 
 	for rows.Next() {
@@ -89,7 +89,7 @@ func (database *Database) GetNMonitoringSnapshots(pid int64, count int) (ss *[]P
 
 	rows, err := db.Query(`SELECT new_task_count, failed_task_count, closed_task_count,
 		worker_access_count, awaiting_verification_task_count, timestamp FROM project_monitoring_snapshot 
-		WHERE project=$1 ORDER BY TIMESTAMP DESC LIMIT $2`, pid, count)
+		WHERE projectChange=$1 ORDER BY TIMESTAMP DESC LIMIT $2`, pid, count)
 	handleErr(err)
 
 	for rows.Next() {

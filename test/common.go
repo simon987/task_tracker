@@ -6,7 +6,6 @@ import (
 	"crypto/hmac"
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"github.com/simon987/task_tracker/config"
 	"github.com/simon987/task_tracker/storage"
 	"io"
@@ -51,12 +50,10 @@ func Get(path string, worker *storage.Worker) *http.Response {
 
 	if worker != nil {
 
-		fmt.Println(worker.Secret)
 		mac := hmac.New(crypto.SHA256.New, worker.Secret)
 		mac.Write([]byte(path))
 		sig := hex.EncodeToString(mac.Sum(nil))
 
-		fmt.Println(strconv.FormatInt(worker.Id, 10))
 		req.Header.Add("X-Worker-Id", strconv.FormatInt(worker.Id, 10))
 		req.Header.Add("X-Signature", sig)
 	}

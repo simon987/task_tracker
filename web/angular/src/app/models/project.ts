@@ -7,4 +7,5 @@ export interface Project {
     git_repo: string;
     version: string;
     public: boolean;
+    chain: number;
 }

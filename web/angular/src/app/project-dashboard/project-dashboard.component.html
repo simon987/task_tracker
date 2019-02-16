@@ -1,14 +1,14 @@
 <div class="container">
     <mat-card class="mat-elevation-z8">
+        <button mat-raised-button style="float: right"
+                [title]="'dashboard.refresh' | translate"
+                (click)="refresh()"
+        >
+            <mat-icon>refresh</mat-icon>
+        </button>
         <mat-card-title *ngIf="project">{{"dashboard.title" | translate}} "{{project.name}}"</mat-card-title>
         <mat-card-content style="padding: 2em 0 1em">
 
-            <button mat-raised-button style="float: right"
-                    [title]="'dashboard.refresh' | translate"
-                    (click)="refresh()"
-            >
-                <mat-icon>refresh</mat-icon>
-            </button>
 
             <p *ngIf="project">
                 {{"project.git_repo" | translate}}:
@@ -54,6 +54,7 @@
 
         </mat-card-content>
         <mat-card-actions>
+            <!--TODO: auth-->
             <button mat-raised-button color="primary" *ngIf="project"
                     [routerLink]="'/project/' + project.id + '/update'">{{"project.update" | translate}}</button>
             <button mat-raised-button color="primary" *ngIf="project"

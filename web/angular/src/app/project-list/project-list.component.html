@@ -1,11 +1,16 @@
 <div class="container">
     <mat-card class="mat-elevation-z8">
+        <button mat-raised-button style="float: right"
+                [title]="'projects.refresh' | translate"
+                (click)="refresh()">
+            <mat-icon>refresh</mat-icon>
+        </button>
         <mat-card-header>
             <mat-card-title>{{"projects.projects" | translate}}</mat-card-title>
         </mat-card-header>
         <mat-card-content>
             <mat-accordion>
-                <mat-expansion-panel *ngFor="let project of projects">
+                <mat-expansion-panel *ngFor="let project of projects" style="margin-top: 1em">
                     <mat-expansion-panel-header>
                         <mat-panel-title>
                             <mat-icon *ngIf="project.public">public</mat-icon>

@@ -245,7 +245,7 @@ func TestUpdateProjectConstraintFail(t *testing.T) {
 
 func createProject(req api.CreateProjectRequest) *api.CreateProjectResponse {
 
-	r := Post("/project/create", req, nil)
+	r := Post("/projectChange/create", req, nil)
 
 	var resp api.CreateProjectResponse
 	data, _ := ioutil.ReadAll(r.Body)
@@ -257,7 +257,7 @@ func createProject(req api.CreateProjectRequest) *api.CreateProjectResponse {
 
 func getProject(id int64) (*api.GetProjectResponse, *http.Response) {
 
-	r := Get(fmt.Sprintf("/project/get/%d", id), nil)
+	r := Get(fmt.Sprintf("/projectChange/get/%d", id), nil)
 
 	var getResp api.GetProjectResponse
 	data, _ := ioutil.ReadAll(r.Body)
@@ -269,7 +269,7 @@ func getProject(id int64) (*api.GetProjectResponse, *http.Response) {
 
 func updateProject(request api.UpdateProjectRequest, pid int64) *api.UpdateProjectResponse {
 
-	r := Post(fmt.Sprintf("/project/update/%d", pid), request, nil)
+	r := Post(fmt.Sprintf("/projectChange/update/%d", pid), request, nil)
 
 	var resp api.UpdateProjectResponse
 	data, _ := ioutil.ReadAll(r.Body)

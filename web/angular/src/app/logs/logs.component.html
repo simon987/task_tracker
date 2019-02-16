@@ -1,5 +1,10 @@
 <div class="container">
     <mat-card class="table-container">
+        <button mat-raised-button style="float: right"
+                [title]="'dashboard.refresh' | translate"
+                (click)="refresh()">
+            <mat-icon>refresh</mat-icon>
+        </button>
         <mat-card-header>
             <mat-card-title>{{"logs.title" | translate}}</mat-card-title>
             <mat-card-subtitle>{{"logs.subtitle" | translate}}</mat-card-subtitle>
@@ -18,11 +23,6 @@
                 <mat-button-toggle value="7">{{"logs.trace" | translate}}</mat-button-toggle>
             </mat-button-toggle-group>
 
-            <button mat-raised-button style="float: right"
-                    [title]="'dashboard.refresh' | translate"
-                    (click)="refresh()">
-                <mat-icon>refresh</mat-icon>
-            </button>
             <div class="mat-elevation-z8">
 
                 <mat-table [dataSource]="data" matSort matSortActive="timestamp"

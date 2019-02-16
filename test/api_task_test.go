@@ -11,7 +11,7 @@ import (
 
 func TestCreateTaskValid(t *testing.T) {
 
-	//Make sure there is always a project for id:1
+	//Make sure there is always a projectChange for id:1
 	createProject(api.CreateProjectRequest{
 		Name:     "Some Test name",
 		Version:  "Test Version",
@@ -132,9 +132,9 @@ func TestCreateTaskInvalidRecipe(t *testing.T) {
 
 func TestCreateGetTask(t *testing.T) {
 
-	//Make sure there is always a project for id:1
+	//Make sure there is always a projectChange for id:1
 	resp := createProject(api.CreateProjectRequest{
-		Name:     "My project",
+		Name:     "My projectChange",
 		Version:  "1.0",
 		CloneUrl: "http://github.com/test/test",
 		GitRepo:  "myrepo",
@@ -637,6 +637,57 @@ func TestReleaseTaskFail(t *testing.T) {
 		t.Error()
 	}
 
+}
+
+func TestTaskChain(t *testing.T) {
+
+	w := genWid()
+
+	p1 := createProject(api.CreateProjectRequest{
+		Name:     "testtaskchain1",
+		Public:   true,
+		GitRepo:  "testtaskchain1",
+		CloneUrl: "testtaskchain1",
+	}).Id
+
+	p2 := createProject(api.CreateProjectRequest{
+		Name:     "testtaskchain2",
+		Public:   true,
+		GitRepo:  "testtaskchain2",
+		CloneUrl: "testtaskchain2",
+		Chain:    p1,
+	}).Id
+
+	createTask(api.CreateTaskRequest{
+		Project:           p2,
+		Recipe:            "###",
+		VerificationCount: 0,
+	}, w)
+
+	t1 := getTaskFromProject(p2, w).Task
+
+	releaseTask(api.ReleaseTaskRequest{
+		TaskId: t1.Id,
+		Result: storage.TR_OK,
+	}, w)
+
+	chained := getTaskFromProject(p1, w).Task
+
+	if chained.VerificationCount != t1.VerificationCount {
+		t.Error()
+	}
+	if chained.Recipe != t1.Recipe {
+		t.Error()
+	}
+	if chained.MaxRetries != t1.MaxRetries {
+		t.Error()
+	}
+	if chained.Priority != t1.Priority {
+		t.Error()
+	}
+	if chained.Status != storage.NEW {
+		t.Error()
+	}
 }
 
 func createTask(request api.CreateTaskRequest, worker *storage.Worker) *api.CreateTaskResponse {

@@ -14,6 +14,7 @@ import {AuthService} from "../auth.service";
 export class CreateProjectComponent implements OnInit {
 
     project = <Project>{};
+    selectedProject: Project = null;
 
     constructor(private apiService: ApiService,
                 private messengerService: MessengerService,
@@ -33,6 +34,8 @@ export class CreateProjectComponent implements OnInit {
     }
 
     onSubmit() {
+        this.project.chain = this.selectedProject ? this.selectedProject.id : 0;
+
         this.apiService.createProject(this.project).subscribe(
             data => {
                 this.router.navigateByUrl("/project/" + data["id"]);

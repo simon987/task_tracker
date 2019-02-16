@@ -63,7 +63,8 @@
         "create": "Créer",
         "motd": "Message du jour",
         "update": "Mettre à jour",
-        "perms": "Permissions"
+        "perms": "Permissions",
+        "chain": "Enchainer les tâches vers"
     },
     "dashboard": {
         "title": "Tableau de bord pour ",
@@ -119,6 +120,10 @@
         "promote": "Promouvoir",
         "demote": "Rétrograder",
         "register_time": "Date d'inscription"
+    },
+    "project_select": {
+        "list_loading": "Chargement de la liste de projets...",
+        "none": "Aucun"
     }
 }
 

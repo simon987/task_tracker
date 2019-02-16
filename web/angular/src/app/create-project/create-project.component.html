@@ -1,36 +1,37 @@
 <div class="container">
     <mat-card class="mat-elevation-z8">
-		<mat-card-title>{{"project.create_title" | translate}}</mat-card-title>
-	    <mat-card-subtitle>{{"project.create_subtitle" | translate}}</mat-card-subtitle>
+        <mat-card-title>{{"project.create_title" | translate}}</mat-card-title>
+        <mat-card-subtitle>{{"project.create_subtitle" | translate}}</mat-card-subtitle>
 
-	    <mat-card-content>
-		    <mat-form-field appearance="outline">
-			    <mat-label>{{"project.name" | translate}}</mat-label>
+        <mat-card-content>
+            <mat-form-field appearance="outline">
+                <mat-label>{{"project.name" | translate}}</mat-label>
                 <input type="text" matInput [(ngModel)]="project.name" [placeholder]="'project.name' | translate">
-		    </mat-form-field>
+            </mat-form-field>
 
-		    <mat-form-field appearance="outline">
-			    <mat-label>{{ "project.clone_url" | translate}}</mat-label>
+            <mat-form-field appearance="outline">
+                <mat-label>{{ "project.clone_url" | translate}}</mat-label>
                 <input type="text" matInput [(ngModel)]="project.clone_url" (change)="cloneUrlChange()"
                        [placeholder]="'project.clone_url_placeholder' | translate">
-		    </mat-form-field>
-		    <mat-form-field appearance="outline">
-			    <mat-label>{{ "project.git_repo" | translate }}</mat-label>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+                <mat-label>{{ "project.git_repo" | translate }}</mat-label>
                 <input type="text" matInput [(ngModel)]="project.git_repo"
                        [placeholder]="'project.git_repo_placeholder' | translate">
-			<mat-hint align="start">
-				{{"project.git_repo_hint" | translate}}
-			</mat-hint>
-		    </mat-form-field>
+                <mat-hint align="start">
+                    {{"project.git_repo_hint" | translate}}
+                </mat-hint>
+            </mat-form-field>
+            <project-select [(project)]="selectedProject"></project-select>
 
             <mat-checkbox [(ngModel)]="project.public"
                           [disabled]="!authService.logged || !authService.account.tracker_admin"
                           style="padding-top: 1em">
-			    {{"project.public" | translate}}</mat-checkbox>
+                {{"project.public" | translate}}</mat-checkbox>
 
-	    </mat-card-content>
+        </mat-card-content>
         <mat-card-actions>
             <button mat-raised-button color="primary" (click)="onSubmit()">{{'project.create' | translate}}</button>
         </mat-card-actions>
-	</mat-card>
+    </mat-card>
 </div>

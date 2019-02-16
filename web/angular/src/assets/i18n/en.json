@@ -62,7 +62,8 @@
         "git_repo": "Git repository name",
         "motd": "Message of the day",
         "update": "Edit",
-        "perms": "Permissions"
+        "perms": "Permissions",
+        "chain": "Chain tasks to"
     },
     "dashboard": {
         "title": "Dashboard for",
@@ -117,5 +118,9 @@
         "promote": "Promote",
         "demote": "Demote",
         "register_time": "Register date"
+    },
+    "project_select": {
+        "list_loading": "Loading project list...",
+        "none": "None"
     }
 }

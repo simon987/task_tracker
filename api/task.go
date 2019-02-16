@@ -14,7 +14,7 @@ import (
 )
 
 type CreateTaskRequest struct {
-	Project           int64  `json:"project"`
+	Project           int64  `json:"projectChange"`
 	MaxRetries        int64  `json:"max_retries"`
 	Recipe            string `json:"recipe"`
 	Priority          int64  `json:"priority"`
@@ -123,7 +123,7 @@ func (api *WebAPI) TaskGetFromProject(r *Request) {
 		return
 	}
 
-	project, err := strconv.ParseInt(r.Ctx.UserValue("project").(string), 10, 64)
+	project, err := strconv.ParseInt(r.Ctx.UserValue("projectChange").(string), 10, 64)
 	handleErr(err, r)
 	task := api.Database.GetTaskFromProject(worker, project)
 
@@ -254,12 +254,7 @@ func (api *WebAPI) TaskRelease(r *Request) {
 	}
 
 	if !res {
-		response.Message = "Could not find a task with the specified Id assigned to this workerId"
-
-		logrus.WithFields(logrus.Fields{
-			"releaseTaskRequest": req,
-			"taskUpdated":        res,
-		}).Warn("Release task: NOT FOUND")
+		response.Message = "Task was not marked as closed"
 	} else {
 
 		logrus.WithFields(logrus.Fields{

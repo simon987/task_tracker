@@ -56,7 +56,7 @@ func (database *Database) GetWorker(id int64) *Worker {
 func (database *Database) GrantAccess(workerId int64, projectId int64) bool {
 
 	db := database.getDB()
-	res, err := db.Exec(`INSERT INTO worker_has_access_to_project (worker, project) VALUES ($1,$2)
+	res, err := db.Exec(`INSERT INTO worker_has_access_to_project (worker, projectChange) VALUES ($1,$2)
 		ON CONFLICT DO NOTHING`,
 		workerId, projectId)
 	if err != nil {
@@ -81,7 +81,7 @@ func (database *Database) GrantAccess(workerId int64, projectId int64) bool {
 func (database *Database) RemoveAccess(workerId int64, projectId int64) bool {
 
 	db := database.getDB()
-	res, err := db.Exec(`DELETE FROM worker_has_access_to_project WHERE worker=$1 AND project=$2`,
+	res, err := db.Exec(`DELETE FROM worker_has_access_to_project WHERE worker=$1 AND projectChange=$2`,
 		workerId, projectId)
 	handleErr(err)
 
@@ -118,8 +118,8 @@ func (database *Database) SaveAccessRequest(worker *Worker, projectId int64) boo
 	db := database.getDB()
 
 	res, err := db.Exec(`INSERT INTO worker_requests_access_to_project 
-  		SELECT $1, id FROM project WHERE id=$2 AND NOT project.public 
-		AND NOT EXISTS(SELECT * FROM worker_has_access_to_project WHERE worker=$1 AND project=$2)`,
+  		SELECT $1, id FROM projectChange WHERE id=$2 AND NOT projectChange.public 
+		AND NOT EXISTS(SELECT * FROM worker_has_access_to_project WHERE worker=$1 AND projectChange=$2)`,
 		worker.Id, projectId)
 	if err != nil {
 		return false
@@ -139,13 +139,13 @@ func (database *Database) AcceptAccessRequest(worker *Worker, projectId int64) b
 	db := database.getDB()
 
 	res, err := db.Exec(`DELETE FROM worker_requests_access_to_project 
-		WHERE worker=$1 AND project=$2`)
+		WHERE worker=$1 AND projectChange=$2`)
 	handleErr(err)
 
 	rowsAffected, _ := res.RowsAffected()
 	if rowsAffected == 1 {
 		_, err := db.Exec(`INSERT INTO worker_has_access_to_project 
-  			(worker, project) VALUES ($1,$2)`,
+  			(worker, projectChange) VALUES ($1,$2)`,
 			worker.Id, projectId)
 		handleErr(err)
 	}
@@ -162,7 +162,7 @@ func (database *Database) RejectAccessRequest(worker *Worker, projectId int64) b
 	db := database.getDB()
 
 	res, err := db.Exec(`DELETE FROM worker_requests_access_to_project 
-		  WHERE worker=$1 AND project=$2`, worker.Id, projectId)
+		  WHERE worker=$1 AND projectChange=$2`, worker.Id, projectId)
 	handleErr(err)
 
 	rowsAffected, _ := res.RowsAffected()
@@ -180,7 +180,7 @@ func (database *Database) GetAllAccessRequests(projectId int64) *[]Worker {
 
 	rows, err := db.Query(`SELECT id, alias, created FROM worker_requests_access_to_project
 		INNER JOIN worker w on worker_requests_access_to_project.worker = w.id
-		WHERE project=$1`,
+		WHERE projectChange=$1`,
 		projectId)
 	handleErr(err)
 

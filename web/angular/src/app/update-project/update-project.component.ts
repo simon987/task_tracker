@@ -18,6 +18,7 @@ export class UpdateProjectComponent implements OnInit {
     }
 
     project: Project;
+    selectedProject: Project;
     private projectId: number;
 
     ngOnInit() {
@@ -29,11 +30,13 @@ export class UpdateProjectComponent implements OnInit {
 
     private getProject() {
         this.apiService.getProject(this.projectId).subscribe(data => {
-            this.project = data["project"]
+            this.project = data["project"];
+            this.selectedProject = <Project>{id: this.project.chain}
         })
     }
 
     onSubmit() {
+        this.project.chain = this.selectedProject ? this.selectedProject.id : 0;
         this.apiService.updateProject(this.project).subscribe(
             data => {
                 this.router.navigateByUrl("/project/" + this.project.id);

@@ -131,7 +131,7 @@ func (database *Database) ManagerHasRoleOn(manager *Manager, projectId int64) Ma
 	db := database.getDB()
 
 	row := db.QueryRow(`SELECT role FROM manager_has_role_on_project 
-		WHERE project=$1 AND manager=$2`, projectId, manager.Id)
+		WHERE projectChange=$1 AND manager=$2`, projectId, manager.Id)
 
 	var role ManagerRole
 	err := row.Scan(&role)
