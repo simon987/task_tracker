@@ -42,7 +42,8 @@
                     <ng-container matColumnDef="message">
                         <mat-header-cell mat-sort-header
                                          *matHeaderCellDef>{{"logs.message" | translate}}</mat-header-cell>
-                        <mat-cell style="flex: 0 0 30em" *matCellDef="let entry"> {{entry.message}} </mat-cell>
+                        <mat-cell class="text-mono" style="flex: 0 0 30em"
+                                  *matCellDef="let entry"> {{entry.message}} </mat-cell>
                     </ng-container>
                     <ng-container matColumnDef="data">
                         <mat-header-cell mat-sort-header *matHeaderCellDef>{{"logs.data" | translate}}</mat-header-cell>

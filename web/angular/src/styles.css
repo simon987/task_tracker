@@ -94,3 +94,8 @@ pre {
     margin-top: 2em !important;
 }
 
+.text-mono {
+    font-family: Hack, Courier, "Courier New", monospace;
+    color: #ff4081;
+}
+

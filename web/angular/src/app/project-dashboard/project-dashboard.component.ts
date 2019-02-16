@@ -44,13 +44,17 @@ export class ProjectDashboardComponent implements OnInit {
     constructor(private apiService: ApiService, private route: ActivatedRoute) {
     }
 
-
     ngOnInit(): void {
         this.route.params.subscribe(params => {
             this.projectId = params["id"];
             this.getProject();
         });
+    }
 
+    public isSafeUrl(url: string) {
+        if (url.substr(0, "http".length) == "http") {
+            return true
+        }
     }
 
     public refresh() {

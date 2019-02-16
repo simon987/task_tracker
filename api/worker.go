@@ -146,7 +146,7 @@ func (api *WebAPI) WorkerGrantAccess(r *Request) {
 	} else {
 		r.OkJson(WorkerAccessResponse{
 			Ok:      false,
-			Message: "Worker already has access to this projectChange",
+			Message: "Worker already has access to this project",
 		})
 	}
 }
@@ -171,7 +171,7 @@ func (api *WebAPI) WorkerRemoveAccess(r *Request) {
 	} else {
 		r.OkJson(WorkerAccessResponse{
 			Ok:      false,
-			Message: "Worker did not have access to this projectChange",
+			Message: "Worker did not have access to this project",
 		})
 	}
 }

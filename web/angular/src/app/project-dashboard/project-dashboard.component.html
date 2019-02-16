@@ -12,7 +12,9 @@
 
             <p *ngIf="project">
                 {{"project.git_repo" | translate}}:
-                <a target="_blank" [href]="project['clone_url']">{{project.git_repo}}</a>
+                <a target="_blank" [href]="project['clone_url']"
+                   *ngIf="isSafeUrl(project['clone_url'])">{{project.git_repo}}</a>
+                <span class="text-mono" *ngIf="!isSafeUrl(project['clone_url'])">{{project['git_repo']}}</span>
             </p>
             <p>{{"project.motd" | translate}}:</p>
             <pre *ngIf="project">{{project.motd}}</pre>

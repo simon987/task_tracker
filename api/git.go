@@ -134,8 +134,8 @@ func (api *WebAPI) getAssociatedProject(payload *GitPayload) *storage.Project {
 	project := api.Database.GetProjectWithRepoName(payload.Repository.FullName)
 
 	logrus.WithFields(logrus.Fields{
-		"projectChange": project,
-	}).Trace("Found projectChange associated with WebHook")
+		"project": project,
+	}).Trace("Found project associated with WebHook")
 
 	return project
 }

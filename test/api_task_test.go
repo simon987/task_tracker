@@ -11,7 +11,7 @@ import (
 
 func TestCreateTaskValid(t *testing.T) {
 
-	//Make sure there is always a projectChange for id:1
+	//Make sure there is always a project for id:1
 	createProject(api.CreateProjectRequest{
 		Name:     "Some Test name",
 		Version:  "Test Version",
@@ -132,9 +132,9 @@ func TestCreateTaskInvalidRecipe(t *testing.T) {
 
 func TestCreateGetTask(t *testing.T) {
 
-	//Make sure there is always a projectChange for id:1
+	//Make sure there is always a project for id:1
 	resp := createProject(api.CreateProjectRequest{
-		Name:     "My projectChange",
+		Name:     "My project",
 		Version:  "1.0",
 		CloneUrl: "http://github.com/test/test",
 		GitRepo:  "myrepo",

@@ -20,6 +20,10 @@ export class ProjectListComponent implements OnInit {
         this.getProjects()
     }
 
+    refresh() {
+        this.getProjects();
+    }
+
     getProjects() {
         this.apiService.getProjects().subscribe(data => this.projects = data["projects"]);
     }

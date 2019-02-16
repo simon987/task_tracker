@@ -27,7 +27,7 @@ type AssignedTasks struct {
 func (database *Database) SaveProject(project *Project) (int64, error) {
 	db := database.getDB()
 
-	row := db.QueryRow(`INSERT INTO projectChange (name, git_repo, clone_url, version, priority,
+	row := db.QueryRow(`INSERT INTO project (name, git_repo, clone_url, version, priority,
                      motd, public, hidden, chain)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NULLIF($9, 0)) RETURNING id`,
 		project.Name, project.GitRepo, project.CloneUrl, project.Version, project.Priority, project.Motd,
@@ -38,17 +38,17 @@ func (database *Database) SaveProject(project *Project) (int64, error) {
 
 	if err != nil {
 		logrus.WithError(err).WithFields(logrus.Fields{
-			"projectChange": project,
-		}).Warn("Database.saveProject INSERT projectChange ERROR")
+			"project": project,
+		}).Warn("Database.saveProject INSERT project ERROR")
 		return -1, err
 	}
 
 	project.Id = id
 
 	logrus.WithFields(logrus.Fields{
-		"id":            id,
-		"projectChange": project,
-	}).Trace("Database.saveProject INSERT projectChange")
+		"id":      id,
+		"project": project,
+	}).Trace("Database.saveProject INSERT project")
 
 	return id, nil
 }
@@ -58,20 +58,20 @@ func (database *Database) GetProject(id int64) *Project {
 	db := database.getDB()
 	row := db.QueryRow(`SELECT id, priority, name, clone_url, git_repo, version,
        motd, public, hidden, COALESCE(chain, 0)
-		FROM projectChange WHERE id=$1`, id)
+		FROM project WHERE id=$1`, id)
 
 	project, err := scanProject(row)
 	if err != nil {
 		logrus.WithError(err).WithFields(logrus.Fields{
 			"id": id,
-		}).Warn("Database.getProject SELECT projectChange NOT FOUND")
+		}).Warn("Database.getProject SELECT project NOT FOUND")
 		return nil
 	}
 
 	logrus.WithFields(logrus.Fields{
-		"id":            id,
-		"projectChange": project,
-	}).Trace("Database.saveProject SELECT projectChange")
+		"id":      id,
+		"project": project,
+	}).Trace("Database.saveProject SELECT project")
 
 	return project
 }
@@ -89,14 +89,14 @@ func (database *Database) GetProjectWithRepoName(repoName string) *Project {
 
 	db := database.getDB()
 	row := db.QueryRow(`SELECT id, priority, name, clone_url, git_repo, version,
-       motd, public, hidden, COALESCE(chain, 0) FROM projectChange WHERE LOWER(git_repo)=$1`,
+       motd, public, hidden, COALESCE(chain, 0) FROM project WHERE LOWER(git_repo)=$1`,
 		strings.ToLower(repoName))
 
 	project, err := scanProject(row)
 	if err != nil {
 		logrus.WithError(err).WithFields(logrus.Fields{
 			"repoName": repoName,
-		}).Warn("Database.getProjectWithRepoName SELECT projectChange NOT FOUND")
+		}).Warn("Database.getProjectWithRepoName SELECT project NOT FOUND")
 		return nil
 	}
 
@@ -107,7 +107,7 @@ func (database *Database) UpdateProject(project *Project) error {
 
 	db := database.getDB()
 
-	res, err := db.Exec(`UPDATE projectChange 
+	res, err := db.Exec(`UPDATE project 
 		SET (priority, name, clone_url, git_repo, version, motd, public, hidden, chain) =
 		  ($1,$2,$3,$4,$5,$6,$7,$8,NULLIF($9, 0))
 		WHERE id=$10`,
@@ -120,9 +120,9 @@ func (database *Database) UpdateProject(project *Project) error {
 	rowsAffected, _ := res.RowsAffected()
 
 	logrus.WithFields(logrus.Fields{
-		"projectChange": project,
-		"rowsAffected":  rowsAffected,
-	}).Trace("Database.updateProject UPDATE projectChange")
+		"project":      project,
+		"rowsAffected": rowsAffected,
+	}).Trace("Database.updateProject UPDATE project")
 
 	return nil
 }
@@ -136,14 +136,14 @@ func (database Database) GetAllProjects(workerId int64) *[]Project {
 	if workerId == 0 {
 		rows, err = db.Query(`SELECT 
        	Id, priority, name, clone_url, git_repo, version, motd, public, hidden, COALESCE(chain,0)
-		FROM projectChange
+		FROM project
 		WHERE NOT hidden
 		ORDER BY name`)
 	} else {
 		rows, err = db.Query(`SELECT 
        	Id, priority, name, clone_url, git_repo, version, motd, public, hidden, COALESCE(chain,0)
-		FROM projectChange
-		LEFT JOIN worker_has_access_to_project whatp ON whatp.projectChange = id
+		FROM project
+		LEFT JOIN worker_has_access_to_project whatp ON whatp.project = id
 		WHERE NOT hidden OR whatp.worker = $1
 		ORDER BY name`, workerId)
 	}
@@ -171,7 +171,7 @@ func (database *Database) GetAssigneeStats(pid int64, count int64) *[]AssignedTa
 	assignees := make([]AssignedTasks, 0)
 
 	rows, err := db.Query(`SELECT worker.alias, COUNT(*) as wc FROM TASK
-  			LEFT JOIN worker ON TASK.assignee = worker.id WHERE projectChange=$1 
+  			LEFT JOIN worker ON TASK.assignee = worker.id WHERE project=$1 
 			GROUP BY worker.id ORDER BY wc LIMIT $2`, pid, count)
 	handleErr(err)
 

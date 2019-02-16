@@ -38,7 +38,7 @@ export class ProjectPermsComponent implements OnInit {
 
     private getProject() {
         this.apiService.getProject(this.projectId).subscribe(data => {
-            this.project = data["projectChange"]
+            this.project = data["project"]
         })
     }
 
