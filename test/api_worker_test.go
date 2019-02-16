@@ -64,79 +64,6 @@ func TestGetWorkerInvalid(t *testing.T) {
 		t.Error()
 	}
 }
-
-func TestGrantAccessFailedProjectConstraint(t *testing.T) {
-
-	wid := genWid()
-
-	resp := grantAccess(wid.Id, 38274593)
-
-	if resp.Ok != false {
-		t.Error()
-	}
-	if len(resp.Message) <= 0 {
-		t.Error()
-	}
-}
-
-func TestRemoveAccessFailedProjectConstraint(t *testing.T) {
-
-	worker := genWid()
-
-	resp := removeAccess(worker.Id, 38274593)
-
-	if resp.Ok != false {
-		t.Error()
-	}
-	if len(resp.Message) <= 0 {
-		t.Error()
-	}
-}
-
-func TestRemoveAccessFailedWorkerConstraint(t *testing.T) {
-
-	pid := createProjectAsAdmin(api.CreateProjectRequest{
-		Priority: 1,
-		GitRepo:  "dfffffffffff",
-		CloneUrl: "fffffffffff23r",
-		Version:  "f83w9rw",
-		Motd:     "ddddddddd",
-		Name:     "removeaccessfailedworkerconstraint",
-		Public:   true,
-	}).Id
-
-	resp := removeAccess(0, pid)
-
-	if resp.Ok != false {
-		t.Error()
-	}
-	if len(resp.Message) <= 0 {
-		t.Error()
-	}
-}
-
-func TestGrantAccessFailedWorkerConstraint(t *testing.T) {
-
-	pid := createProjectAsAdmin(api.CreateProjectRequest{
-		Priority: 1,
-		GitRepo:  "dfffffffffff1",
-		CloneUrl: "fffffffffff23r1",
-		Version:  "f83w9rw1",
-		Motd:     "ddddddddd1",
-		Name:     "grantaccessfailedworkerconstraint",
-		Public:   true,
-	}).Id
-
-	resp := removeAccess(0, pid)
-
-	if resp.Ok != false {
-		t.Error()
-	}
-	if len(resp.Message) <= 0 {
-		t.Error()
-	}
-}
-
 func TestUpdateAliasValid(t *testing.T) {
 
 	wid := genWid()
@@ -169,7 +96,30 @@ func TestCreateWorkerAliasInvalid(t *testing.T) {
 	if len(resp.Message) <= 0 {
 		t.Error()
 	}
+}
 
+func TestInvalidAccessRequest(t *testing.T) {
+
+	w := genWid()
+	pid := createProjectAsAdmin(api.CreateProjectRequest{
+		Name:     "testinvalidaccessreq",
+		CloneUrl: "testinvalidaccessreq",
+		GitRepo:  "testinvalidaccessreq",
+	}).Id
+
+	r := requestAccess(api.WorkerAccessRequest{
+		Submit:  false,
+		Assign:  false,
+		Project: pid,
+	}, w)
+
+	if r.Ok != false {
+		t.Error()
+	}
+
+	if len(r.Message) <= 0 {
+		t.Error()
+	}
 }
 
 func createWorker(req api.CreateWorkerRequest) (*api.CreateWorkerResponse, *http.Response) {
@@ -201,14 +151,11 @@ func genWid() *storage.Worker {
 	return resp.Worker
 }
 
-func grantAccess(wid int64, project int64) *api.WorkerAccessResponse {
+func requestAccess(req api.WorkerAccessRequest, w *storage.Worker) *api.WorkerAccessRequestResponse {
 
-	r := Post("/access/grant", api.WorkerAccessRequest{
-		WorkerId:  wid,
-		ProjectId: project,
-	}, nil, nil)
+	r := Post(fmt.Sprintf("/project/request_access"), req, w, nil)
 
-	var resp *api.WorkerAccessResponse
+	var resp *api.WorkerAccessRequestResponse
 	data, _ := ioutil.ReadAll(r.Body)
 	err := json.Unmarshal(data, &resp)
 	handleErr(err)
@@ -216,14 +163,25 @@ func grantAccess(wid int64, project int64) *api.WorkerAccessResponse {
 	return resp
 }
 
-func removeAccess(wid int64, project int64) *api.WorkerAccessResponse {
+func acceptAccessRequest(pid int64, wid int64, s *http.Client) *api.WorkerAccessRequestResponse {
 
-	r := Post("/access/remove", api.WorkerAccessRequest{
-		WorkerId:  wid,
-		ProjectId: project,
-	}, nil, nil)
+	r := Post(fmt.Sprintf("/project/accept_request/%d/%d", pid, wid), nil,
+		nil, s)
 
-	var resp *api.WorkerAccessResponse
+	var resp *api.WorkerAccessRequestResponse
+	data, _ := ioutil.ReadAll(r.Body)
+	err := json.Unmarshal(data, &resp)
+	handleErr(err)
+
+	return resp
+}
+
+func rejectAccessRequest(pid int64, wid int64, s *http.Client) *api.WorkerAccessRequestResponse {
+
+	r := Post(fmt.Sprintf("/project/reject_request/%d/%d", pid, wid), nil,
+		nil, s)
+
+	var resp *api.WorkerAccessRequestResponse
 	data, _ := ioutil.ReadAll(r.Body)
 	err := json.Unmarshal(data, &resp)
 	handleErr(err)

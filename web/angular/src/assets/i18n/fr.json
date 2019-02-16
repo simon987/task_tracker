@@ -105,7 +105,11 @@
         "created": "Créé le",
         "grant": "Accepter la requête",
         "reject": "Rejeter la requête",
-        "refresh": "Refraichir"
+        "remove": "Enlever l'accès",
+        "refresh": "Refraichir",
+        "pending": "(En attente)",
+        "assign": "Assigner",
+        "submit": "Soumettre"
     },
     "messenger": {
         "close": "Fermer",

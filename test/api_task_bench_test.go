@@ -2,8 +2,6 @@ package test
 
 import (
 	"github.com/simon987/task_tracker/api"
-	"github.com/simon987/task_tracker/config"
-	"github.com/simon987/task_tracker/storage"
 	"strconv"
 	"testing"
 )
@@ -27,26 +25,5 @@ func BenchmarkCreateTaskRemote(b *testing.B) {
 			Recipe:     "{}",
 			MaxRetries: 1,
 		}, worker)
-	}
-}
-
-func BenchmarkCreateTask(b *testing.B) {
-
-	config.SetupConfig()
-	db := storage.Database{}
-
-	project, _ := db.SaveProject(&storage.Project{
-		Priority: 1,
-		Id:       1,
-		Version:  "bmcreatetask",
-		Public:   true,
-		Motd:     "bmcreatetask",
-		Name:     "BenchmarkCreateTask" + strconv.Itoa(b.N),
-		GitRepo:  "benchmark_test" + strconv.Itoa(b.N),
-	})
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		_ = db.SaveTask(&storage.Task{}, project, 0)
 	}
 }

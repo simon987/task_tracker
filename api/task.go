@@ -49,8 +49,17 @@ type GetTaskResponse struct {
 
 func (api *WebAPI) TaskCreate(r *Request) {
 
+	worker, err := api.validateSignature(r)
+	if worker == nil {
+		r.Json(CreateProjectResponse{
+			Ok:      false,
+			Message: err.Error(),
+		}, 401)
+		return
+	}
+
 	createReq := &CreateTaskRequest{}
-	err := json.Unmarshal(r.Ctx.Request.Body(), createReq)
+	err = json.Unmarshal(r.Ctx.Request.Body(), createReq)
 	if err != nil {
 		r.Json(CreateProjectResponse{
 			Ok:      false,
@@ -74,7 +83,7 @@ func (api *WebAPI) TaskCreate(r *Request) {
 			createReq.Hash64 = int64(siphash.Hash(1, 2, []byte(createReq.UniqueString)))
 		}
 
-		err := api.Database.SaveTask(task, createReq.Project, createReq.Hash64)
+		err := api.Database.SaveTask(task, createReq.Project, createReq.Hash64, worker.Id)
 
 		if err != nil {
 			r.Json(CreateTaskResponse{

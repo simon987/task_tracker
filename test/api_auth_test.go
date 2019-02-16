@@ -143,6 +143,40 @@ func TestInvalidCredentialsLogin(t *testing.T) {
 	}
 }
 
+func TestRequireManageAccessRole(t *testing.T) {
+
+	user := getSessionCtx("testreqmanrole", "testreqmanrole", false)
+
+	pid := createProject(api.CreateProjectRequest{
+		GitRepo:  "testRequireManageAccessRole",
+		CloneUrl: "testRequireManageAccessRole",
+		Name:     "testRequireManageAccessRole",
+		Version:  "testRequireManageAccessRole",
+	}, user).Id
+
+	w := genWid()
+	requestAccess(api.WorkerAccessRequest{
+		Submit:  true,
+		Assign:  true,
+		Project: pid,
+	}, w)
+
+	rGuest := acceptAccessRequest(pid, w.Id, nil)
+	rOtherUser := acceptAccessRequest(pid, w.Id, testUserCtx)
+	rUser := acceptAccessRequest(pid, w.Id, user)
+
+	if rGuest.Ok != false {
+		t.Error()
+	}
+	if rOtherUser.Ok != false {
+		t.Error()
+	}
+	if rUser.Ok != true {
+		t.Error()
+	}
+
+}
+
 func register(request *api.RegisterRequest) *api.RegisterResponse {
 
 	r := Post("/register", request, nil, nil)

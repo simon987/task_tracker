@@ -65,8 +65,8 @@ export class ApiService {
         return this.http.get(this.url + `/worker/stats`, this.options)
     }
 
-    getProjectAccessRequests(project: number) {
-        return this.http.get(this.url + `/project/requests/${project}`)
+    getProjectAccess(project: number) {
+        return this.http.get(this.url + `/project/accesses/${project}`)
     }
 
     getAllManagers() {
@@ -79,6 +79,14 @@ export class ApiService {
 
     demote(managerId: number) {
         return this.http.get(this.url + `/manager/demote/${managerId}`)
+    }
+
+    acceptWorkerAccessRequest(wid: number, pid: number) {
+        return this.http.post(this.url + `/project/accept_request/${pid}/${wid}`, null)
+    }
+
+    rejectWorkerAccessRequest(wid: number, pid: number) {
+        return this.http.post(this.url + `/project/reject_request/${pid}/${wid}`, null)
     }
 
 }

@@ -1,6 +1,6 @@
 DROP TABLE IF EXISTS worker, project, task, log_entry,
-  worker_has_access_to_project, manager, manager_has_role_on_project, project_monitoring_snapshot,
-  worker_verifies_task, worker_requests_access_to_project;
+  worker_access, manager, manager_has_role_on_project, project_monitoring_snapshot,
+  worker_verifies_task;
 DROP TYPE IF EXISTS status;
 DROP TYPE IF EXISTS log_level;
 
@@ -28,10 +28,13 @@ CREATE TABLE project
   motd              TEXT               NOT NULL
 );
 
-CREATE TABLE worker_has_access_to_project
+CREATE TABLE worker_access
 (
-  worker  INTEGER REFERENCES worker (id),
-  project INTEGER REFERENCES project (id),
+  worker      INTEGER REFERENCES worker (id),
+  project     INTEGER REFERENCES project (id),
+  role_assign boolean,
+  role_submit boolean,
+  request     boolean,
   primary key (worker, project)
 );
 
@@ -79,7 +82,7 @@ CREATE TABLE manager
 CREATE TABLE manager_has_role_on_project
 (
   manager INTEGER REFERENCES manager (id) NOT NULL,
-  role    SMALLINT                        NOT NULl,
+  role    SMALLINT                        NOT NULL,
   project INTEGER REFERENCES project (id) NOT NULL
 );
 
@@ -92,12 +95,6 @@ CREATE TABLE project_monitoring_snapshot
   awaiting_verification_task_count INT                         NOT NULL,
   worker_access_count              INT                         NOT NULL,
   timestamp                        INT                         NOT NULL
-);
-
-CREATE TABLE worker_requests_access_to_project
-(
-  worker  INT REFERENCES worker (id)  NOT NULL,
-  project INT REFERENCES project (id) NOT NULL
 );
 
 CREATE OR REPLACE FUNCTION on_task_delete_proc() RETURNS TRIGGER AS

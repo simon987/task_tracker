@@ -2,6 +2,7 @@ package storage
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/Sirupsen/logrus"
 )
@@ -35,15 +36,17 @@ const (
 	TR_SKIP TaskResult = 2
 )
 
-func (database *Database) SaveTask(task *Task, project int64, hash64 int64) error {
+func (database *Database) SaveTask(task *Task, project int64, hash64 int64, wid int64) error {
 
 	db := database.getDB()
 
 	//TODO: For some reason it refuses to insert the 64-bit value unless I do that...
 	res, err := db.Exec(fmt.Sprintf(`
 	INSERT INTO task (project, max_retries, recipe, priority, max_assign_time, hash64,verification_count) 
-	VALUES ($1,$2,$3,$4,$5,NULLIF(%d, 0),$6)`, hash64),
-		project, task.MaxRetries, task.Recipe, task.Priority, task.MaxAssignTime, task.VerificationCount)
+	SELECT $1,$2,$3,$4,$5,NULLIF(%d, 0),$6 FROM worker_access 
+	WHERE role_submit AND worker=$7 AND project=$1`, hash64),
+		project, task.MaxRetries, task.Recipe, task.Priority, task.MaxAssignTime, task.VerificationCount,
+		wid)
 	if err != nil {
 		logrus.WithError(err).WithFields(logrus.Fields{
 			"task": task,
@@ -58,6 +61,10 @@ func (database *Database) SaveTask(task *Task, project int64, hash64 int64) erro
 		"rowsAffected": rowsAffected,
 		"task":         task,
 	}).Trace("Database.saveTask INSERT task")
+
+	if rowsAffected == 0 {
+		return errors.New("unauthorized task submit")
+	}
 
 	return nil
 }
@@ -77,7 +84,7 @@ func (database *Database) GetTask(worker *Worker) *Task {
 	LEFT JOIN worker_verifies_task wvt on task.id = wvt.task AND wvt.worker=$1
 	WHERE assignee IS NULL AND task.status=1
 		AND (project.public OR EXISTS (
-		  SELECT 1 FROM worker_has_access_to_project a WHERE a.worker=$1 AND a.project=project.id
+		  SELECT a.role_assign FROM worker_access a WHERE a.worker=$1 AND a.project=project.id
 		))
 		AND wvt.task IS NULL
 	ORDER BY project.priority DESC, task.priority DESC
@@ -179,8 +186,8 @@ func (database *Database) GetTaskFromProject(worker *Worker, projectId int64) *T
 	INNER JOIN project project on task.project = project.id
 	LEFT JOIN worker_verifies_task wvt on task.id = wvt.task AND wvt.worker=$1
 	WHERE assignee IS NULL AND project.id=$2 AND status=1
-		AND (project.public OR EXISTS (
-		  SELECT 1 FROM worker_has_access_to_project a WHERE a.worker=$1 AND a.project=$2
+		AND (project.public OR (
+		  SELECT a.role_assign FROM worker_access a WHERE a.worker=$1 AND a.project=$2
 		))
 		AND wvt.task IS NULL
 	ORDER BY task.priority DESC

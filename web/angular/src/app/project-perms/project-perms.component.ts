@@ -1,4 +1,3 @@
-import {Worker} from "../models/worker"
 import {Component, OnInit} from '@angular/core';
 import {ApiService} from "../api.service";
 import {Project} from "../models/project";
@@ -7,6 +6,7 @@ import {MessengerService} from "../messenger.service";
 import {TranslateService} from "@ngx-translate/core";
 
 import * as moment from "moment"
+import {WorkerAccess} from "../models/worker-access";
 
 @Component({
     selector: 'app-project-perms',
@@ -24,7 +24,7 @@ export class ProjectPermsComponent implements OnInit {
 
     project: Project;
     private projectId: number;
-    requests: Worker[];
+    accesses: WorkerAccess[];
     unauthorized: boolean = false;
     moment = moment;
 
@@ -32,8 +32,18 @@ export class ProjectPermsComponent implements OnInit {
         this.route.params.subscribe(params => {
             this.projectId = params["id"];
             this.getProject();
-            this.getProjectRequests();
+            this.getProjectAccesses();
         })
+    }
+
+    public acceptRequest(wa: WorkerAccess) {
+        this.apiService.acceptWorkerAccessRequest(wa.worker.id, this.projectId)
+            .subscribe(() => this.getProjectAccesses())
+    }
+
+    public rejectRequest(wa: WorkerAccess) {
+        this.apiService.rejectWorkerAccessRequest(wa.worker.id, this.projectId)
+            .subscribe(() => this.getProjectAccesses())
     }
 
     private getProject() {
@@ -42,10 +52,10 @@ export class ProjectPermsComponent implements OnInit {
         })
     }
 
-    private getProjectRequests() {
-        this.apiService.getProjectAccessRequests(this.projectId).subscribe(
+    private getProjectAccesses() {
+        this.apiService.getProjectAccess(this.projectId).subscribe(
             data => {
-                this.requests = data["requests"]
+                this.accesses = data["accesses"]
             },
             error => {
                 if (error && (error.status == 401 || error.status == 403)) {
@@ -55,6 +65,6 @@ export class ProjectPermsComponent implements OnInit {
     }
 
     public refresh() {
-        this.getProjectRequests()
+        this.getProjectAccesses()
     }
 }

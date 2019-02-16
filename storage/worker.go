@@ -16,11 +16,20 @@ type WorkerStats struct {
 	ClosedTaskCount int64  `json:"closed_task_count"`
 }
 
+type WorkerAccess struct {
+	Submit  bool   `json:"submit"`
+	Assign  bool   `json:"assign"`
+	Request bool   `json:"request"`
+	Worker  Worker `json:"worker"`
+	Project int64  `json:"project"`
+}
+
 func (database *Database) SaveWorker(worker *Worker) {
 
 	db := database.getDB()
 
-	row := db.QueryRow("INSERT INTO worker (created, secret, alias) VALUES ($1,$2,$3) RETURNING id",
+	row := db.QueryRow(`INSERT INTO worker (created, secret, alias) 
+		VALUES ($1,$2,$3) RETURNING id`,
 		worker.Created, worker.Secret, worker.Alias)
 
 	err := row.Scan(&worker.Id)
@@ -56,14 +65,14 @@ func (database *Database) GetWorker(id int64) *Worker {
 func (database *Database) GrantAccess(workerId int64, projectId int64) bool {
 
 	db := database.getDB()
-	res, err := db.Exec(`INSERT INTO worker_has_access_to_project (worker, project) VALUES ($1,$2)
-		ON CONFLICT DO NOTHING`,
+	res, err := db.Exec(`UPDATE worker_access SET
+  		request=FALSE WHERE worker=$1 AND project=$2`,
 		workerId, projectId)
 	if err != nil {
 		logrus.WithFields(logrus.Fields{
 			"workerId":  workerId,
 			"projectId": projectId,
-		}).WithError(err).Warn("Database.GrantAccess INSERT worker_hase_access_to_project")
+		}).WithError(err).Warn("Database.GrantAccess INSERT")
 		return false
 	}
 
@@ -73,25 +82,7 @@ func (database *Database) GrantAccess(workerId int64, projectId int64) bool {
 		"rowsAffected": rowsAffected,
 		"workerId":     workerId,
 		"projectId":    projectId,
-	}).Trace("Database.GrantAccess INSERT worker_has_access_to_project")
-
-	return rowsAffected == 1
-}
-
-func (database *Database) RemoveAccess(workerId int64, projectId int64) bool {
-
-	db := database.getDB()
-	res, err := db.Exec(`DELETE FROM worker_has_access_to_project WHERE worker=$1 AND project=$2`,
-		workerId, projectId)
-	handleErr(err)
-
-	rowsAffected, _ := res.RowsAffected()
-
-	logrus.WithFields(logrus.Fields{
-		"rowsAffected": rowsAffected,
-		"workerId":     workerId,
-		"projectId":    projectId,
-	}).Trace("Database.RemoveAccess DELETE worker_has_access_to_project")
+	}).Trace("Database.GrantAccess INSERT")
 
 	return rowsAffected == 1
 }
@@ -113,14 +104,14 @@ func (database *Database) UpdateWorker(worker *Worker) bool {
 	return rowsAffected == 1
 }
 
-func (database *Database) SaveAccessRequest(worker *Worker, projectId int64) bool {
+func (database *Database) SaveAccessRequest(wa *WorkerAccess) bool {
 
 	db := database.getDB()
 
-	res, err := db.Exec(`INSERT INTO worker_requests_access_to_project 
-  		SELECT $1, id FROM project WHERE id=$2 AND NOT project.public 
-		AND NOT EXISTS(SELECT * FROM worker_has_access_to_project WHERE worker=$1 AND project=$2)`,
-		worker.Id, projectId)
+	res, err := db.Exec(`INSERT INTO worker_access(worker, project, role_assign,
+                          role_submit, request)
+ 		VALUES ($1,$2,$3,$4,TRUE)`,
+		wa.Worker.Id, wa.Project, wa.Assign, wa.Submit)
 	if err != nil {
 		return false
 	}
@@ -134,35 +125,12 @@ func (database *Database) SaveAccessRequest(worker *Worker, projectId int64) boo
 	return rowsAffected == 1
 }
 
-func (database *Database) AcceptAccessRequest(worker *Worker, projectId int64) bool {
+func (database *Database) AcceptAccessRequest(worker int64, projectId int64) bool {
 
 	db := database.getDB()
 
-	res, err := db.Exec(`DELETE FROM worker_requests_access_to_project 
-		WHERE worker=$1 AND project=$2`)
-	handleErr(err)
-
-	rowsAffected, _ := res.RowsAffected()
-	if rowsAffected == 1 {
-		_, err := db.Exec(`INSERT INTO worker_has_access_to_project 
-  			(worker, project) VALUES ($1,$2)`,
-			worker.Id, projectId)
-		handleErr(err)
-	}
-
-	logrus.WithFields(logrus.Fields{
-		"rowsAffected": rowsAffected,
-	}).Trace("Database.AcceptAccessRequest")
-
-	return rowsAffected == 1
-}
-
-func (database *Database) RejectAccessRequest(worker *Worker, projectId int64) bool {
-
-	db := database.getDB()
-
-	res, err := db.Exec(`DELETE FROM worker_requests_access_to_project 
-		  WHERE worker=$1 AND project=$2`, worker.Id, projectId)
+	res, err := db.Exec(`UPDATE worker_access SET request=FALSE 
+		WHERE worker=$1 AND project=$2`, worker, projectId)
 	handleErr(err)
 
 	rowsAffected, _ := res.RowsAffected()
@@ -174,22 +142,44 @@ func (database *Database) RejectAccessRequest(worker *Worker, projectId int64) b
 	return rowsAffected == 1
 }
 
-func (database *Database) GetAllAccessRequests(projectId int64) *[]Worker {
+func (database *Database) RejectAccessRequest(workerId int64, projectId int64) bool {
+
+	db := database.getDB()
+	res, err := db.Exec(`DELETE FROM worker_access WHERE worker=$1 AND project=$2`,
+		workerId, projectId)
+	handleErr(err)
+
+	rowsAffected, _ := res.RowsAffected()
+
+	logrus.WithFields(logrus.Fields{
+		"rowsAffected": rowsAffected,
+		"workerId":     workerId,
+		"projectId":    projectId,
+	}).Trace("Database.RejectAccessRequest DELETE")
+
+	return rowsAffected == 1
+}
+
+func (database *Database) GetAllAccesses(projectId int64) *[]WorkerAccess {
 
 	db := database.getDB()
 
-	rows, err := db.Query(`SELECT id, alias, created FROM worker_requests_access_to_project
-		INNER JOIN worker w on worker_requests_access_to_project.worker = w.id
-		WHERE project=$1`,
+	rows, err := db.Query(`SELECT id, alias, created, role_assign, role_submit, request
+		FROM worker_access
+		INNER JOIN worker w on worker_access.worker = w.id
+		WHERE project=$1 ORDER BY request, alias`,
 		projectId)
 	handleErr(err)
 
-	requests := make([]Worker, 0)
+	requests := make([]WorkerAccess, 0)
 
 	for rows.Next() {
-		w := Worker{}
-		_ = rows.Scan(&w.Id, &w.Alias, &w.Created)
-		requests = append(requests, w)
+		wa := WorkerAccess{
+			Project: projectId,
+		}
+		_ = rows.Scan(&wa.Worker.Id, &wa.Worker.Alias, &wa.Worker.Created,
+			&wa.Assign, &wa.Submit, &wa.Request)
+		requests = append(requests, wa)
 	}
 
 	return &requests

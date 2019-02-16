@@ -9,10 +9,6 @@ import (
 	"time"
 )
 
-type CreateWorkerRequest struct {
-	Alias string `json:"alias"`
-}
-
 type UpdateWorkerRequest struct {
 	Alias string `json:"alias"`
 }
@@ -20,6 +16,10 @@ type UpdateWorkerRequest struct {
 type UpdateWorkerResponse struct {
 	Ok      bool   `json:"ok"`
 	Message string `json:"message,omitempty"`
+}
+
+type CreateWorkerRequest struct {
+	Alias string `json:"alias"`
 }
 
 type CreateWorkerResponse struct {
@@ -34,20 +34,23 @@ type GetWorkerResponse struct {
 	Worker  *storage.Worker `json:"worker,omitempty"`
 }
 
-type WorkerAccessRequest struct {
-	WorkerId  int64 `json:"worker_id"`
-	ProjectId int64 `json:"project_id"`
-}
-
-type WorkerAccessResponse struct {
-	Ok      bool   `json:"ok"`
-	Message string `json:"message"`
-}
-
 type GetAllWorkerStatsResponse struct {
 	Ok      bool                   `json:"ok"`
 	Message string                 `json:"message,omitempty"`
 	Stats   *[]storage.WorkerStats `json:"stats"`
+}
+
+type WorkerAccessRequest struct {
+	Assign  bool  `json:"assign"`
+	Submit  bool  `json:"submit"`
+	Project int64 `json:"project"`
+}
+
+func (w *WorkerAccessRequest) isValid() bool {
+	if !w.Assign && !w.Submit {
+		return false
+	}
+	return true
 }
 
 func (api *WebAPI) WorkerCreate(r *Request) {
@@ -122,57 +125,6 @@ func (api *WebAPI) WorkerGet(r *Request) {
 			Ok:      false,
 			Message: "Worker not found",
 		}, 404)
-	}
-}
-
-func (api *WebAPI) WorkerGrantAccess(r *Request) {
-
-	req := &WorkerAccessRequest{}
-	err := json.Unmarshal(r.Ctx.Request.Body(), req)
-	if err != nil {
-		r.Json(GetTaskResponse{
-			Ok:      false,
-			Message: "Could not parse request",
-		}, 400)
-		return
-	}
-
-	ok := api.Database.GrantAccess(req.WorkerId, req.ProjectId)
-
-	if ok {
-		r.OkJson(WorkerAccessResponse{
-			Ok: true,
-		})
-	} else {
-		r.OkJson(WorkerAccessResponse{
-			Ok:      false,
-			Message: "Worker already has access to this project",
-		})
-	}
-}
-
-func (api *WebAPI) WorkerRemoveAccess(r *Request) {
-
-	req := &WorkerAccessRequest{}
-	err := json.Unmarshal(r.Ctx.Request.Body(), req)
-	if err != nil {
-		r.Json(GetTaskResponse{
-			Ok:      false,
-			Message: "Could not parse request",
-		}, 400)
-		return
-	}
-	ok := api.Database.RemoveAccess(req.WorkerId, req.ProjectId)
-
-	if ok {
-		r.OkJson(WorkerAccessResponse{
-			Ok: true,
-		})
-	} else {
-		r.OkJson(WorkerAccessResponse{
-			Ok:      false,
-			Message: "Worker did not have access to this project",
-		})
 	}
 }
 

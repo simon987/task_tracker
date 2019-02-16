@@ -11,19 +11,23 @@
 
         <mat-card-content>
             <mat-list *ngIf="!unauthorized">
-                <mat-list-item *ngFor="let w of requests">
-                    <mat-icon mat-list-icon>person_add</mat-icon>
-                    <h4 mat-line>{{w.alias}}</h4>
+                <mat-list-item *ngFor="let wa of accesses" [class.request]="wa.request">
+                    <mat-icon mat-list-icon *ngIf="wa.submit" [title]="'perms.assign'|translate">library_add</mat-icon>
+                    <mat-icon mat-list-icon *ngIf="wa.assign" [title]="'perms.submit'|translate">get_app</mat-icon>
+                    <h4 mat-line>{{wa.worker.alias}} {{wa.request ? ('perms.pending' | translate) : ''}}</h4>
                     <div mat-line>
-                        Id=<span class="text-mono">{{w.id}}</span>, {{"perms.created" | translate}}
+                        Id=<span class="text-mono">{{wa.worker.id}}</span>, {{"perms.created" | translate}}
                         <span
-                            class="text-mono">{{moment.unix(w.created).utc().format("UTC YYYY-MM-DD HH:mm:ss")}}</span>
+                            class="text-mono">{{moment.unix(wa.worker.created).utc().format("UTC YYYY-MM-DD HH:mm:ss")}}</span>
                     </div>
                     <span style="flex: 1 1 auto;"></span>
-                    <button mat-raised-button color="primary" [title]="'perms.grant' | translate">
+                    <button mat-raised-button color="primary" [title]="'perms.grant' | translate"
+                            *ngIf="wa.request" (click)="acceptRequest(wa)">
                         <mat-icon>check</mat-icon>
                     </button>
-                    <button mat-raised-button color="warn" [title]="'perms.reject' | translate">
+                    <button mat-raised-button color="warn"
+                            [title]="wa.request ? ('perms.reject'|translate) : ('perms.remove'|translate)"
+                            (click)="rejectRequest(wa)">
                         <mat-icon>close</mat-icon>
                     </button>
                 </mat-list-item>

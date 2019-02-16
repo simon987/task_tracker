@@ -103,7 +103,11 @@
         "created": "Created on",
         "grant": "Accept request",
         "reject": "Deny request",
-        "refresh": "Refresh"
+        "remove": "Remove access",
+        "refresh": "Refresh",
+        "pending": "(Pending)",
+        "assign": "Assign",
+        "submit": "Submit"
     },
     "messenger": {
         "close": "Close",

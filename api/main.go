@@ -80,9 +80,6 @@ func New() *WebAPI {
 	api.router.GET("/worker/get/:id", LogRequestMiddleware(api.WorkerGet))
 	api.router.GET("/worker/stats", LogRequestMiddleware(api.GetAllWorkerStats))
 
-	api.router.POST("/access/grant", LogRequestMiddleware(api.WorkerGrantAccess))
-	api.router.POST("/access/remove", LogRequestMiddleware(api.WorkerRemoveAccess))
-
 	api.router.POST("/project/create", LogRequestMiddleware(api.ProjectCreate))
 	api.router.GET("/project/get/:id", LogRequestMiddleware(api.ProjectGet))
 	api.router.POST("/project/update/:id", LogRequestMiddleware(api.ProjectUpdate))
@@ -90,8 +87,10 @@ func New() *WebAPI {
 	api.router.GET("/project/monitoring-between/:id", LogRequestMiddleware(api.GetSnapshotsBetween))
 	api.router.GET("/project/monitoring/:id", LogRequestMiddleware(api.GetNSnapshots))
 	api.router.GET("/project/assignees/:id", LogRequestMiddleware(api.ProjectGetAssigneeStats))
-	api.router.GET("/project/requests/:id", LogRequestMiddleware(api.ProjectGetAccessRequests))
-	api.router.GET("/project/request_access/:id", LogRequestMiddleware(api.WorkerRequestAccess))
+	api.router.GET("/project/accesses/:id", LogRequestMiddleware(api.ProjectGetWorkerAccesses))
+	api.router.POST("/project/request_access", LogRequestMiddleware(api.WorkerRequestAccess))
+	api.router.POST("/project/accept_request/:id/:wid", LogRequestMiddleware(api.AcceptAccessRequest))
+	api.router.POST("/project/reject_request/:id/:wid", LogRequestMiddleware(api.RejectAccessRequest))
 
 	api.router.POST("/task/create", LogRequestMiddleware(api.TaskCreate))
 	api.router.GET("/task/get/:project", LogRequestMiddleware(api.TaskGetFromProject))

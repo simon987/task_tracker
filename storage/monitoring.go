@@ -30,7 +30,7 @@ func (database *Database) MakeProjectSnapshots() {
 			   		WHERE task.project = project.id AND status = 1 AND wvt.task IS NULL),
 			   (SELECT COUNT(*) FROM task WHERE task.project = project.id AND status = 2),
 			   closed_task_count,
-			   (SELECT COUNT(*) FROM worker_has_access_to_project wa WHERE wa.project = project.id),
+			   (SELECT COUNT(*) FROM worker_access wa WHERE wa.project = project.id),
 			   (SELECT COUNT(*) FROM worker_verifies_task INNER JOIN task t on worker_verifies_task.task = t.id
 			  		WHERE t.project = project.id),
 			   extract(epoch from now() at time zone 'utc')
