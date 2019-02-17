@@ -66,7 +66,7 @@ export class ApiService {
     }
 
     getProjectAccess(project: number) {
-        return this.http.get(this.url + `/project/accesses/${project}`)
+        return this.http.get(this.url + `/project/access_list/${project}`)
     }
 
     getAllManagers() {

@@ -781,7 +781,7 @@ func TestTaskChain(t *testing.T) {
 }
 
 func createTask(request api.SubmitTaskRequest, worker *storage.Worker) (ar api.JsonResponse) {
-	r := Post("/task/create", request, worker, nil)
+	r := Post("/task/submit", request, worker, nil)
 	UnmarshalResponse(r, &ar)
 	return
 }
