@@ -1,12 +1,14 @@
 import {Component, OnInit} from '@angular/core';
 import {ApiService} from "../api.service";
 import {Project} from "../models/project";
-import {ActivatedRoute, Router} from "@angular/router";
-import {MessengerService} from "../messenger.service";
-import {TranslateService} from "@ngx-translate/core";
+import {ActivatedRoute} from "@angular/router";
 
 import * as moment from "moment"
 import {WorkerAccess} from "../models/worker-access";
+import {AuthService} from "../auth.service";
+import {Manager, ManagerRoleOnProject} from "../models/manager";
+import {MessengerService} from "../messenger.service";
+import {TranslateService} from "@ngx-translate/core";
 
 @Component({
     selector: 'app-project-perms',
@@ -17,14 +19,15 @@ export class ProjectPermsComponent implements OnInit {
 
     constructor(private apiService: ApiService,
                 private route: ActivatedRoute,
-                private messengerService: MessengerService,
                 private translate: TranslateService,
-                private router: Router) {
+                private messenger: MessengerService,
+                public auth: AuthService) {
     }
 
     project: Project;
     private projectId: number;
     accesses: WorkerAccess[];
+    managerRoles: ManagerRoleOnProject;
     unauthorized: boolean = false;
     moment = moment;
 
@@ -33,17 +36,24 @@ export class ProjectPermsComponent implements OnInit {
             this.projectId = params["id"];
             this.getProject();
             this.getProjectAccesses();
+            this.getProjectManagers();
         })
     }
 
     public acceptRequest(wa: WorkerAccess) {
         this.apiService.acceptWorkerAccessRequest(wa.worker.id, this.projectId)
-            .subscribe(() => this.getProjectAccesses())
+            .subscribe(() => {
+                this.getProjectAccesses();
+                this.translate.get("perms.set").subscribe(t => this.messenger.show(t));
+            })
     }
 
     public rejectRequest(wa: WorkerAccess) {
         this.apiService.rejectWorkerAccessRequest(wa.worker.id, this.projectId)
-            .subscribe(() => this.getProjectAccesses())
+            .subscribe(() => {
+                this.getProjectAccesses();
+                this.translate.get("perms.set").subscribe(t => this.messenger.show(t));
+            })
     }
 
     private getProject() {
@@ -64,7 +74,31 @@ export class ProjectPermsComponent implements OnInit {
             })
     }
 
+    private getProjectManagers() {
+        this.apiService.getManagerListWithRoleOn(this.projectId)
+            .subscribe(data => {
+                this.managerRoles = data["content"]["managers"].map(d =>
+                    ManagerRoleOnProject.fromEntity(d))
+            })
+    }
+
     public refresh() {
-        this.getProjectAccesses()
+        this.getProjectAccesses();
+        this.getProjectManagers();
+    }
+
+    public onSelectManager(manager: Manager) {
+        if (manager.id != this.auth.account.id) {
+            this.apiService.setManagerRoleOnProject(this.projectId, 1, manager.id)
+                .subscribe(() => this.refresh())
+        }
+    }
+
+    public onRoleChange(manager: ManagerRoleOnProject) {
+        this.apiService.setManagerRoleOnProject(this.projectId, manager.role, manager.manager.id)
+            .subscribe(() => {
+                this.refresh();
+                this.translate.get("perms.set").subscribe(t => this.messenger.show(t));
+            })
     }
 }

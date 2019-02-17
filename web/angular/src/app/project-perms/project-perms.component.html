@@ -9,8 +9,9 @@
             <mat-card-subtitle>{{"perms.subtitle" | translate}}</mat-card-subtitle>
         </mat-card-header>
 
-        <mat-card-content>
-            <mat-list *ngIf="!unauthorized">
+        <mat-card-content *ngIf="!unauthorized || !auth.account">
+            <h3>{{"perms.workers" | translate}}</h3>
+            <mat-list *ngIf="accesses && accesses.length>0">
                 <mat-list-item *ngFor="let wa of accesses" [class.request]="wa.request">
                     <mat-icon mat-list-icon *ngIf="wa.submit" [title]="'perms.assign'|translate">library_add</mat-icon>
                     <mat-icon mat-list-icon *ngIf="wa.assign" [title]="'perms.submit'|translate">get_app</mat-icon>
@@ -32,7 +33,33 @@
                     </button>
                 </mat-list-item>
             </mat-list>
-            <p *ngIf="unauthorized" class="unauthorized">
+            <p *ngIf="!accesses || accesses.length == 0">{{"perms.no_workers"|translate}}</p>
+
+            <h3>{{"perms.managers" | translate}}</h3>
+            <manager-select (managerChange)="onSelectManager($event)"></manager-select>
+            <mat-list>
+                <mat-list-item *ngFor="let m of managerRoles">
+                    <mat-icon *ngIf="m.manager.tracker_admin">supervisor_account</mat-icon>
+                    <mat-icon *ngIf="!m.manager.tracker_admin">person</mat-icon>
+                    {{m.manager.username}}
+                    <span class="spacer"></span>
+                    <mat-checkbox [(ngModel)]="m.readRole"
+                                  (change)="onRoleChange(m)"
+                                  [disabled]="m.manager.id==auth.account.id"
+                    >{{"perms.read"|translate}}</mat-checkbox>
+                    <mat-checkbox [(ngModel)]="m.editRole"
+                                  (change)="onRoleChange(m)"
+                                  [disabled]="m.manager.id==auth.account.id"
+                    >{{"perms.edit"|translate}}</mat-checkbox>
+                    <mat-checkbox [(ngModel)]="m.manageRole"
+                                  (change)="onRoleChange(m)"
+                                  [disabled]="m.manager.id==auth.account.id"
+                    >{{"perms.manage"|translate}}</mat-checkbox>
+                </mat-list-item>
+            </mat-list>
+        </mat-card-content>
+        <mat-card-content *ngIf="unauthorized">
+            <p class="unauthorized">
                 <mat-icon>block</mat-icon>
                 {{"perms.unauthorized" | translate}}
             </p>

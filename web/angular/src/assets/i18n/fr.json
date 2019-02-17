@@ -66,7 +66,9 @@
         "motd": "Message du jour",
         "update": "Mettre à jour",
         "perms": "Permissions",
-        "chain": "Enchainer les tâches vers"
+        "chain": "Enchainer les tâches vers",
+        "manager_select": "Donner accès à",
+        "version": "Version git (hash du commit)"
     },
     "dashboard": {
         "title": "Tableau de bord pour ",
@@ -100,7 +102,7 @@
     },
     "perms": {
         "title": "Permissions du projet",
-        "subtitle": "Les Workers doivent faire un requête d'acces pour pouvoir travailler sur les projets privés",
+        "subtitle": "Les Workers doivent faire une requête d'acces pour pouvoir travailler sur les projets privés",
         "unauthorized": "Vous devez avoir ROLE_GESTION_ACCES sur ce project pour accéder à cette page",
         "created": "Créé le",
         "grant": "Accepter la requête",
@@ -109,7 +111,14 @@
         "refresh": "Refraichir",
         "pending": "(En attente)",
         "assign": "Assigner",
-        "submit": "Soumettre"
+        "submit": "Soumettre",
+        "read": "Lecture",
+        "edit": "Modification",
+        "manage": "Gestion des permissions",
+        "set": "Changements enregistrés",
+        "workers": "Workers",
+        "no_workers": "Aucun Worker n'a explicitement accès à ce projet",
+        "managers": "Managers"
     },
     "messenger": {
         "close": "Fermer",

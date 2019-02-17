@@ -1,0 +1,16 @@
+<mat-form-field appearance="outline" style="margin-top: 1em">
+    <mat-label>{{"project.manager_select" | translate}}</mat-label>
+    <mat-select [(ngModel)]="manager" (selectionChange)="managerChange.emit($event.value)"
+                [placeholder]="'perms.manager_select' | translate"
+                (opened)="loadManagerList()">
+        <mat-select-trigger></mat-select-trigger>
+        <mat-option disabled *ngIf="managerList == undefined">
+            {{"project_select.loading" | translate}}
+        </mat-option>
+        <mat-option *ngFor="let m of managerList" [value]="m">
+            <mat-icon *ngIf="m.tracker_admin">supervisor_account</mat-icon>
+            <mat-icon *ngIf="!m.tracker_admin">person</mat-icon>
+            {{m.username}}
+        </mat-option>
+    </mat-select>
+</mat-form-field>

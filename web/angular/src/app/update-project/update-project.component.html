@@ -5,25 +5,37 @@
         <mat-card-content>
             <form (ngSubmit)="onSubmit()" *ngIf="project != undefined" id="uf">
                 <mat-form-field appearance="outline">
-                    <input type="text" matInput [(ngModel)]="project.name" name="name" placeholder="Name">
+                    <mat-label>{{"project.name" | translate}}</mat-label>
+                    <input type="text" matInput [(ngModel)]="project.name" name="name"
+                           [placeholder]="'project.name'|translate"
+                    >
                 </mat-form-field>
 
                 <mat-form-field appearance="outline">
-                    <textarea matInput [(ngModel)]="project.motd" placeholder="Message of the day"
+                    <mat-label>{{"project.motd" | translate}}</mat-label>
+                    <textarea matInput [(ngModel)]="project.motd"
+                              [placeholder]="'project.motd'|translate"
                               name="motd"></textarea>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline">
+                    <mat-label>{{"project.clone_url" | translate}}</mat-label>
                     <input type="text" matInput [(ngModel)]="project.clone_url" name="clone_url"
-                           placeholder="Git clone url">
+                           [placeholder]="'project.clone_url'|translate"
+                    >
                 </mat-form-field>
                 <mat-form-field appearance="outline">
+                    <mat-label>{{"project.version" | translate}}</mat-label>
+                    <input type="text" matInput [(ngModel)]="project.version" name="version"
+                           [placeholder]="'project.version'|translate"
+                    >
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                    <mat-label>{{"project.git_repo" | translate}}</mat-label>
                     <input type="text" matInput [(ngModel)]="project.git_repo" name="git_repo"
-                           placeholder='Full repository name (e.g. "simon987/task_tracker")'>
-                    <mat-hint align="start">Changes on the <strong>master</strong> branch will be tracked if webhooks
-                        are
-                        enabled
-                    </mat-hint>
+                           [placeholder]="'project.git_repo_placeholder'|translate"
+                    >
+                    <mat-hint align="start">{{'project.git_repo_hint'|translate}}</mat-hint>
                 </mat-form-field>
                 <project-select [(project)]="selectedProject"></project-select>
             </form>

@@ -81,6 +81,10 @@ type GetManagerListResponse struct {
 	Managers *[]storage.Manager `json:"managers"`
 }
 
+type GetManagerListWithRoleOnResponse struct {
+	Managers *[]storage.ManagerRoleOn `json:"managers"`
+}
+
 type GetLogRequest struct {
 	Level storage.LogLevel `json:"level"`
 	Since int64            `json:"since"`
@@ -261,6 +265,11 @@ func (w *CreateWorkerAccessRequest) isValid() bool {
 		return false
 	}
 	return true
+}
+
+type SetManagerRoleOnProjectRequest struct {
+	Manager int64               `json:"manager"`
+	Role    storage.ManagerRole `json:"role"`
 }
 
 type Info struct {

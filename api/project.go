@@ -100,7 +100,7 @@ func (api *WebAPI) CreateProject(r *Request) {
 		return
 	}
 
-	api.Database.SetManagerRoleOn(manager.(*storage.Manager), id,
+	api.Database.SetManagerRoleOn(manager.(*storage.Manager).Id, id,
 		storage.ROLE_MANAGE_ACCESS|storage.ROLE_READ|storage.ROLE_EDIT)
 	r.OkJson(JsonResponse{
 		Ok: true,
@@ -402,4 +402,36 @@ func (api *WebAPI) RejectAccessRequest(r *Request) {
 			Message: "Worker did not have access to this project",
 		})
 	}
+}
+
+func (api *WebAPI) SetManagerRoleOnProject(r *Request) {
+
+	pid, err := strconv.ParseInt(r.Ctx.UserValue("id").(string), 10, 64)
+	handleErr(err, r) //todo handle invalid id
+
+	req := &SetManagerRoleOnProjectRequest{}
+	err = json.Unmarshal(r.Ctx.Request.Body(), req)
+	if err != nil {
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: "Could not parse request",
+		}, 400)
+		return
+	}
+
+	sess := api.Session.StartFasthttp(r.Ctx)
+	manager := sess.Get("manager")
+
+	if !isActionOnProjectAuthorized(pid, manager, storage.ROLE_MANAGE_ACCESS, api.Database) {
+		r.Json(JsonResponse{
+			Message: "Unauthorized",
+			Ok:      false,
+		}, 403)
+		return
+	}
+
+	api.Database.SetManagerRoleOn(req.Manager, pid, req.Role)
+	r.OkJson(JsonResponse{
+		Ok: true,
+	})
 }

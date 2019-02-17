@@ -99,3 +99,12 @@ pre {
     color: #ff4081;
 }
 
+.spacer {
+    flex: 1 1 auto;
+}
+
+.mat-list-item-content > mat-icon {
+    margin-right: 15px;
+}
+
+

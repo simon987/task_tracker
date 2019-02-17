@@ -5,6 +5,8 @@ import {ActivatedRoute} from "@angular/router";
 
 import {Chart} from "chart.js";
 import {AssignedTasks, MonitoringSnapshot} from "../models/monitoring";
+import {TranslateService} from "@ngx-translate/core";
+import {MessengerService} from "../messenger.service";
 
 
 @Component({
@@ -41,7 +43,10 @@ export class ProjectDashboardComponent implements OnInit {
     lastSnapshot: MonitoringSnapshot;
     assignees: AssignedTasks[];
 
-    constructor(private apiService: ApiService, private route: ActivatedRoute) {
+    constructor(private apiService: ApiService,
+                private route: ActivatedRoute,
+                private translate: TranslateService,
+                private messenger: MessengerService) {
     }
 
     ngOnInit(): void {
@@ -305,28 +310,32 @@ export class ProjectDashboardComponent implements OnInit {
 
     private getProject() {
         this.apiService.getProject(this.projectId).subscribe((data: any) => {
-            this.project = data.content.project;
+                this.project = data.content.project;
 
-            this.apiService.getMonitoringSnapshots(60, this.projectId)
-                .subscribe((data: any) => {
-                    this.snapshots = data.content.snapshots;
-                    this.lastSnapshot = this.snapshots ? this.snapshots.sort((a, b) => {
-                        return b.time_stamp - a.time_stamp
-                    })[0] : null;
+                this.apiService.getMonitoringSnapshots(60, this.projectId)
+                    .subscribe((data: any) => {
+                        this.snapshots = data.content.snapshots;
+                        this.lastSnapshot = this.snapshots ? this.snapshots.sort((a, b) => {
+                            return b.time_stamp - a.time_stamp
+                        })[0] : null;
 
-                    this.setupTimeline();
-                    this.setupStatusPie();
+                        this.setupTimeline();
+                        this.setupStatusPie();
 
-                    if (!this.snapshots) {
-                        return
-                    }
+                        if (!this.snapshots) {
+                            return
+                        }
 
-                    this.apiService.getAssigneeStats(this.projectId)
-                        .subscribe((data: any) => {
-                            this.assignees = data.content.assignees;
-                            this.setupAssigneesPie();
-                        });
-                })
-        })
+                        this.apiService.getAssigneeStats(this.projectId)
+                            .subscribe((data: any) => {
+                                this.assignees = data.content.assignees;
+                                this.setupAssigneesPie();
+                            });
+                    })
+            },
+            error => {
+                this.translate.get("messenger.unauthorized").subscribe(t =>
+                    this.messenger.show(t))
+            })
     }
 }

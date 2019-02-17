@@ -3,6 +3,7 @@ package storage
 import (
 	"bytes"
 	"crypto"
+	"database/sql"
 	"errors"
 	"github.com/Sirupsen/logrus"
 )
@@ -21,6 +22,11 @@ type Manager struct {
 	Username     string `json:"username"`
 	WebsiteAdmin bool   `json:"tracker_admin"`
 	RegisterTime int64  `json:"register_time"`
+}
+
+type ManagerRoleOn struct {
+	Manager Manager     `json:"manager"`
+	Role    ManagerRole `json:"role"`
 }
 
 func (database *Database) ValidateCredentials(username []byte, password []byte) (*Manager, error) {
@@ -142,20 +148,28 @@ func (database *Database) GetManagerRoleOn(manager *Manager, projectId int64) Ma
 	return role
 }
 
-func (database *Database) SetManagerRoleOn(manager *Manager, projectId int64, role ManagerRole) {
+func (database *Database) SetManagerRoleOn(manager int64, projectId int64, role ManagerRole) {
 
 	db := database.getDB()
 
-	res, err := db.Exec(`INSERT INTO manager_has_role_on_project (manager, role, project) 
-		VALUES ($1,$2,$3) ON CONFLICT (manager, project) DO UPDATE SET role=$2`,
-		manager.Id, role, projectId)
-	handleErr(err)
+	var res sql.Result
+	var err error
 
+	if role == 0 {
+		res, err = db.Exec(`DELETE FROM manager_has_role_on_project WHERE manager=$1 AND project=$2`,
+			manager, projectId)
+	} else {
+		res, err = db.Exec(`INSERT INTO manager_has_role_on_project (manager, role, project) 
+		VALUES ($1,$2,$3) ON CONFLICT (manager, project) DO UPDATE SET role=$2`,
+			manager, role, projectId)
+	}
+
+	handleErr(err)
 	rowsAffected, _ := res.RowsAffected()
 
 	logrus.WithFields(logrus.Fields{
 		"role":         role,
-		"manager":      manager.Username,
+		"manager":      manager,
 		"rowsAffected": rowsAffected,
 		"project":      projectId,
 	}).Info("Set manager role on project")
@@ -173,6 +187,32 @@ func (database *Database) GetManagerList() *[]Manager {
 		m := Manager{}
 		_ = rows.Scan(&m.Id, &m.RegisterTime, &m.WebsiteAdmin, &m.Username)
 		managers = append(managers, m)
+	}
+
+	return &managers
+}
+
+func (database *Database) GetManagerListWithRoleOn(project int64) *[]ManagerRoleOn {
+
+	db := database.getDB()
+
+	rows, err := db.Query(`SELECT id, register_time, tracker_admin, username, role 
+		FROM manager
+		LEFT JOIN manager_has_role_on_project mhrop on
+		  manager.id = mhrop.manager
+		WHERE project=$1 ORDER BY id`, project)
+	handleErr(err)
+
+	managers := make([]ManagerRoleOn, 0)
+
+	for rows.Next() {
+		m := Manager{}
+		var role ManagerRole
+		_ = rows.Scan(&m.Id, &m.RegisterTime, &m.WebsiteAdmin, &m.Username, &role)
+		managers = append(managers, ManagerRoleOn{
+			Manager: m,
+			Role:    role,
+		})
 	}
 
 	return &managers

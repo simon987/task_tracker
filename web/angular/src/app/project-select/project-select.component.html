@@ -11,8 +11,7 @@
             {{"project_select.none" | translate}}
         </mat-option>
         <mat-option *ngFor="let p of projectList" [value]="p">
-            <mat-icon *ngIf="p.public">public</mat-icon>
-            <mat-icon *ngIf="!p.public">lock</mat-icon>
+            <project-icon [project]="p"></project-icon>
             <span style="width: 3em; display: inline-block">{{p.id}}</span>
             {{p.name}}
         </mat-option>

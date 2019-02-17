@@ -3,6 +3,7 @@ import {ApiService} from "./api.service";
 import {Credentials} from "./models/credentials";
 import {MessengerService} from "./messenger.service";
 import {Router} from "@angular/router";
+import {Manager} from "./models/manager";
 
 @Injectable({
     providedIn: 'root'

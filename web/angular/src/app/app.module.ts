@@ -50,6 +50,8 @@ import {WorkerDashboardComponent} from './worker-dashboard/worker-dashboard.comp
 import {ProjectPermsComponent} from './project-perms/project-perms.component';
 import {ManagerListComponent} from './manager-list/manager-list.component';
 import {ProjectSelectComponent} from './project-select/project-select.component';
+import {ManagerSelectComponent} from './manager-select/manager-select.component';
+import {ProjectIconComponent} from './project-icon/project-icon.component';
 
 
 export function createTranslateLoader(http: HttpClient) {
@@ -72,6 +74,8 @@ export function createTranslateLoader(http: HttpClient) {
         ProjectPermsComponent,
         ManagerListComponent,
         ProjectSelectComponent,
+        ManagerSelectComponent,
+        ProjectIconComponent,
     ],
     imports: [
         BrowserModule,

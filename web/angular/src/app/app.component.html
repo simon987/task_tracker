@@ -38,7 +38,7 @@
             >{{"nav.manager_list" | translate}}</button>
         </mat-menu>
     </div>
-    <span class="nav-spacer"></span>
+    <span class="spacer"></span>
     <button mat-button [class.mat-accent]="router.url == '/login'"
             class="nav-link" *ngIf="!authService.account"
             [routerLink]="'login'">{{"nav.login" | translate}}</button>

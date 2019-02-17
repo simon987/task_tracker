@@ -6,3 +6,7 @@ button {
 .request {
     color: #757575;
 }
+
+mat-checkbox {
+    margin-right: 10px;
+}

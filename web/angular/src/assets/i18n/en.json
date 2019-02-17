@@ -51,7 +51,7 @@
     },
     "project": {
         "name": "Project name",
-        "clone_url": "Clone url",
+        "clone_url": "Git clone url",
         "clone_url_placeholder": "Example: \"https://github.com/simon987/task_tracker\"",
         "git_repo_placeholder": "Example: \"simon987/task_tracker\"",
         "git_repo_hint": "Changes in the master branch will be tracked if webhooks are enabled",
@@ -65,7 +65,9 @@
         "motd": "Message of the day",
         "update": "Edit",
         "perms": "Permissions",
-        "chain": "Chain tasks to"
+        "chain": "Chain tasks to",
+        "manager_select": "Give access to manager",
+        "version": "Git version (commit hash)"
     },
     "dashboard": {
         "title": "Dashboard for",
@@ -107,7 +109,14 @@
         "refresh": "Refresh",
         "pending": "(Pending)",
         "assign": "Assign",
-        "submit": "Submit"
+        "submit": "Submit",
+        "read": "Read",
+        "edit": "Edit",
+        "manage": "Manage permissions",
+        "set": "Changes saved",
+        "workers": "Workers",
+        "no_workers": "No workers have explicit access to this project",
+        "managers": "Managers"
     },
     "messenger": {
         "close": "Close",

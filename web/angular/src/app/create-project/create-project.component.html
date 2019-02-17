@@ -6,13 +6,20 @@
         <mat-card-content>
             <mat-form-field appearance="outline">
                 <mat-label>{{"project.name" | translate}}</mat-label>
-                <input type="text" matInput [(ngModel)]="project.name" [placeholder]="'project.name' | translate">
+                <input type="text" matInput [(ngModel)]="project.name" [placeholder]="'project.name' | translate"
+                       required>
             </mat-form-field>
 
             <mat-form-field appearance="outline">
                 <mat-label>{{ "project.clone_url" | translate}}</mat-label>
                 <input type="text" matInput [(ngModel)]="project.clone_url" (change)="cloneUrlChange()"
-                       [placeholder]="'project.clone_url_placeholder' | translate">
+                       [placeholder]="'project.clone_url_placeholder' | translate" required>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+                <mat-label>{{"project.version" | translate}}</mat-label>
+                <input type="text" matInput [(ngModel)]="project.version" name="version"
+                       [placeholder]="'project.version'|translate"
+                >
             </mat-form-field>
             <mat-form-field appearance="outline">
                 <mat-label>{{ "project.git_repo" | translate }}</mat-label>

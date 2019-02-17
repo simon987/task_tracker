@@ -1,0 +1,3 @@
+<mat-icon *ngIf="project.public" [title]="'project.public' | translate">public</mat-icon>
+<mat-icon *ngIf="!project.public && !project.hidden" [title]="'project.private'|translate">lock</mat-icon>
+<mat-icon *ngIf="project.hidden" [title]="'project.hidden'|translate">visibility_off</mat-icon>

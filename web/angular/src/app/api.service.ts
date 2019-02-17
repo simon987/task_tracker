@@ -69,8 +69,12 @@ export class ApiService {
         return this.http.get(this.url + `/project/access_list/${project}`)
     }
 
-    getAllManagers() {
+    getManagerList() {
         return this.http.get(this.url + "/manager/list")
+    }
+
+    getManagerListWithRoleOn(project: number) {
+        return this.http.get(this.url + "/manager/list_for_project/" + project)
     }
 
     promote(managerId: number) {
@@ -87,6 +91,11 @@ export class ApiService {
 
     rejectWorkerAccessRequest(wid: number, pid: number) {
         return this.http.post(this.url + `/project/reject_request/${pid}/${wid}`, null)
+    }
+
+    setManagerRoleOnProject(pid: number, role: number, manager: number) {
+        return this.http.post(this.url + `/manager/set_role_for_project/${pid}`,
+            {"role": role, "manager": manager})
     }
 
 }

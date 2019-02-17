@@ -106,8 +106,10 @@ func New() *WebAPI {
 	api.router.GET("/logout", LogRequestMiddleware(api.Logout))
 	api.router.GET("/account", LogRequestMiddleware(api.GetAccountDetails))
 	api.router.GET("/manager/list", LogRequestMiddleware(api.GetManagerList))
+	api.router.GET("/manager/list_for_project/:id", LogRequestMiddleware(api.GetManagerListWithRoleOn))
 	api.router.GET("/manager/promote/:id", LogRequestMiddleware(api.PromoteManager))
 	api.router.GET("/manager/demote/:id", LogRequestMiddleware(api.DemoteManager))
+	api.router.POST("/manager/set_role_for_project/:id", LogRequestMiddleware(api.SetManagerRoleOnProject))
 
 	api.router.NotFound = func(ctx *fasthttp.RequestCtx) {
 
