@@ -17,8 +17,8 @@ export class AuthService {
                 private router: Router) {
         this.apiService.getAccountDetails()
             .subscribe((data: any) => {
-                this.account = data.manager;
-                this.logged = data.logged_in;
+                this.account = data.content.manager;
+                this.logged = data.content.logged_in;
             })
     }
 
@@ -28,7 +28,7 @@ export class AuthService {
                 () => {
                     this.apiService.getAccountDetails()
                         .subscribe((data: any) => {
-                            this.account = data.manager;
+                            this.account = data.content.manager;
                             this.logged = true;
                             this.router.navigateByUrl("/account");
                         })
@@ -61,7 +61,7 @@ export class AuthService {
                     this.apiService.getAccountDetails()
                         .subscribe((data: any) => {
                             this.logged = true;
-                            this.account = data.manager;
+                            this.account = data.content.manager;
                             this.router.navigateByUrl("/account");
                         }),
                 error => {

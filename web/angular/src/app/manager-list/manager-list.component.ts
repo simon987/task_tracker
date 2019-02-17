@@ -57,7 +57,7 @@ export class ManagerListComponent implements OnInit {
     private getManagers() {
         this.apiService.getAllManagers()
             .subscribe(data => {
-                    this.data.data = data["managers"]
+                    this.data.data = data["content"]["managers"]
                 },
                 error => {
                     if (error && (error.status == 401 || error.status == 403)) {

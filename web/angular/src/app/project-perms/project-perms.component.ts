@@ -48,14 +48,14 @@ export class ProjectPermsComponent implements OnInit {
 
     private getProject() {
         this.apiService.getProject(this.projectId).subscribe(data => {
-            this.project = data["project"]
+            this.project = data["content"]["project"]
         })
     }
 
     private getProjectAccesses() {
         this.apiService.getProjectAccess(this.projectId).subscribe(
             data => {
-                this.accesses = data["accesses"]
+                this.accesses = data["content"]["accesses"]
             },
             error => {
                 if (error && (error.status == 401 || error.status == 403)) {

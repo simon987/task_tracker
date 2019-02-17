@@ -25,7 +25,8 @@ export class ProjectListComponent implements OnInit {
     }
 
     getProjects() {
-        this.apiService.getProjects().subscribe(data => this.projects = data["projects"]);
+        this.apiService.getProjects().subscribe(data =>
+            this.projects = data["content"]["projects"]);
     }
 
 }

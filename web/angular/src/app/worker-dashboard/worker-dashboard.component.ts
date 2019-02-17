@@ -22,8 +22,8 @@ export class WorkerDashboardComponent implements OnInit {
 
     public refresh() {
         this.apiService.getWorkerStats()
-            .subscribe((data: any) => {
-                    this.updateChart(data.stats)
+            .subscribe(data => {
+                this.updateChart(data["content"]["stats"])
                 }
             )
     }

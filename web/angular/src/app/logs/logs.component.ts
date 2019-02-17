@@ -46,7 +46,7 @@ export class LogsComponent implements OnInit {
     private getLogs(level: number) {
         this.apiService.getLogs(level).subscribe(
             data => {
-                this.data.data = _.map(data["logs"], (entry) => {
+                this.data.data = _.map(data["content"]["logs"], (entry) => {
                     return <LogEntry>{
                         message: entry.message,
                         timestamp: moment.unix(entry.timestamp).format("YYYY-MM-DD HH:mm:ss"),

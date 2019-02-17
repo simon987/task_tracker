@@ -61,7 +61,7 @@ export class ProjectDashboardComponent implements OnInit {
 
         this.apiService.getMonitoringSnapshots(60, this.projectId)
             .subscribe((data: any) => {
-                this.snapshots = data.snapshots;
+                this.snapshots = data.content.snapshots;
                 this.lastSnapshot = this.snapshots ? this.snapshots.sort((a, b) => {
                     return b.time_stamp - a.time_stamp
                 })[0] : null;
@@ -99,7 +99,7 @@ export class ProjectDashboardComponent implements OnInit {
 
                 this.apiService.getAssigneeStats(this.projectId)
                     .subscribe((data: any) => {
-                        this.assignees = data.assignees;
+                        this.assignees = data.content.assignees;
                         let colors = this.assignees.map(() => {
                             return this.colors.random[Math.floor(Math.random() * this.colors.random.length)]
                         });
@@ -305,11 +305,11 @@ export class ProjectDashboardComponent implements OnInit {
 
     private getProject() {
         this.apiService.getProject(this.projectId).subscribe((data: any) => {
-            this.project = data.project;
+            this.project = data.content.project;
 
             this.apiService.getMonitoringSnapshots(60, this.projectId)
                 .subscribe((data: any) => {
-                    this.snapshots = data.snapshots;
+                    this.snapshots = data.content.snapshots;
                     this.lastSnapshot = this.snapshots ? this.snapshots.sort((a, b) => {
                         return b.time_stamp - a.time_stamp
                     })[0] : null;
@@ -323,7 +323,7 @@ export class ProjectDashboardComponent implements OnInit {
 
                     this.apiService.getAssigneeStats(this.projectId)
                         .subscribe((data: any) => {
-                            this.assignees = data.assignees;
+                            this.assignees = data.content.assignees;
                             this.setupAssigneesPie();
                         });
                 })

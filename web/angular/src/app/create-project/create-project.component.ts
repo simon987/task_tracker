@@ -38,7 +38,7 @@ export class CreateProjectComponent implements OnInit {
 
         this.apiService.createProject(this.project).subscribe(
             data => {
-                this.router.navigateByUrl("/project/" + data["id"]);
+                this.router.navigateByUrl("/project/" + data["content"]["id"]);
             },
             error => {
                 console.log(error.error.message);

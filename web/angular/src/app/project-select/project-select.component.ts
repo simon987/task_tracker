@@ -22,7 +22,7 @@ export class ProjectSelectComponent implements OnInit {
 
     loadProjectList() {
         this.apiService.getProjects().subscribe(data => {
-            this.projectList = data["projects"]
+            this.projectList = data["content"]["projects"]
         })
     }
 }
