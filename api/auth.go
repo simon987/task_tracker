@@ -7,55 +7,13 @@ import (
 	"strconv"
 )
 
-const MinPasswordLength = 8
-const MinUsernameLength = 3
-const MaxUsernameLength = 16
-
-type LoginRequest struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
-type LoginResponse struct {
-	Ok      bool             `json:"ok"`
-	Message string           `json:"message,omitempty"`
-	Manager *storage.Manager `json:"manager"`
-}
-
-type RegisterRequest struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-
-type AccountDetails struct {
-	LoggedIn bool             `json:"logged_in"`
-	Manager  *storage.Manager `json:"manager,omitempty"`
-}
-
-type GetAllManagersResponse struct {
-	Ok       bool               `json:"ok"`
-	Message  string             `json:"message,omitempty"`
-	Managers *[]storage.Manager `json:"managers"`
-}
-
-func (r *RegisterRequest) isValid() bool {
-	return MinUsernameLength <= len(r.Username) &&
-		len(r.Username) <= MaxUsernameLength &&
-		MinPasswordLength <= len(r.Password)
-}
-
-type RegisterResponse struct {
-	Ok      bool   `json:"ok"`
-	Message string `json:"message,omitempty"`
-}
-
 func (api *WebAPI) Login(r *Request) {
 
 	req := &LoginRequest{}
 	err := json.Unmarshal(r.Ctx.Request.Body(), req)
 
 	if err != nil {
-		r.Json(LoginResponse{
+		r.Json(JsonResponse{
 			Ok:      false,
 			Message: "Could not parse request",
 		}, 400)
@@ -68,7 +26,7 @@ func (api *WebAPI) Login(r *Request) {
 			"username": req.Username,
 		}).Warning("Login attempt")
 
-		r.Json(LoginResponse{
+		r.Json(JsonResponse{
 			Ok:      false,
 			Message: "Invalid username/password",
 		}, 403)
@@ -78,9 +36,11 @@ func (api *WebAPI) Login(r *Request) {
 	sess := api.Session.StartFasthttp(r.Ctx)
 	sess.Set("manager", manager)
 
-	r.OkJson(LoginResponse{
-		Manager: manager,
-		Ok:      true,
+	r.OkJson(JsonResponse{
+		Content: LoginResponse{
+			Manager: manager,
+		},
+		Ok: true,
 	})
 
 	logrus.WithFields(logrus.Fields{
@@ -101,7 +61,7 @@ func (api *WebAPI) Register(r *Request) {
 	err := json.Unmarshal(r.Ctx.Request.Body(), req)
 
 	if err != nil {
-		r.Json(LoginResponse{
+		r.Json(JsonResponse{
 			Ok:      false,
 			Message: "Could not parse request",
 		}, 400)
@@ -109,7 +69,7 @@ func (api *WebAPI) Register(r *Request) {
 	}
 
 	if !req.isValid() {
-		r.Json(LoginResponse{
+		r.Json(JsonResponse{
 			Ok:      false,
 			Message: "Invalid register request",
 		}, 400)
@@ -126,7 +86,7 @@ func (api *WebAPI) Register(r *Request) {
 			"username": string(manager.Username),
 		}).Warning("Register attempt")
 
-		r.Json(LoginResponse{
+		r.Json(JsonResponse{
 			Ok:      false,
 			Message: err.Error(),
 		}, 400)
@@ -136,7 +96,7 @@ func (api *WebAPI) Register(r *Request) {
 	sess := api.Session.StartFasthttp(r.Ctx)
 	sess.Set("manager", manager)
 
-	r.OkJson(RegisterResponse{
+	r.OkJson(JsonResponse{
 		Ok: true,
 	})
 
@@ -145,7 +105,7 @@ func (api *WebAPI) Register(r *Request) {
 	}).Info("Registered")
 }
 
-func (api *WebAPI) AccountDetails(r *Request) {
+func (api *WebAPI) GetAccountDetails(r *Request) {
 
 	sess := api.Session.StartFasthttp(r.Ctx)
 	manager := sess.Get("manager")
@@ -155,35 +115,43 @@ func (api *WebAPI) AccountDetails(r *Request) {
 	}).Trace("Account details request")
 
 	if manager == nil {
-		r.OkJson(AccountDetails{
-			LoggedIn: false,
+		r.OkJson(JsonResponse{
+			Ok: false,
+			Content: GetAccountDetailsResponse{
+				LoggedIn: false,
+			},
 		})
 	} else {
-		r.OkJson(AccountDetails{
-			LoggedIn: true,
-			Manager:  manager.(*storage.Manager),
+		r.OkJson(JsonResponse{
+			Ok: true,
+			Content: GetAccountDetailsResponse{
+				LoggedIn: true,
+				Manager:  manager.(*storage.Manager),
+			},
 		})
 	}
 }
 
-func (api *WebAPI) GetAllManagers(r *Request) {
+func (api *WebAPI) GetManagerList(r *Request) {
 
 	sess := api.Session.StartFasthttp(r.Ctx)
 	manager := sess.Get("manager")
 
 	if manager == nil {
-		r.Json(GetAllManagersResponse{
+		r.Json(JsonResponse{
 			Ok:      false,
 			Message: "Unauthorized",
 		}, 401)
 		return
 	}
 
-	managers := api.Database.GetAllManagers()
+	managers := api.Database.GetManagerList()
 
-	r.OkJson(GetAllManagersResponse{
-		Ok:       true,
-		Managers: managers,
+	r.OkJson(JsonResponse{
+		Ok: true,
+		Content: GetManagerListResponse{
+			Managers: managers,
+		},
 	})
 }
 
@@ -191,7 +159,7 @@ func (api *WebAPI) PromoteManager(r *Request) {
 
 	id, err := strconv.ParseInt(r.Ctx.UserValue("id").(string), 10, 64)
 	if err != nil || id <= 0 {
-		r.Json(CreateProjectResponse{
+		r.Json(JsonResponse{
 			Ok:      false,
 			Message: "Invalid manager id",
 		}, 400)
@@ -202,7 +170,7 @@ func (api *WebAPI) PromoteManager(r *Request) {
 	manager := sess.Get("manager")
 
 	if !manager.(*storage.Manager).WebsiteAdmin || manager.(*storage.Manager).Id == id {
-		r.Json(GetAllManagersResponse{
+		r.Json(JsonResponse{
 			Ok:      false,
 			Message: "Unauthorized",
 		}, 401)
@@ -210,7 +178,7 @@ func (api *WebAPI) PromoteManager(r *Request) {
 	}
 
 	if !manager.(*storage.Manager).WebsiteAdmin {
-		r.Json(GetAllManagersResponse{
+		r.Json(JsonResponse{
 			Ok:      false,
 			Message: "Unauthorized",
 		}, 403)
@@ -229,7 +197,7 @@ func (api *WebAPI) DemoteManager(r *Request) {
 
 	id, err := strconv.ParseInt(r.Ctx.UserValue("id").(string), 10, 64)
 	if err != nil || id <= 0 {
-		r.Json(CreateProjectResponse{
+		r.Json(JsonResponse{
 			Ok:      false,
 			Message: "Invalid manager id",
 		}, 400)
@@ -240,7 +208,7 @@ func (api *WebAPI) DemoteManager(r *Request) {
 	manager := sess.Get("manager")
 
 	if manager == nil {
-		r.Json(GetAllManagersResponse{
+		r.Json(JsonResponse{
 			Ok:      false,
 			Message: "Unauthorized",
 		}, 401)
@@ -248,7 +216,7 @@ func (api *WebAPI) DemoteManager(r *Request) {
 	}
 
 	if !manager.(*storage.Manager).WebsiteAdmin || manager.(*storage.Manager).Id == id {
-		r.Json(GetAllManagersResponse{
+		r.Json(JsonResponse{
 			Ok:      false,
 			Message: "Unauthorized",
 		}, 403)

@@ -22,7 +22,7 @@ func TestCreateGetProject(t *testing.T) {
 		Hidden:   false,
 	})
 
-	id := resp.Id
+	id := resp.Content.Id
 
 	if id == 0 {
 		t.Fail()
@@ -31,7 +31,7 @@ func TestCreateGetProject(t *testing.T) {
 		t.Fail()
 	}
 
-	getResp, _ := getProjectAsAdmin(id)
+	getResp := getProjectAsAdmin(id).Content
 
 	if getResp.Project.Id != id {
 		t.Error()
@@ -111,17 +111,13 @@ func TestCreateDuplicateProjectRepo(t *testing.T) {
 
 func TestGetProjectNotFound(t *testing.T) {
 
-	getResp, r := getProjectAsAdmin(12345)
+	getResp := getProjectAsAdmin(12345)
 
 	if getResp.Ok != false {
 		t.Fail()
 	}
 
 	if len(getResp.Message) <= 0 {
-		t.Fail()
-	}
-
-	if r.StatusCode != 404 {
 		t.Fail()
 	}
 }
@@ -136,7 +132,7 @@ func TestUpdateProjectValid(t *testing.T) {
 		CloneUrl: "CloneUrlA",
 		GitRepo:  "GitRepoA",
 		Priority: 1,
-	}).Id
+	}).Content.Id
 
 	updateResp := updateProject(api.UpdateProjectRequest{
 		Priority: 2,
@@ -152,7 +148,7 @@ func TestUpdateProjectValid(t *testing.T) {
 		t.Error()
 	}
 
-	proj, _ := getProjectAsAdmin(pid)
+	proj := getProjectAsAdmin(pid).Content
 
 	if proj.Project.Public != false {
 		t.Error()
@@ -184,7 +180,7 @@ func TestUpdateProjectInvalid(t *testing.T) {
 		CloneUrl: "333333333333333",
 		GitRepo:  "llllllllllllllllllls",
 		Priority: 1,
-	}).Id
+	}).Content.Id
 
 	updateResp := updateProject(api.UpdateProjectRequest{
 		Priority: -1,
@@ -214,7 +210,7 @@ func TestUpdateProjectConstraintFail(t *testing.T) {
 		CloneUrl: "testUpdateProjectConstraintFail",
 		GitRepo:  "testUpdateProjectConstraintFail",
 		Priority: 1,
-	}).Id
+	}).Content.Id
 
 	createProjectAsAdmin(api.CreateProjectRequest{
 		Public:   true,
@@ -314,8 +310,8 @@ func TestHiddenProjectsNotShownInList(t *testing.T) {
 
 	list := getProjectList(nil)
 
-	for _, p := range *list.Projects {
-		if p.Id == r.Id {
+	for _, p := range *list.Content.Projects {
+		if p.Id == r.Content.Id {
 			t.Error()
 		}
 	}
@@ -356,10 +352,12 @@ func TestHiddenProjectNotAccessible(t *testing.T) {
 		t.Error()
 	}
 
-	pAdmin, _ := getProject(r.Id, testAdminCtx)
-	pUser, _ := getProject(r.Id, testUserCtx)
-	pOtherUser, _ := getProject(r.Id, otherUser)
-	pGuest, _ := getProject(r.Id, nil)
+	pid := r.Content.Id
+
+	pAdmin := getProject(pid, testAdminCtx)
+	pUser := getProject(pid, testUserCtx)
+	pOtherUser := getProject(pid, otherUser)
+	pGuest := getProject(pid, nil)
 
 	if pAdmin.Ok != true {
 		t.Error()
@@ -388,7 +386,7 @@ func TestUpdateProjectPermissions(t *testing.T) {
 		GitRepo:  "newupdateprojectpermissions",
 		CloneUrl: "newupdateprojectpermissions",
 		Name:     "newupdateprojectpermissions",
-	}, p.Id, nil)
+	}, p.Content.Id, nil)
 
 	if r.Ok != false {
 		t.Error()
@@ -411,8 +409,8 @@ func TestUserWithReadAccessShouldSeeHiddenProjectInList(t *testing.T) {
 	list := getProjectList(testUserCtx)
 
 	found := false
-	for _, p := range *list.Projects {
-		if p.Id == pHidden.Id {
+	for _, p := range *list.Content.Projects {
+		if p.Id == pHidden.Content.Id {
 			found = true
 		}
 	}
@@ -435,8 +433,8 @@ func TestAdminShouldSeeHiddenProjectInList(t *testing.T) {
 	list := getProjectList(testAdminCtx)
 
 	found := false
-	for _, p := range *list.Projects {
-		if p.Id == pHidden.Id {
+	for _, p := range *list.Content.Projects {
+		if p.Id == pHidden.Content.Id {
 			found = true
 		}
 	}
@@ -446,42 +444,31 @@ func TestAdminShouldSeeHiddenProjectInList(t *testing.T) {
 	}
 }
 
-func createProjectAsAdmin(req api.CreateProjectRequest) *api.CreateProjectResponse {
+func createProjectAsAdmin(req api.CreateProjectRequest) CreateProjectAR {
 	return createProject(req, testAdminCtx)
 }
 
-func createProject(req api.CreateProjectRequest, s *http.Client) *api.CreateProjectResponse {
+func createProject(req api.CreateProjectRequest, s *http.Client) (ar CreateProjectAR) {
 	r := Post("/project/create", req, nil, s)
-
-	var resp api.CreateProjectResponse
-	data, _ := ioutil.ReadAll(r.Body)
-	err := json.Unmarshal(data, &resp)
-	handleErr(err)
-
-	return &resp
+	UnmarshalResponse(r, &ar)
+	return
 }
 
-func getProjectAsAdmin(id int64) (*api.GetProjectResponse, *http.Response) {
+func getProjectAsAdmin(id int64) ProjectAR {
 	return getProject(id, testAdminCtx)
 }
 
-func getProject(id int64, s *http.Client) (*api.GetProjectResponse, *http.Response) {
-
+func getProject(id int64, s *http.Client) (ar ProjectAR) {
 	r := Get(fmt.Sprintf("/project/get/%d", id), nil, s)
-
-	var getResp api.GetProjectResponse
-	data, _ := ioutil.ReadAll(r.Body)
-	err := json.Unmarshal(data, &getResp)
-	handleErr(err)
-
-	return &getResp, r
+	UnmarshalResponse(r, &ar)
+	return
 }
 
-func updateProject(request api.UpdateProjectRequest, pid int64, s *http.Client) *api.UpdateProjectResponse {
+func updateProject(request api.UpdateProjectRequest, pid int64, s *http.Client) *api.JsonResponse {
 
 	r := Post(fmt.Sprintf("/project/update/%d", pid), request, nil, s)
 
-	var resp api.UpdateProjectResponse
+	var resp api.JsonResponse
 	data, _ := ioutil.ReadAll(r.Body)
 	err := json.Unmarshal(data, &resp)
 	handleErr(err)
@@ -489,13 +476,8 @@ func updateProject(request api.UpdateProjectRequest, pid int64, s *http.Client) 
 	return &resp
 }
 
-func getProjectList(s *http.Client) *api.GetAllProjectsResponse {
+func getProjectList(s *http.Client) (ar ProjectListAR) {
 	r := Get("/project/list", nil, s)
-
-	var resp api.GetAllProjectsResponse
-	data, _ := ioutil.ReadAll(r.Body)
-	err := json.Unmarshal(data, &resp)
-	handleErr(err)
-
-	return &resp
+	UnmarshalResponse(r, &ar)
+	return
 }

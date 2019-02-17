@@ -14,36 +14,6 @@ import (
 	"strings"
 )
 
-type GitPayload struct {
-	Ref        string `json:"ref"`
-	Before     string `json:"before"`
-	After      string `json:"after"`
-	Repository struct {
-		Id    int64 `json:"id"`
-		Owner struct {
-			Id       int64  `json:"id"`
-			Username string `json:"username"`
-			Login    string `json:"login"`
-			FullName string `json:"full_name"`
-			Email    string `json:"email"`
-		} `json:"owner"`
-		Name          string `json:"name"`
-		FullName      string `json:"full_name"`
-		Private       bool   `json:"private"`
-		Fork          bool   `json:"fork"`
-		Size          int64  `json:"size"`
-		HtmlUrl       string `json:"html_url"`
-		SshUrl        string `json:"ssh_url"`
-		CloneUrl      string `json:"clone_url"`
-		DefaultBranch string `json:"default_branch"`
-	} `json:"repository"`
-}
-
-func (g GitPayload) String() string {
-	jsonBytes, _ := json.Marshal(g)
-	return string(jsonBytes)
-}
-
 func (api *WebAPI) ReceiveGitWebHook(r *Request) {
 
 	if !signatureValid(r) {

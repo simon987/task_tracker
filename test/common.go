@@ -6,6 +6,8 @@ import (
 	"crypto/hmac"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
+	"github.com/simon987/task_tracker/api"
 	"github.com/simon987/task_tracker/config"
 	"github.com/simon987/task_tracker/storage"
 	"io"
@@ -17,6 +19,11 @@ import (
 type SessionContext struct {
 	Manager       *storage.Manager
 	SessionCookie *http.Cookie
+}
+
+type ResponseHeader struct {
+	Ok      bool   `json:"ok"`
+	Message string `json:"message"`
 }
 
 func Post(path string, x interface{}, worker *storage.Worker, s *http.Client) *http.Response {
@@ -87,4 +94,81 @@ func GenericJson(body io.ReadCloser) map[string]interface{} {
 	handleErr(err)
 
 	return obj
+}
+
+func UnmarshalResponse(r *http.Response, result interface{}) {
+	data, err := ioutil.ReadAll(r.Body)
+	fmt.Println(string(data))
+	err = json.Unmarshal(data, result)
+	handleErr(err)
+}
+
+type WorkerAR struct {
+	Ok      bool   `json:"ok"`
+	Message string `json:"message"`
+	Content struct {
+		Worker *storage.Worker `json:"worker"`
+	} `json:"content"`
+}
+
+type RegisterAR struct {
+	Ok      bool   `json:"ok"`
+	Message string `json:"message"`
+	Content struct {
+		Manager *storage.Manager `json:"manager"`
+	} `json:"content"`
+}
+
+type ProjectAR struct {
+	Ok      bool   `json:"ok"`
+	Message string `json:"message"`
+	Content struct {
+		Project *storage.Project `json:"project"`
+	} `json:"content"`
+}
+
+type CreateProjectAR struct {
+	Ok      bool   `json:"ok"`
+	Message string `json:"message"`
+	Content struct {
+		Id int64 `json:"id"`
+	} `json:"content"`
+}
+
+type InfoAR struct {
+	Ok       bool   `json:"ok"`
+	Message  string `json:"message"`
+	api.Info `json:"content"`
+}
+
+type LogsAR struct {
+	Ok      bool   `json:"ok"`
+	Message string `json:"message"`
+	Content struct {
+		Logs *[]storage.LogEntry `json:"logs"`
+	} `json:"content"`
+}
+
+type ProjectListAR struct {
+	Ok      bool   `json:"ok"`
+	Message string `json:"message"`
+	Content struct {
+		Projects *[]storage.Project `json:"projects"`
+	} `json:"content"`
+}
+
+type TaskAR struct {
+	Ok      bool   `json:"ok"`
+	Message string `json:"message"`
+	Content struct {
+		Task *storage.Task `json:"task"`
+	} `json:"content"`
+}
+
+type ReleaseAR struct {
+	Ok      bool   `json:"ok"`
+	Message string `json:"message"`
+	Content struct {
+		Updated bool `json:"updated"`
+	} `json:"content"`
 }

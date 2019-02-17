@@ -9,51 +9,7 @@ import (
 	"time"
 )
 
-type UpdateWorkerRequest struct {
-	Alias string `json:"alias"`
-}
-
-type UpdateWorkerResponse struct {
-	Ok      bool   `json:"ok"`
-	Message string `json:"message,omitempty"`
-}
-
-type CreateWorkerRequest struct {
-	Alias string `json:"alias"`
-}
-
-type CreateWorkerResponse struct {
-	Ok      bool            `json:"ok"`
-	Message string          `json:"message,omitempty"`
-	Worker  *storage.Worker `json:"worker,omitempty"`
-}
-
-type GetWorkerResponse struct {
-	Ok      bool            `json:"ok"`
-	Message string          `json:"message,omitempty"`
-	Worker  *storage.Worker `json:"worker,omitempty"`
-}
-
-type GetAllWorkerStatsResponse struct {
-	Ok      bool                   `json:"ok"`
-	Message string                 `json:"message,omitempty"`
-	Stats   *[]storage.WorkerStats `json:"stats"`
-}
-
-type WorkerAccessRequest struct {
-	Assign  bool  `json:"assign"`
-	Submit  bool  `json:"submit"`
-	Project int64 `json:"project"`
-}
-
-func (w *WorkerAccessRequest) isValid() bool {
-	if !w.Assign && !w.Submit {
-		return false
-	}
-	return true
-}
-
-func (api *WebAPI) WorkerCreate(r *Request) {
+func (api *WebAPI) CreateWorker(r *Request) {
 
 	workerReq := &CreateWorkerRequest{}
 	err := json.Unmarshal(r.Ctx.Request.Body(), workerReq)
@@ -61,13 +17,13 @@ func (api *WebAPI) WorkerCreate(r *Request) {
 		return
 	}
 
-	if !canCreateWorker(r, workerReq) {
+	if !workerReq.isValid() {
 
 		logrus.WithFields(logrus.Fields{
 			"createWorkerRequest": workerReq,
 		}).Warn("Failed CreateWorkerRequest")
 
-		r.Json(CreateWorkerResponse{
+		r.Json(JsonResponse{
 			Ok:      false,
 			Message: "You are now allowed to create a worker",
 		}, 403)
@@ -78,14 +34,16 @@ func (api *WebAPI) WorkerCreate(r *Request) {
 	if err != nil {
 		handleErr(err, r)
 	} else {
-		r.OkJson(CreateWorkerResponse{
-			Ok:     true,
-			Worker: worker,
+		r.OkJson(JsonResponse{
+			Ok: true,
+			Content: CreateWorkerResponse{
+				Worker: worker,
+			},
 		})
 	}
 }
 
-func (api *WebAPI) WorkerGet(r *Request) {
+func (api *WebAPI) GetWorker(r *Request) {
 
 	id, err := strconv.ParseInt(r.Ctx.UserValue("id").(string), 10, 64)
 	if err != nil {
@@ -93,7 +51,7 @@ func (api *WebAPI) WorkerGet(r *Request) {
 			"id": id,
 		}).Warn("Invalid worker id")
 
-		r.Json(GetWorkerResponse{
+		r.Json(JsonResponse{
 			Ok:      false,
 			Message: err.Error(),
 		}, 400)
@@ -103,7 +61,7 @@ func (api *WebAPI) WorkerGet(r *Request) {
 			"id": id,
 		}).Warn("Invalid worker id")
 
-		r.Json(GetWorkerResponse{
+		r.Json(JsonResponse{
 			Ok:      false,
 			Message: "Invalid worker id",
 		}, 400)
@@ -116,23 +74,25 @@ func (api *WebAPI) WorkerGet(r *Request) {
 
 		worker.Secret = nil
 
-		r.OkJson(GetWorkerResponse{
-			Ok:     true,
-			Worker: worker,
+		r.OkJson(JsonResponse{
+			Ok: true,
+			Content: GetWorkerResponse{
+				Worker: worker,
+			},
 		})
 	} else {
-		r.Json(GetWorkerResponse{
+		r.Json(JsonResponse{
 			Ok:      false,
 			Message: "Worker not found",
 		}, 404)
 	}
 }
 
-func (api *WebAPI) WorkerUpdate(r *Request) {
+func (api *WebAPI) UpdateWorker(r *Request) {
 
 	worker, err := api.validateSignature(r)
 	if err != nil {
-		r.Json(GetTaskResponse{
+		r.Json(JsonResponse{
 			Ok:      false,
 			Message: err.Error(),
 		}, 401)
@@ -142,7 +102,7 @@ func (api *WebAPI) WorkerUpdate(r *Request) {
 	req := &UpdateWorkerRequest{}
 	err = json.Unmarshal(r.Ctx.Request.Body(), req)
 	if err != nil {
-		r.Json(GetTaskResponse{
+		r.Json(JsonResponse{
 			Ok:      false,
 			Message: "Could not parse request",
 		}, 400)
@@ -153,11 +113,11 @@ func (api *WebAPI) WorkerUpdate(r *Request) {
 	ok := api.Database.UpdateWorker(worker)
 
 	if ok {
-		r.OkJson(UpdateWorkerResponse{
+		r.OkJson(JsonResponse{
 			Ok: true,
 		})
 	} else {
-		r.OkJson(UpdateWorkerResponse{
+		r.OkJson(JsonResponse{
 			Ok:      false,
 			Message: "Could not update worker",
 		})
@@ -168,9 +128,11 @@ func (api *WebAPI) GetAllWorkerStats(r *Request) {
 
 	stats := api.Database.GetAllWorkerStats()
 
-	r.OkJson(GetAllWorkerStatsResponse{
-		Ok:    true,
-		Stats: stats,
+	r.OkJson(JsonResponse{
+		Ok: true,
+		Content: GetAllWorkerStatsResponse{
+			Stats: stats,
+		},
 	})
 }
 
@@ -188,16 +150,6 @@ func (api *WebAPI) workerCreate(request *CreateWorkerRequest) (*storage.Worker, 
 
 	api.Database.SaveWorker(&worker)
 	return &worker, nil
-}
-
-func canCreateWorker(r *Request, cwr *CreateWorkerRequest) bool {
-
-	if cwr.Alias == "unassigned" {
-		//Reserved alias
-		return false
-	}
-
-	return true
 }
 
 func makeSecret() []byte {

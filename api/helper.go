@@ -10,7 +10,7 @@ type Request struct {
 	Ctx *fasthttp.RequestCtx
 }
 
-func (r *Request) OkJson(object interface{}) {
+func (r *Request) OkJson(object JsonResponse) {
 
 	resp, err := json.Marshal(object)
 	handleErr(err, r)
@@ -20,7 +20,7 @@ func (r *Request) OkJson(object interface{}) {
 	handleErr(err, r)
 }
 
-func (r *Request) Json(object interface{}, code int) {
+func (r *Request) Json(object JsonResponse, code int) {
 
 	resp, err := json.Marshal(object)
 	if err != nil {

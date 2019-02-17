@@ -39,7 +39,7 @@ func TestWebHookDontUpdateVersion(t *testing.T) {
 		Name:    "My version should not be updated",
 		Version: "old",
 		GitRepo: "username/not_this_one",
-	})
+	}).Content
 
 	body := []byte(`{"ref": "refs/heads/master", "after": "new", "repository": {"full_name": "username/repo_name"}}`)
 	bodyReader := bytes.NewReader(body)
@@ -59,7 +59,7 @@ func TestWebHookDontUpdateVersion(t *testing.T) {
 		t.Error()
 	}
 
-	getResp, _ := getProjectAsAdmin(resp.Id)
+	getResp := getProjectAsAdmin(resp.Id).Content
 
 	if getResp.Project.Version != "old" {
 		t.Error()
@@ -71,7 +71,7 @@ func TestWebHookUpdateVersion(t *testing.T) {
 		Name:    "My version should be updated",
 		Version: "old",
 		GitRepo: "username/repo_name",
-	})
+	}).Content
 
 	body := []byte(`{"ref": "refs/heads/master", "after": "new", "repository": {"full_name": "username/repo_name"}}`)
 	bodyReader := bytes.NewReader(body)
@@ -91,7 +91,7 @@ func TestWebHookUpdateVersion(t *testing.T) {
 		t.Error()
 	}
 
-	getResp, _ := getProjectAsAdmin(resp.Id)
+	getResp := getProjectAsAdmin(resp.Id).Content
 
 	if getResp.Project.Version != "new" {
 		t.Error()

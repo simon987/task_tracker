@@ -5,35 +5,9 @@ import (
 	"errors"
 	"github.com/Sirupsen/logrus"
 	"github.com/simon987/task_tracker/config"
-	"github.com/simon987/task_tracker/storage"
 	"github.com/valyala/fasthttp"
 	"time"
 )
-
-type RequestHandler func(*Request)
-
-type GetLogRequest struct {
-	Level storage.LogLevel `json:"level"`
-	Since int64            `json:"since"`
-}
-
-type LogRequest struct {
-	Scope     string `json:"scope"`
-	Message   string `json:"Message"`
-	TimeStamp int64  `json:"timestamp"`
-	worker    *storage.Worker
-}
-
-type GetLogResponse struct {
-	Ok      bool                `json:"ok"`
-	Message string              `json:"message"`
-	Logs    *[]storage.LogEntry `json:"logs"`
-}
-
-type LogResponse struct {
-	Ok      bool   `json:"ok"`
-	Message string `json:"message"`
-}
 
 func (e *LogRequest) Time() time.Time {
 
@@ -94,7 +68,7 @@ func (api *WebAPI) LogTrace(r *Request) {
 
 	entry, err := api.parseLogEntry(r)
 	if err != nil {
-		r.Json(LogResponse{
+		r.Json(JsonResponse{
 			Ok:      false,
 			Message: "Could not parse request",
 		}, 400)
@@ -111,7 +85,7 @@ func (api *WebAPI) LogInfo(r *Request) {
 
 	entry, err := api.parseLogEntry(r)
 	if err != nil {
-		r.Json(LogResponse{
+		r.Json(JsonResponse{
 			Ok:      false,
 			Message: "Could not parse request",
 		}, 400)
@@ -128,7 +102,7 @@ func (api *WebAPI) LogWarn(r *Request) {
 
 	entry, err := api.parseLogEntry(r)
 	if err != nil {
-		r.Json(LogResponse{
+		r.Json(JsonResponse{
 			Ok:      false,
 			Message: "Could not parse request",
 		}, 400)
@@ -145,7 +119,7 @@ func (api *WebAPI) LogError(r *Request) {
 
 	entry, err := api.parseLogEntry(r)
 	if err != nil {
-		r.Json(LogResponse{
+		r.Json(JsonResponse{
 			Ok:      false,
 			Message: "Could not parse request",
 		}, 400)
@@ -163,7 +137,7 @@ func (api *WebAPI) GetLog(r *Request) {
 	req := &GetLogRequest{}
 	err := json.Unmarshal(r.Ctx.Request.Body(), req)
 	if err != nil {
-		r.Json(GetLogResponse{
+		r.Json(JsonResponse{
 			Ok:      false,
 			Message: "Could not parse request",
 		}, 400)
@@ -178,27 +152,20 @@ func (api *WebAPI) GetLog(r *Request) {
 			"logCount":      len(*logs),
 		}).Trace("Get log request")
 
-		r.OkJson(GetLogResponse{
-			Ok:   true,
-			Logs: logs,
+		r.OkJson(JsonResponse{
+			Ok: true,
+			Content: GetLogResponse{
+				Logs: logs,
+			},
 		})
 	} else {
 		logrus.WithFields(logrus.Fields{
 			"getLogRequest": req,
 		}).Warn("Invalid log request")
 
-		r.Json(GetLogResponse{
+		r.Json(JsonResponse{
 			Ok:      false,
 			Message: "Invalid log request",
 		}, 400)
 	}
-}
-
-func (r GetLogRequest) isValid() bool {
-
-	if r.Since <= 0 {
-		return false
-	}
-
-	return true
 }

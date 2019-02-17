@@ -19,8 +19,8 @@ func BenchmarkCreateTaskRemote(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		createTask(api.CreateTaskRequest{
-			Project:    resp.Id,
+		createTask(api.SubmitTaskRequest{
+			Project:    resp.Content.Id,
 			Priority:   1,
 			Recipe:     "{}",
 			MaxRetries: 1,

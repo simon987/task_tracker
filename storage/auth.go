@@ -161,7 +161,7 @@ func (database *Database) SetManagerRoleOn(manager *Manager, projectId int64, ro
 	}).Info("Set manager role on project")
 }
 
-func (database *Database) GetAllManagers() *[]Manager {
+func (database *Database) GetManagerList() *[]Manager {
 
 	db := database.getDB()
 

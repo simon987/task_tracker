@@ -1,50 +1,39 @@
 package test
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/simon987/task_tracker/api"
 	"github.com/simon987/task_tracker/storage"
-	"io/ioutil"
 	"net/http"
 	"testing"
 )
 
 func TestCreateGetWorker(t *testing.T) {
 
-	resp, r := createWorker(api.CreateWorkerRequest{
+	resp := createWorker(api.CreateWorkerRequest{
 		Alias: "my_worker_alias",
 	})
-
-	if r.StatusCode != 200 {
-		t.Error()
-	}
+	w := resp.Content.Worker
 
 	if resp.Ok != true {
 		t.Error()
 	}
 
-	getResp, r := getWorker(resp.Worker.Id)
+	getResp := getWorker(w.Id)
 
-	if r.StatusCode != 200 {
-		t.Error()
-	}
-	if resp.Worker.Id != getResp.Worker.Id {
+	if w.Id != getResp.Content.Worker.Id {
 		t.Error()
 	}
 
-	if resp.Worker.Alias != "my_worker_alias" {
+	if w.Alias != "my_worker_alias" {
 		t.Error()
 	}
 }
 
 func TestGetWorkerNotFound(t *testing.T) {
 
-	resp, r := getWorker(99999999)
+	resp := getWorker(99999999)
 
-	if r.StatusCode != 404 {
-		t.Error()
-	}
 	if resp.Ok != false {
 		t.Error()
 	}
@@ -52,11 +41,8 @@ func TestGetWorkerNotFound(t *testing.T) {
 
 func TestGetWorkerInvalid(t *testing.T) {
 
-	resp, r := getWorker(-1)
+	resp := getWorker(-1)
 
-	if r.StatusCode != 400 {
-		t.Error()
-	}
 	if resp.Ok != false {
 		t.Error()
 	}
@@ -76,16 +62,16 @@ func TestUpdateAliasValid(t *testing.T) {
 		t.Error()
 	}
 
-	w, _ := getWorker(wid.Id)
+	w := getWorker(wid.Id).Content.Worker
 
-	if w.Worker.Alias != "new alias" {
+	if w.Alias != "new alias" {
 		t.Error()
 	}
 }
 
 func TestCreateWorkerAliasInvalid(t *testing.T) {
 
-	resp, _ := createWorker(api.CreateWorkerRequest{
+	resp := createWorker(api.CreateWorkerRequest{
 		Alias: "unassigned", //reserved alias
 	})
 
@@ -105,9 +91,9 @@ func TestInvalidAccessRequest(t *testing.T) {
 		Name:     "testinvalidaccessreq",
 		CloneUrl: "testinvalidaccessreq",
 		GitRepo:  "testinvalidaccessreq",
-	}).Id
+	}).Content.Id
 
-	r := requestAccess(api.WorkerAccessRequest{
+	r := requestAccess(api.CreateWorkerAccessRequest{
 		Submit:  false,
 		Assign:  false,
 		Project: pid,
@@ -122,81 +108,46 @@ func TestInvalidAccessRequest(t *testing.T) {
 	}
 }
 
-func createWorker(req api.CreateWorkerRequest) (*api.CreateWorkerResponse, *http.Response) {
+func createWorker(req api.CreateWorkerRequest) (ar WorkerAR) {
 	r := Post("/worker/create", req, nil, nil)
-
-	var resp *api.CreateWorkerResponse
-	data, _ := ioutil.ReadAll(r.Body)
-	err := json.Unmarshal(data, &resp)
-	handleErr(err)
-
-	return resp, r
+	UnmarshalResponse(r, &ar)
+	return
 }
 
-func getWorker(id int64) (*api.GetWorkerResponse, *http.Response) {
-
+func getWorker(id int64) (ar WorkerAR) {
 	r := Get(fmt.Sprintf("/worker/get/%d", id), nil, nil)
-
-	var resp *api.GetWorkerResponse
-	data, _ := ioutil.ReadAll(r.Body)
-	err := json.Unmarshal(data, &resp)
-	handleErr(err)
-
-	return resp, r
+	UnmarshalResponse(r, &ar)
+	return
 }
 
 func genWid() *storage.Worker {
-
-	resp, _ := createWorker(api.CreateWorkerRequest{})
-	return resp.Worker
+	resp := createWorker(api.CreateWorkerRequest{})
+	return resp.Content.Worker
 }
 
-func requestAccess(req api.WorkerAccessRequest, w *storage.Worker) *api.WorkerAccessRequestResponse {
-
+func requestAccess(req api.CreateWorkerAccessRequest, w *storage.Worker) (ar WorkerAR) {
 	r := Post(fmt.Sprintf("/project/request_access"), req, w, nil)
-
-	var resp *api.WorkerAccessRequestResponse
-	data, _ := ioutil.ReadAll(r.Body)
-	err := json.Unmarshal(data, &resp)
-	handleErr(err)
-
-	return resp
+	UnmarshalResponse(r, &ar)
+	return
 }
 
-func acceptAccessRequest(pid int64, wid int64, s *http.Client) *api.WorkerAccessRequestResponse {
-
+func acceptAccessRequest(pid int64, wid int64, s *http.Client) (ar api.JsonResponse) {
 	r := Post(fmt.Sprintf("/project/accept_request/%d/%d", pid, wid), nil,
 		nil, s)
-
-	var resp *api.WorkerAccessRequestResponse
-	data, _ := ioutil.ReadAll(r.Body)
-	err := json.Unmarshal(data, &resp)
-	handleErr(err)
-
-	return resp
+	UnmarshalResponse(r, &ar)
+	return
 }
 
-func rejectAccessRequest(pid int64, wid int64, s *http.Client) *api.WorkerAccessRequestResponse {
-
+func rejectAccessRequest(pid int64, wid int64, s *http.Client) (ar api.JsonResponse) {
 	r := Post(fmt.Sprintf("/project/reject_request/%d/%d", pid, wid), nil,
 		nil, s)
-
-	var resp *api.WorkerAccessRequestResponse
-	data, _ := ioutil.ReadAll(r.Body)
-	err := json.Unmarshal(data, &resp)
-	handleErr(err)
-
-	return resp
+	UnmarshalResponse(r, &ar)
+	return
 }
 
-func updateWorker(request api.UpdateWorkerRequest, w *storage.Worker) *api.UpdateWorkerResponse {
+func updateWorker(request api.UpdateWorkerRequest, w *storage.Worker) (ar api.JsonResponse) {
 
 	r := Post("/worker/update", request, w, nil)
-
-	var resp *api.UpdateWorkerResponse
-	data, _ := ioutil.ReadAll(r.Body)
-	err := json.Unmarshal(data, &resp)
-	handleErr(err)
-
-	return resp
+	UnmarshalResponse(r, &ar)
+	return
 }

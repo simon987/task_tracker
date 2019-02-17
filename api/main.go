@@ -20,10 +20,7 @@ type WebAPI struct {
 	Cron          *cron.Cron
 }
 
-type Info struct {
-	Name    string `json:"name"`
-	Version string `json:"version"`
-}
+type RequestHandler func(*Request)
 
 var info = Info{
 	Name:    "task_tracker",
@@ -31,7 +28,10 @@ var info = Info{
 }
 
 func Index(r *Request) {
-	r.OkJson(info)
+	r.OkJson(JsonResponse{
+		Ok:      true,
+		Content: info,
+	})
 }
 
 func (api *WebAPI) setupMonitoring() {
@@ -75,27 +75,27 @@ func New() *WebAPI {
 	api.router.POST("/log/warn", LogRequestMiddleware(api.LogWarn))
 	api.router.POST("/log/error", LogRequestMiddleware(api.LogError))
 
-	api.router.POST("/worker/create", LogRequestMiddleware(api.WorkerCreate))
-	api.router.POST("/worker/update", LogRequestMiddleware(api.WorkerUpdate))
-	api.router.GET("/worker/get/:id", LogRequestMiddleware(api.WorkerGet))
+	api.router.POST("/worker/create", LogRequestMiddleware(api.CreateWorker))
+	api.router.POST("/worker/update", LogRequestMiddleware(api.UpdateWorker))
+	api.router.GET("/worker/get/:id", LogRequestMiddleware(api.GetWorker))
 	api.router.GET("/worker/stats", LogRequestMiddleware(api.GetAllWorkerStats))
 
-	api.router.POST("/project/create", LogRequestMiddleware(api.ProjectCreate))
-	api.router.GET("/project/get/:id", LogRequestMiddleware(api.ProjectGet))
-	api.router.POST("/project/update/:id", LogRequestMiddleware(api.ProjectUpdate))
-	api.router.GET("/project/list", LogRequestMiddleware(api.ProjectGetAllProjects))
-	api.router.GET("/project/monitoring-between/:id", LogRequestMiddleware(api.GetSnapshotsBetween))
+	api.router.POST("/project/create", LogRequestMiddleware(api.CreateProject))
+	api.router.GET("/project/get/:id", LogRequestMiddleware(api.GetProject))
+	api.router.POST("/project/update/:id", LogRequestMiddleware(api.UpdateProject))
+	api.router.GET("/project/list", LogRequestMiddleware(api.GetProjectList))
+	api.router.GET("/project/monitoring-between/:id", LogRequestMiddleware(api.GetSnapshotsWithinRange))
 	api.router.GET("/project/monitoring/:id", LogRequestMiddleware(api.GetNSnapshots))
-	api.router.GET("/project/assignees/:id", LogRequestMiddleware(api.ProjectGetAssigneeStats))
-	api.router.GET("/project/accesses/:id", LogRequestMiddleware(api.ProjectGetWorkerAccesses))
-	api.router.POST("/project/request_access", LogRequestMiddleware(api.WorkerRequestAccess))
+	api.router.GET("/project/assignees/:id", LogRequestMiddleware(api.GetAssigneeStatsForProject))
+	api.router.GET("/project/accesses/:id", LogRequestMiddleware(api.GetWorkerAccessListForProject))
+	api.router.POST("/project/request_access", LogRequestMiddleware(api.CreateWorkerAccess))
 	api.router.POST("/project/accept_request/:id/:wid", LogRequestMiddleware(api.AcceptAccessRequest))
 	api.router.POST("/project/reject_request/:id/:wid", LogRequestMiddleware(api.RejectAccessRequest))
 
-	api.router.POST("/task/create", LogRequestMiddleware(api.TaskCreate))
-	api.router.GET("/task/get/:project", LogRequestMiddleware(api.TaskGetFromProject))
-	api.router.GET("/task/get", LogRequestMiddleware(api.TaskGet))
-	api.router.POST("/task/release", LogRequestMiddleware(api.TaskRelease))
+	api.router.POST("/task/create", LogRequestMiddleware(api.SubmitTask))
+	api.router.GET("/task/get/:project", LogRequestMiddleware(api.GetTaskFromProject))
+	api.router.GET("/task/get", LogRequestMiddleware(api.GetTask))
+	api.router.POST("/task/release", LogRequestMiddleware(api.ReleaseTask))
 
 	api.router.POST("/git/receivehook", LogRequestMiddleware(api.ReceiveGitWebHook))
 
@@ -104,8 +104,8 @@ func New() *WebAPI {
 	api.router.POST("/register", LogRequestMiddleware(api.Register))
 	api.router.POST("/login", LogRequestMiddleware(api.Login))
 	api.router.GET("/logout", LogRequestMiddleware(api.Logout))
-	api.router.GET("/account", LogRequestMiddleware(api.AccountDetails))
-	api.router.GET("/manager/list", LogRequestMiddleware(api.GetAllManagers))
+	api.router.GET("/account", LogRequestMiddleware(api.GetAccountDetails))
+	api.router.GET("/manager/list", LogRequestMiddleware(api.GetManagerList))
 	api.router.GET("/manager/promote/:id", LogRequestMiddleware(api.PromoteManager))
 	api.router.GET("/manager/demote/:id", LogRequestMiddleware(api.DemoteManager))
 

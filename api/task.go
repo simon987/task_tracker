@@ -13,55 +13,21 @@ import (
 	"strconv"
 )
 
-type CreateTaskRequest struct {
-	Project           int64  `json:"project"`
-	MaxRetries        int64  `json:"max_retries"`
-	Recipe            string `json:"recipe"`
-	Priority          int64  `json:"priority"`
-	MaxAssignTime     int64  `json:"max_assign_time"`
-	Hash64            int64  `json:"hash_u64"`
-	UniqueString      string `json:"unique_string"`
-	VerificationCount int64  `json:"verification_count"`
-}
-
-type ReleaseTaskRequest struct {
-	TaskId       int64              `json:"task_id"`
-	Result       storage.TaskResult `json:"result"`
-	Verification int64              `json:"verification"`
-}
-
-type ReleaseTaskResponse struct {
-	Ok      bool   `json:"ok"`
-	Updated bool   `json:"updated"`
-	Message string `json:"message,omitempty"`
-}
-
-type CreateTaskResponse struct {
-	Ok      bool   `json:"ok"`
-	Message string `json:"message,omitempty"`
-}
-
-type GetTaskResponse struct {
-	Ok      bool          `json:"ok"`
-	Message string        `json:"message,omitempty"`
-	Task    *storage.Task `json:"task,omitempty"`
-}
-
-func (api *WebAPI) TaskCreate(r *Request) {
+func (api *WebAPI) SubmitTask(r *Request) {
 
 	worker, err := api.validateSignature(r)
 	if worker == nil {
-		r.Json(CreateProjectResponse{
+		r.Json(JsonResponse{
 			Ok:      false,
 			Message: err.Error(),
 		}, 401)
 		return
 	}
 
-	createReq := &CreateTaskRequest{}
+	createReq := &SubmitTaskRequest{}
 	err = json.Unmarshal(r.Ctx.Request.Body(), createReq)
 	if err != nil {
-		r.Json(CreateProjectResponse{
+		r.Json(JsonResponse{
 			Ok:      false,
 			Message: "Could not parse request",
 		}, 400)
@@ -76,56 +42,41 @@ func (api *WebAPI) TaskCreate(r *Request) {
 		VerificationCount: createReq.VerificationCount,
 	}
 
-	if createReq.IsValid() && isTaskValid(task) {
-
-		if createReq.UniqueString != "" {
-			//TODO: Load key from config
-			createReq.Hash64 = int64(siphash.Hash(1, 2, []byte(createReq.UniqueString)))
-		}
-
-		err := api.Database.SaveTask(task, createReq.Project, createReq.Hash64, worker.Id)
-
-		if err != nil {
-			r.Json(CreateTaskResponse{
-				Ok:      false,
-				Message: err.Error(),
-			}, 400)
-		} else {
-			r.OkJson(CreateTaskResponse{
-				Ok: true,
-			})
-		}
-	} else {
+	if !createReq.IsValid() {
 		logrus.WithFields(logrus.Fields{
 			"task": task,
 		}).Warn("Invalid task")
-		r.Json(CreateTaskResponse{
+		r.Json(JsonResponse{
 			Ok:      false,
 			Message: "Invalid task",
 		}, 400)
+		return
+	}
+
+	if createReq.UniqueString != "" {
+		//TODO: Load key from config
+		createReq.Hash64 = int64(siphash.Hash(1, 2, []byte(createReq.UniqueString)))
+	}
+
+	err = api.Database.SaveTask(task, createReq.Project, createReq.Hash64, worker.Id)
+
+	if err != nil {
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: err.Error(),
+		}, 400)
+	} else {
+		r.OkJson(JsonResponse{
+			Ok: true,
+		})
 	}
 }
 
-func (req *CreateTaskRequest) IsValid() bool {
-	return req.Hash64 == 0 || req.UniqueString == ""
-}
-
-func isTaskValid(task *storage.Task) bool {
-	if task.MaxRetries < 0 {
-		return false
-	}
-	if len(task.Recipe) <= 0 {
-		return false
-	}
-
-	return true
-}
-
-func (api *WebAPI) TaskGetFromProject(r *Request) {
+func (api *WebAPI) GetTaskFromProject(r *Request) {
 
 	worker, err := api.validateSignature(r)
 	if err != nil {
-		r.Json(GetTaskResponse{
+		r.Json(JsonResponse{
 			Ok:      false,
 			Message: err.Error(),
 		}, 403)
@@ -138,26 +89,28 @@ func (api *WebAPI) TaskGetFromProject(r *Request) {
 
 	if task == nil {
 
-		r.OkJson(GetTaskResponse{
+		r.OkJson(JsonResponse{
 			Ok:      false,
 			Message: "No task available",
 		})
 
 	} else {
 
-		r.OkJson(GetTaskResponse{
-			Ok:   true,
-			Task: task,
+		r.OkJson(JsonResponse{
+			Ok: true,
+			Content: GetTaskResponse{
+				Task: task,
+			},
 		})
 	}
 
 }
 
-func (api *WebAPI) TaskGet(r *Request) {
+func (api *WebAPI) GetTask(r *Request) {
 
 	worker, err := api.validateSignature(r)
 	if err != nil {
-		r.Json(GetTaskResponse{
+		r.Json(JsonResponse{
 			Ok:      false,
 			Message: err.Error(),
 		}, 403)
@@ -167,16 +120,18 @@ func (api *WebAPI) TaskGet(r *Request) {
 	task := api.Database.GetTask(worker)
 	if task == nil {
 
-		r.OkJson(GetTaskResponse{
+		r.OkJson(JsonResponse{
 			Ok:      false,
 			Message: "No task available",
 		})
 
 	} else {
 
-		r.OkJson(GetTaskResponse{
-			Ok:   true,
-			Task: task,
+		r.OkJson(JsonResponse{
+			Ok: true,
+			Content: GetTaskResponse{
+				Task: task,
+			},
 		})
 	}
 }
@@ -236,11 +191,11 @@ func (api WebAPI) validateSignature(r *Request) (*storage.Worker, error) {
 	return worker, nil
 }
 
-func (api *WebAPI) TaskRelease(r *Request) {
+func (api *WebAPI) ReleaseTask(r *Request) {
 
 	worker, err := api.validateSignature(r)
 	if err != nil {
-		r.Json(GetTaskResponse{
+		r.Json(JsonResponse{
 			Ok:      false,
 			Message: err.Error(),
 		}, 403)
@@ -250,16 +205,18 @@ func (api *WebAPI) TaskRelease(r *Request) {
 	req := &ReleaseTaskRequest{}
 	err = json.Unmarshal(r.Ctx.Request.Body(), req)
 	if err != nil {
-		r.Json(CreateProjectResponse{
+		r.Json(JsonResponse{
 			Ok:      false,
 			Message: "Could not parse request",
 		}, 400)
 	}
 	res := api.Database.ReleaseTask(req.TaskId, worker.Id, req.Result, req.Verification)
 
-	response := ReleaseTaskResponse{
-		Updated: res,
-		Ok:      true,
+	response := JsonResponse{
+		Ok: true,
+		Content: ReleaseTaskResponse{
+			Updated: res,
+		},
 	}
 
 	if !res {

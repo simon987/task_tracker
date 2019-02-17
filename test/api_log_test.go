@@ -1,12 +1,10 @@
 package test
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/Sirupsen/logrus"
 	"github.com/simon987/task_tracker/api"
 	"github.com/simon987/task_tracker/storage"
-	"io/ioutil"
 	"testing"
 	"time"
 )
@@ -141,12 +139,12 @@ func TestGetLogs(t *testing.T) {
 		t.Error()
 	}
 
-	if len(*r.Logs) <= 0 {
+	if len(*r.Content.Logs) <= 0 {
 		t.Error()
 	}
 
 	debugFound := false
-	for _, log := range *r.Logs {
+	for _, log := range *r.Content.Logs {
 		if log.Message == "This one shouldn't be returned" {
 			t.Error()
 		} else if log.Message == "error" {
@@ -174,17 +172,12 @@ func TestGetLogsInvalid(t *testing.T) {
 	}
 }
 
-func getLogs(since int64, level storage.LogLevel) *api.GetLogResponse {
+func getLogs(since int64, level storage.LogLevel) (ar LogsAR) {
 
 	r := Post(fmt.Sprintf("/logs"), api.GetLogRequest{
 		Since: since,
 		Level: level,
 	}, nil, nil)
-
-	resp := &api.GetLogResponse{}
-	data, _ := ioutil.ReadAll(r.Body)
-	err := json.Unmarshal(data, resp)
-	handleErr(err)
-
-	return resp
+	UnmarshalResponse(r, &ar)
+	return
 }

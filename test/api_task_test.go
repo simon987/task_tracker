@@ -1,11 +1,9 @@
 package test
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/simon987/task_tracker/api"
 	"github.com/simon987/task_tracker/storage"
-	"io/ioutil"
 	"testing"
 )
 
@@ -16,17 +14,17 @@ func TestCreateTaskValid(t *testing.T) {
 		Version:  "Test Version",
 		CloneUrl: "http://github.com/test/test",
 		GitRepo:  "Some git repo",
-	}).Id
+	}).Content.Id
 
 	worker := genWid()
-	requestAccess(api.WorkerAccessRequest{
+	requestAccess(api.CreateWorkerAccessRequest{
 		Project: pid,
 		Submit:  true,
 		Assign:  false,
 	}, worker)
 	acceptAccessRequest(pid, worker.Id, testAdminCtx)
 
-	resp := createTask(api.CreateTaskRequest{
+	resp := createTask(api.SubmitTaskRequest{
 		Project:    pid,
 		Recipe:     "{}",
 		MaxRetries: 3,
@@ -41,7 +39,7 @@ func TestCreateTaskInvalidProject(t *testing.T) {
 
 	worker := genWid()
 
-	resp := createTask(api.CreateTaskRequest{
+	resp := createTask(api.SubmitTaskRequest{
 		Project:    123456,
 		Recipe:     "{}",
 		MaxRetries: 3,
@@ -103,7 +101,7 @@ func TestCreateTaskInvalidRetries(t *testing.T) {
 
 	worker := genWid()
 
-	resp := createTask(api.CreateTaskRequest{
+	resp := createTask(api.SubmitTaskRequest{
 		Project:    1,
 		MaxRetries: -1,
 	}, worker)
@@ -121,7 +119,7 @@ func TestCreateTaskInvalidRecipe(t *testing.T) {
 
 	worker := genWid()
 
-	resp := createTask(api.CreateTaskRequest{
+	resp := createTask(api.SubmitTaskRequest{
 		Project:    1,
 		Recipe:     "",
 		MaxRetries: 3,
@@ -138,37 +136,33 @@ func TestCreateTaskInvalidRecipe(t *testing.T) {
 
 func TestCreateGetTask(t *testing.T) {
 
-	//Make sure there is always a project for id:1
-	resp := createProjectAsAdmin(api.CreateProjectRequest{
+	pid := createProjectAsAdmin(api.CreateProjectRequest{
 		Name:     "My project",
 		Version:  "1.0",
 		CloneUrl: "http://github.com/test/test",
 		GitRepo:  "myrepo",
 		Priority: 999,
 		Public:   true,
-	})
+	}).Content.Id
 
 	worker := genWid()
-	requestAccess(api.WorkerAccessRequest{
+	requestAccess(api.CreateWorkerAccessRequest{
 		Submit:  true,
 		Assign:  true,
-		Project: resp.Id,
+		Project: pid,
 	}, worker)
-	acceptAccessRequest(resp.Id, worker.Id, testAdminCtx)
+	acceptAccessRequest(pid, worker.Id, testAdminCtx)
 
-	createTask(api.CreateTaskRequest{
-		Project:           resp.Id,
+	createTask(api.SubmitTaskRequest{
+		Project:           pid,
 		Recipe:            "{\"url\":\"test\"}",
 		MaxRetries:        3,
 		Priority:          9999,
 		VerificationCount: 12,
 	}, worker)
 
-	taskResp := getTaskFromProject(resp.Id, worker)
+	taskResp := getTaskFromProject(pid, worker).Content
 
-	if taskResp.Ok != true {
-		t.Error()
-	}
 	if taskResp.Task.VerificationCount != 12 {
 		t.Error()
 	}
@@ -187,7 +181,7 @@ func TestCreateGetTask(t *testing.T) {
 	if taskResp.Task.MaxRetries != 3 {
 		t.Error()
 	}
-	if taskResp.Task.Project.Id != resp.Id {
+	if taskResp.Task.Project.Id != pid {
 		t.Error()
 	}
 	if taskResp.Task.Project.Priority != 999 {
@@ -213,7 +207,7 @@ func createTasks(prefix string) (int64, int64) {
 		GitRepo:  prefix + "low1",
 		Priority: 1,
 		Public:   true,
-	})
+	}).Content
 	highP := createProjectAsAdmin(api.CreateProjectRequest{
 		Name:     prefix + "high",
 		Version:  "1.0",
@@ -221,37 +215,37 @@ func createTasks(prefix string) (int64, int64) {
 		GitRepo:  prefix + "high1",
 		Priority: 999,
 		Public:   true,
-	})
+	}).Content
 	worker := genWid()
-	requestAccess(api.WorkerAccessRequest{
+	requestAccess(api.CreateWorkerAccessRequest{
 		Submit:  true,
 		Assign:  false,
 		Project: highP.Id,
 	}, worker)
 	acceptAccessRequest(highP.Id, worker.Id, testAdminCtx)
-	requestAccess(api.WorkerAccessRequest{
+	requestAccess(api.CreateWorkerAccessRequest{
 		Submit:  true,
 		Assign:  false,
 		Project: lowP.Id,
 	}, worker)
 	acceptAccessRequest(lowP.Id, worker.Id, testAdminCtx)
 
-	createTask(api.CreateTaskRequest{
+	createTask(api.SubmitTaskRequest{
 		Project:  lowP.Id,
 		Recipe:   "low1",
 		Priority: 0,
 	}, worker)
-	createTask(api.CreateTaskRequest{
+	createTask(api.SubmitTaskRequest{
 		Project:  lowP.Id,
 		Recipe:   "low2",
 		Priority: 1,
 	}, worker)
-	createTask(api.CreateTaskRequest{
+	createTask(api.SubmitTaskRequest{
 		Project:  highP.Id,
 		Recipe:   "high1",
 		Priority: 100,
 	}, worker)
-	createTask(api.CreateTaskRequest{
+	createTask(api.SubmitTaskRequest{
 		Project:  highP.Id,
 		Recipe:   "high2",
 		Priority: 101,
@@ -265,10 +259,10 @@ func TestTaskProjectPriority(t *testing.T) {
 	wid := genWid()
 	l, h := createTasks("withProject")
 
-	t1 := getTaskFromProject(l, wid)
-	t2 := getTaskFromProject(l, wid)
-	t3 := getTaskFromProject(h, wid)
-	t4 := getTaskFromProject(h, wid)
+	t1 := getTaskFromProject(l, wid).Content
+	t2 := getTaskFromProject(l, wid).Content
+	t3 := getTaskFromProject(h, wid).Content
+	t4 := getTaskFromProject(h, wid).Content
 
 	if t1.Task.Recipe != "low2" {
 		t.Error()
@@ -295,10 +289,10 @@ func TestTaskPriority(t *testing.T) {
 
 	createTasks("")
 
-	t1 := getTask(wid)
-	t2 := getTask(wid)
-	t3 := getTask(wid)
-	t4 := getTask(wid)
+	t1 := getTask(wid).Content
+	t2 := getTask(wid).Content
+	t3 := getTask(wid).Content
+	t4 := getTask(wid).Content
 
 	if t1.Task.Recipe != "high2" {
 		t.Error()
@@ -326,16 +320,16 @@ func TestTaskNoAccess(t *testing.T) {
 		CloneUrl: "fjkslejf cesl",
 		GitRepo:  "fffffffff",
 		Public:   false,
-	}).Id
+	}).Content.Id
 
-	requestAccess(api.WorkerAccessRequest{
+	requestAccess(api.CreateWorkerAccessRequest{
 		Project: pid,
 		Assign:  true,
 		Submit:  true,
 	}, worker)
 	acceptAccessRequest(worker.Id, pid, testAdminCtx)
 
-	createResp := createTask(api.CreateTaskRequest{
+	createResp := createTask(api.SubmitTaskRequest{
 		Project:       pid,
 		Priority:      1,
 		MaxAssignTime: 10,
@@ -357,7 +351,7 @@ func TestTaskNoAccess(t *testing.T) {
 	if len(tResp.Message) <= 0 {
 		t.Error()
 	}
-	if tResp.Task != nil {
+	if tResp.Content.Task != nil {
 		t.Error()
 	}
 }
@@ -374,16 +368,16 @@ func TestTaskHasAccess(t *testing.T) {
 		CloneUrl: "josaeiuf cesl",
 		GitRepo:  "wewwwwwwwwwwwwwwwwwwwwww",
 		Public:   false,
-	}).Id
+	}).Content.Id
 
-	requestAccess(api.WorkerAccessRequest{
+	requestAccess(api.CreateWorkerAccessRequest{
 		Submit:  true,
 		Assign:  true,
 		Project: pid,
 	}, worker)
 	acceptAccessRequest(worker.Id, pid, testAdminCtx)
 
-	createResp := createTask(api.CreateTaskRequest{
+	createResp := createTask(api.SubmitTaskRequest{
 		Project:       pid,
 		Priority:      1,
 		MaxAssignTime: 10,
@@ -400,7 +394,7 @@ func TestTaskHasAccess(t *testing.T) {
 	if tResp.Ok != true {
 		t.Error()
 	}
-	if tResp.Task == nil {
+	if tResp.Content.Task == nil {
 		t.Error()
 	}
 }
@@ -426,23 +420,23 @@ func TestReleaseTaskSuccess(t *testing.T) {
 		Name:     "testreleasetask",
 		Motd:     "",
 		Public:   true,
-	}).Id
+	}).Content.Id
 
-	requestAccess(api.WorkerAccessRequest{
+	requestAccess(api.CreateWorkerAccessRequest{
 		Project: pid,
 		Assign:  true,
 		Submit:  true,
 	}, worker)
 	acceptAccessRequest(pid, worker.Id, testAdminCtx)
 
-	createTask(api.CreateTaskRequest{
+	createTask(api.SubmitTaskRequest{
 		Priority:   0,
 		Project:    pid,
 		Recipe:     "{}",
 		MaxRetries: 3,
 	}, worker)
 
-	task := getTaskFromProject(pid, worker).Task
+	task := getTaskFromProject(pid, worker).Content.Task
 
 	releaseResp := releaseTask(api.ReleaseTaskRequest{
 		TaskId: task.Id,
@@ -471,17 +465,17 @@ func TestCreateIntCollision(t *testing.T) {
 		Public:   true,
 		Name:     "testcreateintcollision",
 		Version:  "testcreateintcollision",
-	}).Id
+	}).Content.Id
 
 	w := genWid()
-	requestAccess(api.WorkerAccessRequest{
+	requestAccess(api.CreateWorkerAccessRequest{
 		Project: pid,
 		Assign:  true,
 		Submit:  true,
 	}, w)
 	acceptAccessRequest(pid, w.Id, testAdminCtx)
 
-	if createTask(api.CreateTaskRequest{
+	if createTask(api.SubmitTaskRequest{
 		Project:  pid,
 		Hash64:   123,
 		Priority: 1,
@@ -490,7 +484,7 @@ func TestCreateIntCollision(t *testing.T) {
 		t.Error()
 	}
 
-	resp := createTask(api.CreateTaskRequest{
+	resp := createTask(api.SubmitTaskRequest{
 		Project:  pid,
 		Hash64:   123,
 		Priority: 1,
@@ -517,17 +511,17 @@ func TestCreateStringCollision(t *testing.T) {
 		Public:   true,
 		Name:     "testcreatestringcollision",
 		Version:  "testcreatestringcollision",
-	}).Id
+	}).Content.Id
 
 	w := genWid()
-	requestAccess(api.WorkerAccessRequest{
+	requestAccess(api.CreateWorkerAccessRequest{
 		Project: pid,
 		Assign:  true,
 		Submit:  true,
 	}, w)
 	acceptAccessRequest(pid, w.Id, testAdminCtx)
 
-	if createTask(api.CreateTaskRequest{
+	if createTask(api.SubmitTaskRequest{
 		Project:      pid,
 		UniqueString: "Hello, world",
 		Priority:     1,
@@ -536,14 +530,14 @@ func TestCreateStringCollision(t *testing.T) {
 		t.Error()
 	}
 
-	resp := createTask(api.CreateTaskRequest{
+	resp := createTask(api.SubmitTaskRequest{
 		Project:      pid,
 		UniqueString: "Hello, world",
 		Priority:     1,
 		Recipe:       "{}",
 	}, w)
 
-	if !createTask(api.CreateTaskRequest{
+	if !createTask(api.SubmitTaskRequest{
 		Project:      pid,
 		UniqueString: "This one should work",
 		Priority:     1,
@@ -572,28 +566,28 @@ func TestCannotVerifySameTaskTwice(t *testing.T) {
 		Public:   true,
 		Name:     "verifysametasktwice",
 		Version:  "verifysametasktwice",
-	}).Id
+	}).Content.Id
 
 	w := genWid()
-	requestAccess(api.WorkerAccessRequest{
+	requestAccess(api.CreateWorkerAccessRequest{
 		Project: pid,
 		Assign:  true,
 		Submit:  true,
 	}, w)
 	acceptAccessRequest(pid, w.Id, testAdminCtx)
 
-	createTask(api.CreateTaskRequest{
+	createTask(api.SubmitTaskRequest{
 		VerificationCount: 2,
 		Project:           pid,
 		Recipe:            "verifysametasktwice",
 	}, w)
 
-	task := getTaskFromProject(pid, w).Task
+	task := getTaskFromProject(pid, w).Content.Task
 	rlr := releaseTask(api.ReleaseTaskRequest{
 		Result:       storage.TR_OK,
 		TaskId:       task.Id,
 		Verification: 123,
-	}, w)
+	}, w).Content
 
 	if rlr.Updated != false {
 		t.Error()
@@ -616,22 +610,22 @@ func TestVerification2(t *testing.T) {
 		Public:   true,
 		Name:     "verify2",
 		Version:  "verify2",
-	}).Id
+	}).Content.Id
 
 	w := genWid()
 	w2 := genWid()
 	w3 := genWid()
-	requestAccess(api.WorkerAccessRequest{
+	requestAccess(api.CreateWorkerAccessRequest{
 		Project: pid,
 		Assign:  true,
 		Submit:  true,
 	}, w)
-	requestAccess(api.WorkerAccessRequest{
+	requestAccess(api.CreateWorkerAccessRequest{
 		Project: pid,
 		Assign:  true,
 		Submit:  true,
 	}, w2)
-	requestAccess(api.WorkerAccessRequest{
+	requestAccess(api.CreateWorkerAccessRequest{
 		Project: pid,
 		Assign:  true,
 		Submit:  true,
@@ -640,40 +634,40 @@ func TestVerification2(t *testing.T) {
 	acceptAccessRequest(pid, w2.Id, testAdminCtx)
 	acceptAccessRequest(pid, w3.Id, testAdminCtx)
 
-	createTask(api.CreateTaskRequest{
+	createTask(api.SubmitTaskRequest{
 		VerificationCount: 2,
 		Project:           pid,
 		Recipe:            "verify2",
 	}, w)
 
-	task := getTaskFromProject(pid, w).Task
+	task := getTaskFromProject(pid, w).Content.Task
 	rlr := releaseTask(api.ReleaseTaskRequest{
 		Result:       storage.TR_OK,
 		TaskId:       task.Id,
 		Verification: 123,
-	}, w)
+	}, w).Content
 
 	if rlr.Updated != false {
 		t.Error()
 	}
 
-	task2 := getTaskFromProject(pid, w2).Task
+	task2 := getTaskFromProject(pid, w2).Content.Task
 	rlr2 := releaseTask(api.ReleaseTaskRequest{
 		Result:       storage.TR_OK,
 		Verification: 1,
 		TaskId:       task2.Id,
-	}, w2)
+	}, w2).Content
 
 	if rlr2.Updated != false {
 		t.Error()
 	}
 
-	task3 := getTaskFromProject(pid, w3).Task
+	task3 := getTaskFromProject(pid, w3).Content.Task
 	rlr3 := releaseTask(api.ReleaseTaskRequest{
 		Result:       storage.TR_OK,
 		Verification: 123,
 		TaskId:       task3.Id,
-	}, w3)
+	}, w3).Content
 
 	if rlr3.Updated != true {
 		t.Error()
@@ -690,24 +684,24 @@ func TestReleaseTaskFail(t *testing.T) {
 		Public:   true,
 		Name:     "releasefail",
 		Version:  "releasefail",
-	}).Id
+	}).Content.Id
 
 	w := genWid()
-	requestAccess(api.WorkerAccessRequest{
+	requestAccess(api.CreateWorkerAccessRequest{
 		Project: pid,
 		Assign:  true,
 		Submit:  true,
 	}, w)
 	acceptAccessRequest(pid, w.Id, testAdminCtx)
 
-	createTask(api.CreateTaskRequest{
+	createTask(api.SubmitTaskRequest{
 		MaxRetries:        0,
 		Project:           pid,
 		VerificationCount: 1,
 		Recipe:            "releasefail",
 	}, w)
 
-	task := getTaskFromProject(pid, w).Task
+	task := getTaskFromProject(pid, w).Content.Task
 
 	resp := releaseTask(api.ReleaseTaskRequest{
 		Result:       storage.TR_FAIL,
@@ -715,13 +709,12 @@ func TestReleaseTaskFail(t *testing.T) {
 		Verification: 1,
 	}, w)
 
-	if resp.Updated != true {
+	if resp.Content.Updated != true {
 		t.Error()
 	}
 	if resp.Ok != true {
 		t.Error()
 	}
-
 }
 
 func TestTaskChain(t *testing.T) {
@@ -733,7 +726,7 @@ func TestTaskChain(t *testing.T) {
 		Public:   true,
 		GitRepo:  "testtaskchain1",
 		CloneUrl: "testtaskchain1",
-	}).Id
+	}).Content.Id
 
 	p2 := createProjectAsAdmin(api.CreateProjectRequest{
 		Name:     "testtaskchain2",
@@ -741,13 +734,13 @@ func TestTaskChain(t *testing.T) {
 		GitRepo:  "testtaskchain2",
 		CloneUrl: "testtaskchain2",
 		Chain:    p1,
-	}).Id
-	requestAccess(api.WorkerAccessRequest{
+	}).Content.Id
+	requestAccess(api.CreateWorkerAccessRequest{
 		Project: p1,
 		Assign:  true,
 		Submit:  true,
 	}, w)
-	requestAccess(api.WorkerAccessRequest{
+	requestAccess(api.CreateWorkerAccessRequest{
 		Project: p2,
 		Assign:  true,
 		Submit:  true,
@@ -755,20 +748,20 @@ func TestTaskChain(t *testing.T) {
 	acceptAccessRequest(p1, w.Id, testAdminCtx)
 	acceptAccessRequest(p2, w.Id, testAdminCtx)
 
-	createTask(api.CreateTaskRequest{
+	createTask(api.SubmitTaskRequest{
 		Project:           p2,
 		Recipe:            "###",
 		VerificationCount: 0,
 	}, w)
 
-	t1 := getTaskFromProject(p2, w).Task
+	t1 := getTaskFromProject(p2, w).Content.Task
 
 	releaseTask(api.ReleaseTaskRequest{
 		TaskId: t1.Id,
 		Result: storage.TR_OK,
 	}, w)
 
-	chained := getTaskFromProject(p1, w).Task
+	chained := getTaskFromProject(p1, w).Content.Task
 
 	if chained.VerificationCount != t1.VerificationCount {
 		t.Error()
@@ -787,50 +780,26 @@ func TestTaskChain(t *testing.T) {
 	}
 }
 
-func createTask(request api.CreateTaskRequest, worker *storage.Worker) *api.CreateTaskResponse {
-
+func createTask(request api.SubmitTaskRequest, worker *storage.Worker) (ar api.JsonResponse) {
 	r := Post("/task/create", request, worker, nil)
-
-	var resp api.CreateTaskResponse
-	data, _ := ioutil.ReadAll(r.Body)
-	err := json.Unmarshal(data, &resp)
-	handleErr(err)
-
-	return &resp
+	UnmarshalResponse(r, &ar)
+	return
 }
 
-func getTask(worker *storage.Worker) *api.GetTaskResponse {
-
-	r := Get(fmt.Sprintf("/task/get"), worker, nil)
-
-	var resp api.GetTaskResponse
-	data, _ := ioutil.ReadAll(r.Body)
-	err := json.Unmarshal(data, &resp)
-	handleErr(err)
-
-	return &resp
+func getTask(worker *storage.Worker) (ar TaskAR) {
+	r := Get("/task/get", worker, nil)
+	UnmarshalResponse(r, &ar)
+	return
 }
 
-func getTaskFromProject(project int64, worker *storage.Worker) *api.GetTaskResponse {
-
+func getTaskFromProject(project int64, worker *storage.Worker) (ar TaskAR) {
 	r := Get(fmt.Sprintf("/task/get/%d", project), worker, nil)
-
-	var resp api.GetTaskResponse
-	data, _ := ioutil.ReadAll(r.Body)
-	err := json.Unmarshal(data, &resp)
-	handleErr(err)
-
-	return &resp
+	UnmarshalResponse(r, &ar)
+	return
 }
 
-func releaseTask(request api.ReleaseTaskRequest, worker *storage.Worker) *api.ReleaseTaskResponse {
-
+func releaseTask(request api.ReleaseTaskRequest, worker *storage.Worker) (ar ReleaseAR) {
 	r := Post("/task/release", request, worker, nil)
-
-	var resp api.ReleaseTaskResponse
-	data, _ := ioutil.ReadAll(r.Body)
-	err := json.Unmarshal(data, &resp)
-	handleErr(err)
-
-	return &resp
+	UnmarshalResponse(r, &ar)
+	return
 }
