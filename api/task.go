@@ -209,7 +209,17 @@ func (api *WebAPI) ReleaseTask(r *Request) {
 			Ok:      false,
 			Message: "Could not parse request",
 		}, 400)
+		return
 	}
+
+	if !req.IsValid() {
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: "Invalid request",
+		}, 400)
+		return
+	}
+
 	res := api.Database.ReleaseTask(req.TaskId, worker.Id, req.Result, req.Verification)
 
 	response := JsonResponse{

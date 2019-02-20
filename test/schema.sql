@@ -1,8 +1,6 @@
 DROP TABLE IF EXISTS worker, project, task, log_entry,
   worker_access, manager, manager_has_role_on_project, project_monitoring_snapshot,
   worker_verifies_task;
-DROP TYPE IF EXISTS status;
-DROP TYPE IF EXISTS log_level;
 
 CREATE TABLE worker
 (
@@ -25,7 +23,8 @@ CREATE TABLE project
   clone_url         TEXT               NOT NULL,
   git_repo          TEXT UNIQUE        NOT NULL,
   version           TEXT               NOT NULL,
-  motd              TEXT               NOT NULL
+  motd              TEXT               NOT NULL,
+  secret            TEXT               NOT NULL DEFAULT '{}'
 );
 
 CREATE TABLE worker_access
@@ -103,14 +102,18 @@ $$
 DECLARE
   chain INTEGER;
 BEGIN
-  UPDATE project SET closed_task_count=closed_task_count + 1 WHERE id = OLD.project returning project.chain into chain;
-  UPDATE worker SET closed_task_count=closed_task_count + 1 WHERE id = OLD.assignee;
-  IF chain != 0 THEN
-    INSERT into task (hash64, project, assignee, max_assign_time, assign_time, verification_count,
-                      priority, retries, max_retries, status, recipe)
-    VALUES (old.hash64, chain, NULL, old.max_assign_time, NULL,
-            old.verification_count, old.priority, 0, old.max_retries, 1,
-            old.recipe);
+  if OLD.assignee IS NOT NULL THEN
+    UPDATE project
+    SET closed_task_count=closed_task_count + 1
+    WHERE id = OLD.project returning project.chain into chain;
+    UPDATE worker SET closed_task_count=closed_task_count + 1 WHERE id = OLD.assignee;
+    IF chain != 0 THEN
+      INSERT into task (hash64, project, assignee, max_assign_time, assign_time, verification_count,
+                        priority, retries, max_retries, status, recipe)
+      VALUES (old.hash64, chain, NULL, old.max_assign_time, NULL,
+              old.verification_count, old.priority, 0, old.max_retries, 1,
+              old.recipe);
+    end if;
   end if;
   RETURN OLD;
 END;
@@ -136,7 +139,7 @@ CREATE TRIGGER on_manager_insert
   FOR EACH ROW
 EXECUTE PROCEDURE on_manager_insert();
 
-CREATE OR REPLACE FUNCTION release_task_ok(wid INT, tid INT, ver INT) RETURNS BOOLEAN AS
+CREATE OR REPLACE FUNCTION release_task_ok(wid INT, tid INT, ver BIGINT) RETURNS BOOLEAN AS
 $$
 DECLARE
   res INT = NULL;

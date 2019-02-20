@@ -13,8 +13,11 @@ import {AccountDetailsComponent} from "./account-details/account-details.compone
 import {WorkerDashboardComponent} from "./worker-dashboard/worker-dashboard.component";
 import {ProjectPermsComponent} from "./project-perms/project-perms.component";
 import {ManagerListComponent} from "./manager-list/manager-list.component";
+import {IndexComponent} from "./index/index.component";
+import {ProjectSecretComponent} from "./project-secret/project-secret.component";
 
 const routes: Routes = [
+    {path: "", component: IndexComponent},
     {path: "log", component: LogsComponent},
     {path: "login", component: LoginComponent},
     {path: "account", component: AccountDetailsComponent},
@@ -22,9 +25,10 @@ const routes: Routes = [
     {path: "project/:id", component: ProjectDashboardComponent},
     {path: "project/:id/update", component: UpdateProjectComponent},
     {path: "project/:id/perms", component: ProjectPermsComponent},
+    {path: "project/:id/secret", component: ProjectSecretComponent},
     {path: "new_project", component: CreateProjectComponent},
     {path: "workers", component: WorkerDashboardComponent},
-    {path: "manager_list", component: ManagerListComponent}
+    {path: "manager_list", component: ManagerListComponent},
 ];
 
 @NgModule({

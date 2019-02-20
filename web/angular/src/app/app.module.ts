@@ -27,6 +27,7 @@ import {
     MatSlideToggleModule,
     MatSnackBarModule,
     MatSortModule,
+    MatStepperModule,
     MatTableModule,
     MatTabsModule,
     MatToolbarModule,
@@ -52,6 +53,8 @@ import {ManagerListComponent} from './manager-list/manager-list.component';
 import {ProjectSelectComponent} from './project-select/project-select.component';
 import {ManagerSelectComponent} from './manager-select/manager-select.component';
 import {ProjectIconComponent} from './project-icon/project-icon.component';
+import {IndexComponent} from './index/index.component';
+import {ProjectSecretComponent} from './project-secret/project-secret.component';
 
 
 export function createTranslateLoader(http: HttpClient) {
@@ -76,6 +79,8 @@ export function createTranslateLoader(http: HttpClient) {
         ProjectSelectComponent,
         ManagerSelectComponent,
         ProjectIconComponent,
+        IndexComponent,
+        ProjectSecretComponent,
     ],
     imports: [
         BrowserModule,
@@ -114,7 +119,8 @@ export function createTranslateLoader(http: HttpClient) {
         MatProgressBarModule,
         MatTabsModule,
         MatListModule,
-        MatButtonToggleModule
+        MatButtonToggleModule,
+        MatStepperModule
 
     ],
     exports: [],

@@ -83,7 +83,7 @@ func (database *Database) GetTask(worker *Worker) *Task {
 	INNER JOIN project project on task.project = project.id
 	LEFT JOIN worker_verifies_task wvt on task.id = wvt.task AND wvt.worker=$1
 	WHERE assignee IS NULL AND task.status=1
-		AND (project.public OR EXISTS (
+		AND (project.public OR (
 		  SELECT a.role_assign FROM worker_access a WHERE a.worker=$1 AND a.project=project.id
 		))
 		AND wvt.task IS NULL
@@ -144,9 +144,10 @@ func (database Database) ReleaseTask(id int64, workerId int64, result TaskResult
 
 	var taskUpdated bool
 	if result == TR_OK {
-		row := db.QueryRow(`SELECT release_task_ok($1,$2,$3)`, workerId, id, verification)
+		row := db.QueryRow(fmt.Sprintf(`SELECT release_task_ok(%d,%d,%d)`, workerId, id, verification))
 
-		_ = row.Scan(&taskUpdated)
+		err := row.Scan(&taskUpdated)
+		handleErr(err)
 	} else if result == TR_FAIL {
 		res, err := db.Exec(`UPDATE task SET (status, assignee, retries) = 
 			(CASE WHEN retries+1 >= max_retries THEN 2 ELSE 1 END, NULL, retries+1)

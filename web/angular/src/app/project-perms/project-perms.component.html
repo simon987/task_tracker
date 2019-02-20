@@ -9,7 +9,7 @@
             <mat-card-subtitle>{{"perms.subtitle" | translate}}</mat-card-subtitle>
         </mat-card-header>
 
-        <mat-card-content *ngIf="!unauthorized || !auth.account">
+        <mat-card-content *ngIf="!(unauthorized || !auth.account)">
             <h3>{{"perms.workers" | translate}}</h3>
             <mat-list *ngIf="accesses && accesses.length>0">
                 <mat-list-item *ngFor="let wa of accesses" [class.request]="wa.request">
@@ -65,5 +65,8 @@
             </p>
         </mat-card-content>
 
+        <mat-card-actions>
+            <button mat-raised-button [routerLink]="'../'">Back</button>
+        </mat-card-actions>
     </mat-card>
 </div>

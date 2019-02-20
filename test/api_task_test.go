@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/simon987/task_tracker/api"
 	"github.com/simon987/task_tracker/storage"
+	"math"
 	"testing"
 )
 
@@ -776,6 +777,42 @@ func TestTaskChain(t *testing.T) {
 		t.Error()
 	}
 	if chained.Status != storage.NEW {
+		t.Error()
+	}
+}
+
+func TestTaskReleaseBigInt(t *testing.T) {
+
+	createTask(api.SubmitTaskRequest{
+		Project:           testProject,
+		VerificationCount: 1,
+		Recipe:            "bigint",
+	}, testWorker)
+	createTask(api.SubmitTaskRequest{
+		Project:           testProject,
+		VerificationCount: 1,
+		Recipe:            "smallint",
+	}, testWorker)
+
+	tid := getTaskFromProject(testProject, testWorker).Content.Task.Id
+	tid2 := getTaskFromProject(testProject, testWorker).Content.Task.Id
+
+	r := releaseTask(api.ReleaseTaskRequest{
+		Verification: math.MaxInt64,
+		Result:       storage.TR_OK,
+		TaskId:       tid,
+	}, testWorker)
+
+	r2 := releaseTask(api.ReleaseTaskRequest{
+		Verification: math.MinInt64,
+		Result:       storage.TR_OK,
+		TaskId:       tid2,
+	}, testWorker)
+
+	if r.Content.Updated != true {
+		t.Error()
+	}
+	if r2.Content.Updated != true {
 		t.Error()
 	}
 }

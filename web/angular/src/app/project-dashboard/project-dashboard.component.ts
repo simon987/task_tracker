@@ -7,6 +7,7 @@ import {Chart} from "chart.js";
 import {AssignedTasks, MonitoringSnapshot} from "../models/monitoring";
 import {TranslateService} from "@ngx-translate/core";
 import {MessengerService} from "../messenger.service";
+import {AuthService} from "../auth.service";
 
 
 @Component({
@@ -46,6 +47,7 @@ export class ProjectDashboardComponent implements OnInit {
     constructor(private apiService: ApiService,
                 private route: ActivatedRoute,
                 private translate: TranslateService,
+                public auth: AuthService,
                 private messenger: MessengerService) {
     }
 

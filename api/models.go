@@ -214,6 +214,10 @@ type ReleaseTaskRequest struct {
 	Verification int64              `json:"verification"`
 }
 
+func (r *ReleaseTaskRequest) IsValid() bool {
+	return r.TaskId != 0
+}
+
 type ReleaseTaskResponse struct {
 	Updated bool `json:"updated"`
 }
@@ -275,4 +279,12 @@ type SetManagerRoleOnProjectRequest struct {
 type Info struct {
 	Name    string `json:"name"`
 	Version string `json:"version"`
+}
+
+type SetSecretRequest struct {
+	Secret string `json:"secret"`
+}
+
+type GetSecretResponse struct {
+	Secret string `json:"secret"`
 }

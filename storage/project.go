@@ -192,3 +192,36 @@ func (database *Database) GetAssigneeStats(pid int64, count int64) *[]AssignedTa
 
 	return &assignees
 }
+
+func (database *Database) GetSecret(pid int64, workerId int64) (secret string, err error) {
+
+	db := database.getDB()
+
+	var row *sql.Row
+	if workerId == 0 {
+		row = db.QueryRow(`SELECT secret FROM project WHERE id=$1`, pid)
+	} else {
+		row = db.QueryRow(`SELECT secret FROM project 
+		WHERE id =$1 AND (
+		  	SELECT a.role_assign FROM worker_access a WHERE a.worker=$2 AND a.project=$1
+		  )`, pid, workerId)
+	}
+
+	err = row.Scan(&secret)
+	handleErr(err)
+	return
+}
+
+func (database *Database) SetSecret(pid int64, secret string) {
+
+	db := database.getDB()
+
+	res, err := db.Exec(`UPDATE project SET secret=$1 WHERE id=$2`, secret, pid)
+	handleErr(err)
+
+	rowsAffected, _ := res.RowsAffected()
+	logrus.WithFields(logrus.Fields{
+		"rowsAffected": rowsAffected,
+		"project":      pid,
+	}).Info("Set secret")
+}

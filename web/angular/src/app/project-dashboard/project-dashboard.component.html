@@ -56,11 +56,13 @@
 
         </mat-card-content>
         <mat-card-actions>
-            <!--TODO: auth-->
-            <button mat-raised-button color="primary" *ngIf="project"
+            <button mat-raised-button [routerLink]="'/projects'">Back</button>
+            <button mat-raised-button color="primary" *ngIf="project && auth.logged"
                     [routerLink]="'/project/' + project.id + '/update'">{{"project.update" | translate}}</button>
-            <button mat-raised-button color="primary" *ngIf="project"
+            <button mat-raised-button color="primary" *ngIf="project && auth.logged"
                     [routerLink]="'/project/' + project.id + '/perms'">{{"project.perms" | translate}}</button>
+            <button mat-raised-button color="primary" *ngIf="project && auth.logged"
+                    [routerLink]="'/project/' + project.id + '/secret'">{{"project.secret" | translate}}</button>
         </mat-card-actions>
     </mat-card>
 </div>

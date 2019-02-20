@@ -67,7 +67,8 @@
         "perms": "Permissions",
         "chain": "Chain tasks to",
         "manager_select": "Give access to manager",
-        "version": "Git version (commit hash)"
+        "version": "Git version (commit hash)",
+        "secret": "Secret"
     },
     "dashboard": {
         "title": "Dashboard for",
@@ -137,5 +138,16 @@
     "project_select": {
         "list_loading": "Loading project list...",
         "none": "None"
+    },
+    "index": {
+        "version": "Latest commit hash here",
+        "alias": "Relevent alias"
+    },
+    "secret": {
+        "title": "Project secret",
+        "subtitle": "You can set project configuration here. It is only accessible by workers with ASSIGN access to this project",
+        "secret": "Secret",
+        "update": "Update",
+        "ok": "Updated"
     }
 }

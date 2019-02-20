@@ -6,6 +6,7 @@ import {MatPaginator, MatSort, MatTableDataSource} from "@angular/material";
 
 import * as moment from "moment"
 import {AuthService} from "../auth.service";
+import {Manager} from "../models/manager";
 
 @Component({
     selector: 'app-manager-list',

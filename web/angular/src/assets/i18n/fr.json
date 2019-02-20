@@ -118,7 +118,8 @@
         "set": "Changements enregistrés",
         "workers": "Workers",
         "no_workers": "Aucun Worker n'a explicitement accès à ce projet",
-        "managers": "Managers"
+        "managers": "Managers",
+        "secret": "Secret"
     },
     "messenger": {
         "close": "Fermer",
@@ -139,6 +140,17 @@
     "project_select": {
         "list_loading": "Chargement de la liste de projets...",
         "none": "Aucun"
+    },
+    "index": {
+        "version": "Le dernier hash de commit",
+        "alias": "Alias pertinent"
+    },
+    "secret": {
+        "title": "Secret",
+        "subtitle": "Vous pouvez définir la configuration du projet ici. Ce n'est accessible que par les Workers ayant accès au projet",
+        "secret": "Secret",
+        "update": "Mettre à jour",
+        "ok": "Mis à jour"
     }
 }
 

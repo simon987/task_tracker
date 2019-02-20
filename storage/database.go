@@ -39,6 +39,8 @@ func (database *Database) getDB() *sql.DB {
 			logrus.Fatal(err)
 		}
 
+		db.SetMaxOpenConns(50)
+
 		database.db = db
 	} else {
 		err := database.db.Ping()

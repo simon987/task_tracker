@@ -6,7 +6,7 @@ import {Credentials} from "./models/credentials";
 @Injectable()
 export class ApiService {
 
-    private url: string = "http://localhost/api";
+    public url: string = "http://localhost/api";
     private options: {
         withCredentials: true,
         responseType: "json"
@@ -66,36 +66,44 @@ export class ApiService {
     }
 
     getProjectAccess(project: number) {
-        return this.http.get(this.url + `/project/access_list/${project}`)
+        return this.http.get(this.url + `/project/access_list/${project}`, this.options)
     }
 
     getManagerList() {
-        return this.http.get(this.url + "/manager/list")
+        return this.http.get(this.url + "/manager/list", this.options)
     }
 
     getManagerListWithRoleOn(project: number) {
-        return this.http.get(this.url + "/manager/list_for_project/" + project)
+        return this.http.get(this.url + "/manager/list_for_project/" + project, this.options)
     }
 
     promote(managerId: number) {
-        return this.http.get(this.url + `/manager/promote/${managerId}`)
+        return this.http.get(this.url + `/manager/promote/${managerId}`, this.options)
     }
 
     demote(managerId: number) {
-        return this.http.get(this.url + `/manager/demote/${managerId}`)
+        return this.http.get(this.url + `/manager/demote/${managerId}`, this.options)
     }
 
     acceptWorkerAccessRequest(wid: number, pid: number) {
-        return this.http.post(this.url + `/project/accept_request/${pid}/${wid}`, null)
+        return this.http.post(this.url + `/project/accept_request/${pid}/${wid}`, null, this.options)
     }
 
     rejectWorkerAccessRequest(wid: number, pid: number) {
-        return this.http.post(this.url + `/project/reject_request/${pid}/${wid}`, null)
+        return this.http.post(this.url + `/project/reject_request/${pid}/${wid}`, null, this.options)
     }
 
     setManagerRoleOnProject(pid: number, role: number, manager: number) {
         return this.http.post(this.url + `/manager/set_role_for_project/${pid}`,
-            {"role": role, "manager": manager})
+            {"role": role, "manager": manager}, this.options)
+    }
+
+    getSecret(pid: number) {
+        return this.http.get(this.url + `/project/secret/${pid}`,)
+    }
+
+    setSecret(pid: number, secret: string) {
+        return this.http.post(this.url + `/project/secret/${pid}`, {"secret": secret})
     }
 
 }

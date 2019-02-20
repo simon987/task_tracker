@@ -29,6 +29,10 @@
                                 *ngIf="authService.logged">
                             <mat-icon>perm_identity</mat-icon>
                             {{"project.perms" | translate}}</button>
+                        <button mat-raised-button color="primary"
+                                *ngIf="authService.logged"
+                                [routerLink]="'/project/' + project.id + '/secret'">
+                            {{"project.secret" | translate}}</button>
                     </div>
                 </mat-expansion-panel>
                 <span *ngIf="projects && projects.length == 0">

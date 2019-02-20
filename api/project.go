@@ -10,7 +10,13 @@ import (
 func (api *WebAPI) GetProject(r *Request) {
 
 	id, err := strconv.ParseInt(r.Ctx.UserValue("id").(string), 10, 64)
-	handleErr(err, r) //todo handle invalid id
+	if err != nil || id <= 0 {
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: "Invalid worker id",
+		}, 400)
+		return
+	}
 
 	sess := api.Session.StartFasthttp(r.Ctx)
 	manager := sess.Get("manager")
@@ -263,7 +269,13 @@ func (api *WebAPI) GetProjectList(r *Request) {
 func (api *WebAPI) GetAssigneeStatsForProject(r *Request) {
 
 	id, err := strconv.ParseInt(r.Ctx.UserValue("id").(string), 10, 64)
-	handleErr(err, r) //todo handle invalid id
+	if err != nil || id <= 0 {
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: "Invalid worker id",
+		}, 400)
+		return
+	}
 
 	stats := api.Database.GetAssigneeStats(id, 16)
 
@@ -281,7 +293,13 @@ func (api *WebAPI) GetWorkerAccessListForProject(r *Request) {
 	manager := sess.Get("manager")
 
 	id, err := strconv.ParseInt(r.Ctx.UserValue("id").(string), 10, 64)
-	handleErr(err, r) //todo handle invalid id
+	if err != nil || id <= 0 {
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: "Invalid worker id",
+		}, 400)
+		return
+	}
 
 	if !isActionOnProjectAuthorized(id, manager, storage.ROLE_MANAGE_ACCESS, api.Database) {
 		r.Json(JsonResponse{
@@ -352,10 +370,22 @@ func (api *WebAPI) CreateWorkerAccess(r *Request) {
 func (api *WebAPI) AcceptAccessRequest(r *Request) {
 
 	pid, err := strconv.ParseInt(r.Ctx.UserValue("id").(string), 10, 64)
-	handleErr(err, r) //todo handle invalid id
+	if err != nil || pid <= 0 {
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: "Invalid worker id",
+		}, 400)
+		return
+	}
 
 	wid, err := strconv.ParseInt(r.Ctx.UserValue("wid").(string), 10, 64)
-	handleErr(err, r) //todo handle invalid id
+	if err != nil || wid <= 0 {
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: "Invalid worker id",
+		}, 400)
+		return
+	}
 
 	sess := api.Session.StartFasthttp(r.Ctx)
 	manager := sess.Get("manager")
@@ -385,10 +415,22 @@ func (api *WebAPI) AcceptAccessRequest(r *Request) {
 func (api *WebAPI) RejectAccessRequest(r *Request) {
 
 	pid, err := strconv.ParseInt(r.Ctx.UserValue("id").(string), 10, 64)
-	handleErr(err, r) //todo handle invalid id
+	if err != nil || pid <= 0 {
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: "Invalid project id",
+		}, 400)
+		return
+	}
 
 	wid, err := strconv.ParseInt(r.Ctx.UserValue("wid").(string), 10, 64)
-	handleErr(err, r) //todo handle invalid id
+	if err != nil || wid <= 0 {
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: "Invalid worker id",
+		}, 400)
+		return
+	}
 
 	ok := api.Database.RejectAccessRequest(wid, pid)
 
@@ -407,7 +449,13 @@ func (api *WebAPI) RejectAccessRequest(r *Request) {
 func (api *WebAPI) SetManagerRoleOnProject(r *Request) {
 
 	pid, err := strconv.ParseInt(r.Ctx.UserValue("id").(string), 10, 64)
-	handleErr(err, r) //todo handle invalid id
+	if err != nil || pid <= 0 {
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: "Invalid project id",
+		}, 400)
+		return
+	}
 
 	req := &SetManagerRoleOnProjectRequest{}
 	err = json.Unmarshal(r.Ctx.Request.Body(), req)
@@ -433,5 +481,97 @@ func (api *WebAPI) SetManagerRoleOnProject(r *Request) {
 	api.Database.SetManagerRoleOn(req.Manager, pid, req.Role)
 	r.OkJson(JsonResponse{
 		Ok: true,
+	})
+}
+
+func (api *WebAPI) SetSecret(r *Request) {
+
+	pid, err := strconv.ParseInt(r.Ctx.UserValue("id").(string), 10, 64)
+	handleErr(err, r) //todo handle invalid id
+	if err != nil || pid <= 0 {
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: "Invalid project id",
+		}, 400)
+		return
+	}
+
+	sess := api.Session.StartFasthttp(r.Ctx)
+	manager := sess.Get("manager")
+
+	if !isActionOnProjectAuthorized(pid, manager, storage.ROLE_EDIT, api.Database) {
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: "Unauthorized",
+		}, 403)
+		return
+	}
+
+	req := &SetSecretRequest{}
+	err = json.Unmarshal(r.Ctx.Request.Body(), req)
+	if err != nil {
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: "Could not parse request",
+		}, 400)
+		return
+	}
+
+	api.Database.SetSecret(pid, req.Secret)
+
+	r.OkJson(JsonResponse{
+		Ok: true,
+	})
+}
+
+func (api *WebAPI) GetSecret(r *Request) {
+
+	pid, err := strconv.ParseInt(r.Ctx.UserValue("id").(string), 10, 64)
+	if err != nil || pid <= 0 {
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: "Invalid project id",
+		}, 400)
+		return
+	}
+
+	var secret string
+
+	worker, err := api.validateSignature(r)
+	if err == nil {
+		secret, err = api.Database.GetSecret(pid, worker.Id)
+		if err != nil {
+			r.Json(JsonResponse{
+				Ok:      false,
+				Message: "Unauthorized",
+			}, 403)
+			return
+		}
+		r.OkJson(JsonResponse{
+			Ok: true,
+			Content: GetSecretResponse{
+				Secret: secret,
+			},
+		})
+		return
+	}
+
+	sess := api.Session.StartFasthttp(r.Ctx)
+	manager := sess.Get("manager")
+
+	if !isActionOnProjectAuthorized(pid, manager, storage.ROLE_EDIT, api.Database) {
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: "Unauthorized",
+		}, 403)
+		return
+	}
+
+	secret, _ = api.Database.GetSecret(pid, 0)
+	r.OkJson(JsonResponse{
+		Ok: true,
+		Content: GetSecretResponse{
+			Secret: secret,
+		},
 	})
 }
