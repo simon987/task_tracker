@@ -2,7 +2,7 @@ server:
   address: "0.0.0.0:42901"
 
 database:
-  conn_str: "user=task_tracker dbname=task_tracker_test sslmode=disable"
+  conn_str: "user=task_tracker dbname=task_tracker sslmode=disable"
   #  log_levels: ["debug", "error", "trace", "info", "warn"]
   log_levels: ["error", "info", "warn"]
 
@@ -23,4 +23,4 @@ session:
 
 monitoring:
   snapshot_interval: "60s"
-  history_length: "4h"
+  history_length: "400h"

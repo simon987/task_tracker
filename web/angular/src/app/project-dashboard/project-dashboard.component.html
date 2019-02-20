@@ -9,7 +9,6 @@
         <mat-card-title *ngIf="project">{{"dashboard.title" | translate}} "{{project.name}}"</mat-card-title>
         <mat-card-content style="padding: 2em 0 1em">
 
-
             <p *ngIf="project">
                 {{"project.git_repo" | translate}}:
                 <a target="_blank" [href]="project['clone_url']"
@@ -18,7 +17,6 @@
             </p>
             <p>{{"project.motd" | translate}}:</p>
             <pre *ngIf="project">{{project.motd}}</pre>
-
 
             <div style="display: flex; align-items: center; justify-content: center">
                 <div id="timeline-wrapper">

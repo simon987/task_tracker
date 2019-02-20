@@ -12,6 +12,16 @@ import (
 type Database struct {
 	db           *sql.DB
 	saveTaskStmt *sql.Stmt
+
+	workerCache map[int64]*Worker
+}
+
+func New() *Database {
+
+	d := Database{}
+	d.workerCache = make(map[int64]*Worker)
+
+	return &d
 }
 
 func (database *Database) Reset() {

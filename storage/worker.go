@@ -42,6 +42,10 @@ func (database *Database) SaveWorker(worker *Worker) {
 
 func (database *Database) GetWorker(id int64) *Worker {
 
+	if database.workerCache[id] != nil {
+		return database.workerCache[id]
+	}
+
 	db := database.getDB()
 
 	worker := &Worker{}
@@ -58,6 +62,8 @@ func (database *Database) GetWorker(id int64) *Worker {
 	logrus.WithFields(logrus.Fields{
 		"worker": worker,
 	}).Trace("Database.getWorker SELECT worker")
+
+	database.workerCache[id] = worker
 
 	return worker
 }
@@ -100,6 +106,8 @@ func (database *Database) UpdateWorker(worker *Worker) bool {
 		"rowsAffected": rowsAffected,
 		"worker":       worker,
 	}).Trace("Database.UpdateWorker UPDATE worker")
+
+	database.workerCache[worker.Id] = worker
 
 	return rowsAffected == 1
 }

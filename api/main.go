@@ -49,7 +49,7 @@ func (api *WebAPI) setupMonitoring() {
 func New() *WebAPI {
 
 	api := new(WebAPI)
-	api.Database = &storage.Database{}
+	api.Database = storage.New()
 	api.setupMonitoring()
 
 	api.router = &fasthttprouter.Router{}
