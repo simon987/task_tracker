@@ -1,0 +1,74 @@
+<div class="container">
+    <mat-card>
+        <mat-card-header>
+            <mat-card-title>task_tracker</mat-card-title>
+            <mat-card-subtitle>"simple tracker that aims to blah blah"</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+            <h3>Get started</h3>
+
+            <mat-vertical-stepper>
+                <mat-step [label]="'Create a project'">
+                    <p>Create a project and associate it to a git repository.
+                        Payload URL for webhooks is is: </p>
+                    <pre>{{apiService.url}}/receivewebhook</pre>
+
+                    <p>Workers will be made aware of version changes on the master branch
+                        when they assign themselves to new tasks:</p>
+
+                    <pre>{{
+                        'GET /task/get\n\n{\n' +
+                        '  "id": 24,\n' +
+                        '  "priority": 1,\n' +
+                        '  ...\n' +
+                        '  "project": {\n' +
+                        '    "id": 1,\n' +
+                        '    ...\n' +
+                        '    "version": "<' + ('index.version'|translate) +
+                        '>",\n  }\n}'}}
+                    </pre>
+                </mat-step>
+                <mat-step [label]="'Setup worker(s)'">
+
+                    <p>Register a worker</p>
+                    <pre>{{
+                        'POST /worker/create\n{\n' +
+                        '  "alias": "' + ('index.alias'|translate) +
+                        '"\n}\n\n'}}</pre>
+                    <p>Tracker response:</p>
+                    <pre>{{
+                        '{\n' +
+                        '  "ok": true,\n' +
+                        '  "content": {\n' +
+                        '    "worker": {\n' +
+                        '      "id": 45,\n' +
+                        '      "created": 1550442984,\n' +
+                        '      "alias": "' + ('index.alias'|translate) +
+                        '",\n      "secret": "PvFRQZK7CpSP+4fc0iczfn++PbWh7qMLVfO1+Y3d6X4="\n' +
+                        '    }\n' +
+                        '  }\n' +
+                        '}'}}</pre>
+
+                    <p>
+                        Workers need to request access to private or hidden projects to submit new tasks.
+                        Public projects do not require any additional configuration.</p>
+                    <pre>{{
+                        'POST /project/request_access\n{\n' +
+                        '  "assign": true,\n' +
+                        '  "submit": true,\n' +
+                        '  "project": 23\n}'
+                        }}</pre>
+                </mat-step>
+                <mat-step [label]="'Setup permissions'">
+                    <p>You will be given READ, EDIT and MANAGE_ACCESS roles from projects you create.
+                        You can also give access to other project managers from the project permissions page</p>
+                </mat-step>
+
+                <ng-template matStepperIcon="edit" let-index="index">
+                    {{index + 1}}
+                </ng-template>
+            </mat-vertical-stepper>
+        </mat-card-content>
+    </mat-card>
+</div>
