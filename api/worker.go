@@ -72,12 +72,14 @@ func (api *WebAPI) GetWorker(r *Request) {
 
 	if worker != nil {
 
-		worker.Secret = nil
-
 		r.OkJson(JsonResponse{
 			Ok: true,
 			Content: GetWorkerResponse{
-				Worker: worker,
+				Worker: &storage.Worker{
+					Alias:   worker.Alias,
+					Id:      worker.Id,
+					Created: worker.Created,
+				},
 			},
 		})
 	} else {
