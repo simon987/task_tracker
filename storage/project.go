@@ -17,6 +17,7 @@ type Project struct {
 	Public   bool   `json:"public"`
 	Hidden   bool   `json:"hidden"`
 	Chain    int64  `json:"chain"`
+	Paused   bool   `json:"paused"`
 }
 
 type AssignedTasks struct {
@@ -28,10 +29,10 @@ func (database *Database) SaveProject(project *Project) (int64, error) {
 	db := database.getDB()
 
 	row := db.QueryRow(`INSERT INTO project (name, git_repo, clone_url, version, priority,
-                     motd, public, hidden, chain)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NULLIF($9, 0)) RETURNING id`,
+                     motd, public, hidden, chain, paused)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NULLIF($9, 0),$10) RETURNING id`,
 		project.Name, project.GitRepo, project.CloneUrl, project.Version, project.Priority, project.Motd,
-		project.Public, project.Hidden, project.Chain)
+		project.Public, project.Hidden, project.Chain, project.Paused)
 
 	var id int64
 	err := row.Scan(&id)
@@ -57,7 +58,7 @@ func (database *Database) GetProject(id int64) *Project {
 
 	db := database.getDB()
 	row := db.QueryRow(`SELECT id, priority, name, clone_url, git_repo, version,
-       motd, public, hidden, COALESCE(chain, 0)
+       motd, public, hidden, COALESCE(chain, 0), paused
 		FROM project WHERE id=$1`, id)
 
 	project, err := scanProject(row)
@@ -80,7 +81,7 @@ func scanProject(row *sql.Row) (*Project, error) {
 
 	p := &Project{}
 	err := row.Scan(&p.Id, &p.Priority, &p.Name, &p.CloneUrl, &p.GitRepo, &p.Version,
-		&p.Motd, &p.Public, &p.Hidden, &p.Chain)
+		&p.Motd, &p.Public, &p.Hidden, &p.Chain, &p.Paused)
 
 	return p, err
 }
@@ -89,7 +90,7 @@ func (database *Database) GetProjectWithRepoName(repoName string) *Project {
 
 	db := database.getDB()
 	row := db.QueryRow(`SELECT id, priority, name, clone_url, git_repo, version,
-       motd, public, hidden, COALESCE(chain, 0) FROM project WHERE LOWER(git_repo)=$1`,
+       motd, public, hidden, COALESCE(chain, 0), paused FROM project WHERE LOWER(git_repo)=$1`,
 		strings.ToLower(repoName))
 
 	project, err := scanProject(row)
@@ -108,11 +109,11 @@ func (database *Database) UpdateProject(project *Project) error {
 	db := database.getDB()
 
 	res, err := db.Exec(`UPDATE project 
-		SET (priority, name, clone_url, git_repo, version, motd, public, hidden, chain) =
-		  ($1,$2,$3,$4,$5,$6,$7,$8,NULLIF($9, 0))
-		WHERE id=$10`,
+		SET (priority, name, clone_url, git_repo, version, motd, public, hidden, chain, paused) =
+		  ($1,$2,$3,$4,$5,$6,$7,$8,NULLIF($9, 0), $10)
+		WHERE id=$11`,
 		project.Priority, project.Name, project.CloneUrl, project.GitRepo, project.Version, project.Motd,
-		project.Public, project.Hidden, project.Chain, project.Id)
+		project.Public, project.Hidden, project.Chain, project.Paused, project.Id)
 	if err != nil {
 		return err
 	}
@@ -135,13 +136,13 @@ func (database Database) GetAllProjects(managerId int64) *[]Project {
 	var err error
 	if managerId == 0 {
 		rows, err = db.Query(`SELECT 
-       	Id, priority, name, clone_url, git_repo, version, motd, public, hidden, COALESCE(chain,0)
+       	Id, priority, name, clone_url, git_repo, version, motd, public, hidden, COALESCE(chain,0), paused
 		FROM project
 		WHERE NOT hidden
 		ORDER BY name`)
 	} else {
 		rows, err = db.Query(`SELECT 
-       	Id, priority, name, clone_url, git_repo, version, motd, public, hidden, COALESCE(chain,0)
+       	Id, priority, name, clone_url, git_repo, version, motd, public, hidden, COALESCE(chain,0), paused
 		FROM project
 		LEFT JOIN manager_has_role_on_project mhrop ON mhrop.project = id AND mhrop.manager=$1
 		WHERE NOT hidden OR mhrop.role & 1 = 1 OR (SELECT tracker_admin FROM manager WHERE id=$1)
@@ -153,7 +154,7 @@ func (database Database) GetAllProjects(managerId int64) *[]Project {
 		p := Project{}
 		err := rows.Scan(&p.Id, &p.Priority, &p.Name, &p.CloneUrl,
 			&p.GitRepo, &p.Version, &p.Motd, &p.Public, &p.Hidden,
-			&p.Chain)
+			&p.Chain, &p.Paused)
 		handleErr(err)
 		projects = append(projects, p)
 	}

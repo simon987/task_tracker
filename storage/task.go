@@ -82,7 +82,7 @@ func (database *Database) GetTask(worker *Worker) *Task {
 	FROM task
 	INNER JOIN project project on task.project = project.id
 	LEFT JOIN worker_verifies_task wvt on task.id = wvt.task AND wvt.worker=$1
-	WHERE assignee IS NULL AND task.status=1
+	WHERE NOT project.paused AND assignee IS NULL AND task.status=1
 		AND (project.public OR (
 		  SELECT a.role_assign FROM worker_access a WHERE a.worker=$1 AND a.project=project.id
 		))
@@ -186,7 +186,7 @@ func (database *Database) GetTaskFromProject(worker *Worker, projectId int64) *T
 	FROM task
 	INNER JOIN project project on task.project = project.id
 	LEFT JOIN worker_verifies_task wvt on task.id = wvt.task AND wvt.worker=$1
-	WHERE assignee IS NULL AND project.id=$2 AND status=1
+	WHERE NOT project.paused AND assignee IS NULL AND project.id=$2 AND status=1
 		AND (project.public OR (
 		  SELECT a.role_assign FROM worker_access a WHERE a.worker=$1 AND a.project=$2
 		))

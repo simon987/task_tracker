@@ -9,4 +9,5 @@ export interface Project {
     public: boolean;
     chain: number;
     hidden: boolean;
+    paused: boolean;
 }

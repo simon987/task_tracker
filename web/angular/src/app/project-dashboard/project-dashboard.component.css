@@ -38,3 +38,11 @@
         display: none;
     }
 }
+
+.project-actions {
+    margin-top: 1em;
+}
+
+.project-actions button {
+    margin-right: 1em;
+}

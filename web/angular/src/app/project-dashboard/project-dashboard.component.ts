@@ -8,6 +8,8 @@ import {AssignedTasks, MonitoringSnapshot} from "../models/monitoring";
 import {TranslateService} from "@ngx-translate/core";
 import {MessengerService} from "../messenger.service";
 import {AuthService} from "../auth.service";
+import {MatDialog} from "@angular/material";
+import {AreYouSureComponent} from "../are-you-sure/are-you-sure.component";
 
 
 @Component({
@@ -48,6 +50,7 @@ export class ProjectDashboardComponent implements OnInit {
                 private route: ActivatedRoute,
                 private translate: TranslateService,
                 public auth: AuthService,
+                public dialog: MatDialog,
                 private messenger: MessengerService) {
     }
 
@@ -339,5 +342,33 @@ export class ProjectDashboardComponent implements OnInit {
                 this.translate.get("messenger.unauthorized").subscribe(t =>
                     this.messenger.show(t))
             })
+    }
+
+    resetFailedTasks() {
+        this.dialog.open(AreYouSureComponent, {
+            width: '250px',
+        }).afterClosed().subscribe(result => {
+            if (result) {
+                alert("yes")
+            }
+        });
+    }
+
+    pauseProject() {
+        this.dialog.open(AreYouSureComponent, {
+            width: '250px',
+        }).afterClosed().subscribe(result => {
+            if (result) {
+                this.project.paused = true;
+                this.apiService.updateProject(this.project).subscribe(() => {
+                    this.translate.get("messenger.acknowledged").subscribe(t =>
+                        this.messenger.show(t))
+                })
+            }
+        });
+    }
+
+    hardReset() {
+
     }
 }

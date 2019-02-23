@@ -2,7 +2,7 @@ server:
   address: "0.0.0.0:42901"
 
 database:
-  conn_str: "user=task_tracker dbname=task_tracker sslmode=disable"
+  conn_str: "user=task_tracker password=task_tracker dbname=task_tracker sslmode=disable"
   #  log_levels: ["debug", "error", "trace", "info", "warn"]
   log_levels: ["error", "info", "warn"]
 
@@ -19,8 +19,8 @@ log:
 
 session:
   cookie_name: "tt"
-  expiration: "25m"
+  expiration: "8h"
 
 monitoring:
-  snapshot_interval: "60s"
+  snapshot_interval: "120s"
   history_length: "400h"

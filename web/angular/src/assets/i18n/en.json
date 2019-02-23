@@ -74,7 +74,12 @@
         "title": "Dashboard for",
         "metadata": "Project metadata",
         "empty": "No tasks",
-        "refresh": "Refresh"
+        "refresh": "Refresh",
+        "actions": "Actions",
+        "reset_failed": "Reset failed tasks",
+        "pause": "Pause",
+        "resume": "Resume",
+        "hard_reset": "Hard_reset"
     },
     "login": {
         "title": "Login",
@@ -121,7 +126,8 @@
     },
     "messenger": {
         "close": "Close",
-        "unauthorized": "Unauthorized"
+        "unauthorized": "Unauthorized",
+        "acknowledged": "Changes saved"
     },
     "manager_list": {
         "title": "Manager list",
@@ -149,5 +155,11 @@
         "secret": "Secret",
         "update": "Update",
         "ok": "Updated"
+    },
+    "dialog": {
+        "confirmation": "Confirmation",
+        "are_you_sure": "Are you sure?",
+        "no": "No",
+        "ok": "Ok"
     }
 }

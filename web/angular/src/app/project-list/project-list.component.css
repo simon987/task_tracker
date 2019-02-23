@@ -5,3 +5,11 @@ button {
 mat-panel-title > project-icon {
     margin-right: 1em;
 }
+
+.paused {
+    color: #9a9a9a;
+}
+
+.mat-expansion-panel-header-description {
+    flex-grow: 0;
+}

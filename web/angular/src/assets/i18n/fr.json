@@ -74,7 +74,8 @@
         "title": "Tableau de bord pour ",
         "metadata": "Métadonnés du projet",
         "empty": "Aucune tâche",
-        "refresh": "Rafraîchir"
+        "refresh": "Rafraîchir",
+        "actions": "Actions"
     },
     "login": {
         "title": "Ouvrir un session",
@@ -123,7 +124,8 @@
     },
     "messenger": {
         "close": "Fermer",
-        "unauthorized": "Non autorisé"
+        "unauthorized": "Non autorisé",
+        "acknowledged": "Changements enregistrés"
     },
     "manager_list": {
         "title": "Liste ",

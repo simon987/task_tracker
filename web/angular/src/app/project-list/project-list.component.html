@@ -12,11 +12,12 @@
             <mat-accordion>
                 <mat-expansion-panel *ngFor="let project of projects" style="margin-top: 1em">
                     <mat-expansion-panel-header>
-                        <mat-panel-title>
+                        <mat-panel-title [class.paused]="project.paused">
                             <project-icon [project]="project"></project-icon>
-                            <span style="width: 3em">{{project.id}}</span>{{project.name}}
+                            <span style="width: 3em; align-self: center">{{project.id}}</span>
+                            <span style="align-self: center">{{project.name}}</span>
                         </mat-panel-title>
-                        <mat-panel-description>{{project.motd}}</mat-panel-description>
+                        <mat-panel-description style="align-self: center">{{project.motd}}</mat-panel-description>
                     </mat-expansion-panel-header>
                     <pre>{{project | json}}</pre>
                     <div>

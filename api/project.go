@@ -158,6 +158,7 @@ func (api *WebAPI) UpdateProject(r *Request) {
 		Public:   updateReq.Public,
 		Hidden:   updateReq.Hidden,
 		Chain:    updateReq.Chain,
+		Paused:   updateReq.Paused,
 	}
 	sess := api.Session.StartFasthttp(r.Ctx)
 	manager := sess.Get("manager")

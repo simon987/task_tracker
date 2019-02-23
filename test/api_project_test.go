@@ -142,6 +142,7 @@ func TestUpdateProjectValid(t *testing.T) {
 		Motd:     "MotdB",
 		Public:   false,
 		Hidden:   true,
+		Paused:   true,
 	}, pid, testAdminCtx)
 
 	if updateResp.Ok != true {
@@ -166,6 +167,9 @@ func TestUpdateProjectValid(t *testing.T) {
 		t.Error()
 	}
 	if proj.Project.Hidden != true {
+		t.Error()
+	}
+	if proj.Project.Paused != true {
 		t.Error()
 	}
 }
@@ -442,6 +446,42 @@ func TestAdminShouldSeeHiddenProjectInList(t *testing.T) {
 	if !found {
 		t.Error()
 	}
+}
+
+func TestPausedProjectShouldNotDispatchTasks(t *testing.T) {
+
+	createTask(api.SubmitTaskRequest{
+		Project: testProject,
+		Recipe:  "...",
+	}, testWorker)
+	createTask(api.SubmitTaskRequest{
+		Project: testProject,
+		Recipe:  "...",
+	}, testWorker)
+	createTask(api.SubmitTaskRequest{
+		Project: testProject,
+		Recipe:  "...",
+	}, testWorker)
+
+	task1 := getTaskFromProject(testProject, testWorker).Content.Task
+	if task1 == nil {
+		t.Error()
+	}
+
+	updateProject(api.UpdateProjectRequest{
+		Paused: true,
+		Name:   "generictestproject",
+	}, testProject, testAdminCtx)
+
+	task2 := getTaskFromProject(testProject, testWorker).Content.Task
+	if task2 != nil {
+		t.Error()
+	}
+
+	updateProject(api.UpdateProjectRequest{
+		Paused: false,
+		Name:   "generictestproject",
+	}, testProject, testAdminCtx)
 }
 
 func createProjectAsAdmin(req api.CreateProjectRequest) CreateProjectAR {

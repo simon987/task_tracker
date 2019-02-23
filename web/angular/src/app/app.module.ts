@@ -12,6 +12,7 @@ import {
     MatButtonToggleModule,
     MatCardModule,
     MatCheckboxModule,
+    MatDialogModule,
     MatDividerModule,
     MatExpansionModule,
     MatFormFieldModule,
@@ -55,6 +56,8 @@ import {ManagerSelectComponent} from './manager-select/manager-select.component'
 import {ProjectIconComponent} from './project-icon/project-icon.component';
 import {IndexComponent} from './index/index.component';
 import {ProjectSecretComponent} from './project-secret/project-secret.component';
+import {AdminPanelComponent} from './admin-panel/admin-panel.component';
+import {AreYouSureComponent} from './are-you-sure/are-you-sure.component';
 
 
 export function createTranslateLoader(http: HttpClient) {
@@ -81,6 +84,8 @@ export function createTranslateLoader(http: HttpClient) {
         ProjectIconComponent,
         IndexComponent,
         ProjectSecretComponent,
+        AdminPanelComponent,
+        AreYouSureComponent,
     ],
     imports: [
         BrowserModule,
@@ -120,7 +125,8 @@ export function createTranslateLoader(http: HttpClient) {
         MatTabsModule,
         MatListModule,
         MatButtonToggleModule,
-        MatStepperModule
+        MatStepperModule,
+        MatDialogModule,
 
     ],
     exports: [],
@@ -131,6 +137,7 @@ export function createTranslateLoader(http: HttpClient) {
     ],
     entryComponents: [
         SnackBarComponent,
+        AreYouSureComponent
     ],
     bootstrap: [AppComponent]
 })

@@ -148,6 +148,7 @@ type UpdateProjectRequest struct {
 	Public   bool   `json:"public"`
 	Hidden   bool   `json:"hidden"`
 	Chain    int64  `json:"chain"`
+	Paused   bool   `json:"paused"`
 }
 
 func (req *UpdateProjectRequest) isValid() bool {
@@ -202,6 +203,9 @@ func (req *SubmitTaskRequest) IsValid() bool {
 		return false
 	}
 	if req.Hash64 != 0 && req.UniqueString != "" {
+		return false
+	}
+	if req.Project == 0 {
 		return false
 	}
 

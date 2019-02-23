@@ -19,6 +19,7 @@ CREATE TABLE project
   chain             INT     DEFAULT NULL REFERENCES project (id),
   public            boolean            NOT NULL,
   hidden            boolean            NOT NULL,
+  paused            boolean            NOT NULL,
   name              TEXT UNIQUE        NOT NULL,
   clone_url         TEXT               NOT NULL,
   git_repo          TEXT UNIQUE        NOT NULL,

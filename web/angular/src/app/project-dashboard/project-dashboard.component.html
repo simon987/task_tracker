@@ -52,6 +52,28 @@
                 <pre>{{project | json}}</pre>
             </mat-expansion-panel>
 
+            <mat-expansion-panel *ngIf="project && auth.logged" class="project-actions">
+                <mat-expansion-panel-header>
+                    <mat-panel-title>{{"dashboard.actions" | translate}}</mat-panel-title>
+                </mat-expansion-panel-header>
+                <button mat-raised-button color="accent" (click)="resetFailedTasks()">
+                    <mat-icon>replay</mat-icon>
+                    {{"dashboard.reset_failed"|translate}}
+                </button>
+                <button mat-raised-button
+                        color="primary"
+                        (click)="pauseProject()"
+                        *ngIf="!project.paused"
+                        [title]="'dashboard.pause_hint'|translate">{{"dashboard.pause"|translate}}</button>
+                <button mat-raised-button color="primary" (click)="pauseProject()">
+                    <mat-icon>pause</mat-icon>
+                    {{"dashboard.pause"|translate}}</button>
+                <button mat-raised-button color="warn" (click)="hardReset()">
+                    <mat-icon>warning</mat-icon>
+                    {{"dashboard.hard_reset"|translate}}
+                </button>
+            </mat-expansion-panel>
+
         </mat-card-content>
         <mat-card-actions>
             <button mat-raised-button [routerLink]="'/projects'">Back</button>
