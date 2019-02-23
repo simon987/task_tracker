@@ -1,0 +1,22 @@
+pipeline {
+    agent {
+        docker {
+            image 'node:10-alpine'
+        }
+    }
+    environment {
+        CI = 'true'
+    }
+    stages {
+        stage('Build') {
+            steps {
+                sh 'cd web/angular && ng build --prod --optimization'
+            }
+        }
+        stage('Deliver') {
+            steps {
+                sh './jenkins/deploy.sh'
+            }
+        }
+    }
+}
