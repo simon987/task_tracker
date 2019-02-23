@@ -209,7 +209,6 @@ func (database *Database) GetSecret(pid int64, workerId int64) (secret string, e
 	}
 
 	err = row.Scan(&secret)
-	handleErr(err)
 	return
 }
 

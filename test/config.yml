@@ -2,7 +2,7 @@ server:
   address: "127.0.0.1:5001"
 
 database:
-  conn_str: "user=task_tracker password=task_tracker dbname=task_tracker sslmode=disable"
+  conn_str: "user=task_tracker password=task_tracker dbname=task_tracker_test sslmode=disable"
   log_levels: ["debug", "error", "trace", "info", "warn"]
 
 git:

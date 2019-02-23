@@ -21,7 +21,20 @@ func New() *Database {
 	d := Database{}
 	d.workerCache = make(map[int64]*Worker)
 
+	d.init()
+
 	return &d
+}
+
+func (database *Database) init() {
+
+	db := database.getDB()
+
+	_, err := db.Exec(`SELECT * FROM project`)
+	if err != nil {
+		logrus.Info("Database first time setup")
+		database.Reset()
+	}
 }
 
 func (database *Database) Reset() {

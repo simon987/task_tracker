@@ -1,22 +1,79 @@
+def remote = [:]
+remote.name = 'remote'
+remote.host = 'localhost'
+remote.user = 'simon'
+remote.identityFile = '/var/lib/jenkins/.ssh/id_rsa'
+remote.knownHosts = '/var/lib/jenkins/.ssh/known_hosts'
+
 pipeline {
-    agent {
-        docker {
-            image 'node:10-alpine'
-        }
-    }
+    agent none
     environment {
-        CI = 'true'
+        GOOS='linux'
+        CGO_ENABLED='0'
+        HOME='.'
     }
     stages {
-        stage('Build') {
-            steps {
-                sh 'cd web/angular && ng build --prod --optimization'
+        stage('Parallel build & test') {
+            failFast true
+            parallel {
+                stage('Build - web') {
+                    agent {
+                        docker {
+                            image 'node:10-alpine'
+                        }
+                    }
+                    steps {
+                        sh 'cd web/angular/ && npm install'
+                        sh 'cd web/angular/ && ./node_modules/\\@angular/cli/bin/ng build --prod --optimization --output-path "${WORKSPACE}/webroot"'
+                        stash includes: 'webroot/', name: 'webdist'
+                    }
+                }
+                stage('Build - api') {
+                    agent {
+                        docker {
+                            image 'golang:latest'
+                        }
+                    }
+                    steps {
+                        sh 'mkdir -p /go/src/github.com/task_tracker'
+                        sh 'cp -r api config main storage config.yml schema.sql "/go/src/github.com/task_tracker"'
+                        sh 'cd /go/src/github.com/task_tracker/main && go get ./...'
+                        sh 'cd /go/src/github.com/task_tracker/main && go build -a -installsuffix cgo -o "${WORKSPACE}/tt_api" .'
+                        stash includes: 'tt_api', name: 'apidist'
+                    }
+                }
+                stage('Test - api') {
+                    agent {
+                        docker {
+                            image 'golang:latest'
+                            args '--network "host"'
+                        }
+                    }
+                    steps {
+                        sh 'mkdir -p /go/src/github.com/task_tracker'
+                        sh 'cp -r api config main storage test config.yml schema.sql "/go/src/github.com/task_tracker"'
+                        sh 'cd /go/src/github.com/task_tracker/ && go get -t ./test/...'
+                        sh 'cd /go/src/github.com/task_tracker/test && go test .'
+                    }
+                }
             }
         }
-        stage('Deliver') {
+        stage('Deploy') {
+            agent none
             steps {
-                sh './jenkins/deploy.sh'
+                node('master') {
+                    unstash 'webdist'
+                    unstash 'apidist'
+                    sshPut remote: remote, from: 'tt_api', into: 'task_tracker/'
+                    sshPut remote: remote, from: 'config.yml', into: 'task_tracker/'
+                    sshPut remote: remote, from: 'schema.sql', into: 'task_tracker/'
+                    sshPut remote: remote, from: 'webroot/', into: 'task_tracker'
+                    sshPut remote: remote, from: 'jenkins/deploy.sh', into: 'task_tracker/'
+                    sshCommand remote: remote, command: 'chmod +x task_tracker/deploy.sh && ./task_tracker/deploy.sh'
+                }
             }
         }
     }
 }
+
+

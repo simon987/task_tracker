@@ -1,5 +1,5 @@
 server:
-  address: "0.0.0.0:42901"
+  address: "localhost:3010"
 
 database:
   conn_str: "user=task_tracker password=task_tracker dbname=task_tracker sslmode=disable"
