@@ -172,3 +172,19 @@ type ReleaseAR struct {
 		Updated bool `json:"updated"`
 	} `json:"content"`
 }
+
+type WebhookSecretAR struct {
+	Ok      bool   `json:"ok"`
+	Message string `json:"message"`
+	Content struct {
+		WebhookSecret string `json:"webhook_secret"`
+	} `json:"content"`
+}
+
+type AccountAR struct {
+	Ok      bool   `json:"ok"`
+	Message string `json:"message"`
+	Content struct {
+		*storage.Manager `json:"manager"`
+	} `json:"content"`
+}

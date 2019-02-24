@@ -93,6 +93,8 @@ func New() *WebAPI {
 	api.router.POST("/project/reject_request/:id/:wid", LogRequestMiddleware(api.RejectAccessRequest))
 	api.router.GET("/project/secret/:id", LogRequestMiddleware(api.GetSecret))
 	api.router.POST("/project/secret/:id", LogRequestMiddleware(api.SetSecret))
+	api.router.GET("/project/webhook_secret/:id", LogRequestMiddleware(api.GetWebhookSecret))
+	api.router.POST("/project/webhook_secret/:id", LogRequestMiddleware(api.SetWebhookSecret))
 
 	api.router.POST("/task/submit", LogRequestMiddleware(api.SubmitTask))
 	api.router.GET("/task/get/:project", LogRequestMiddleware(api.GetTaskFromProject))

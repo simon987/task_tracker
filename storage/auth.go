@@ -11,10 +11,11 @@ import (
 type ManagerRole int
 
 const (
-	ROLE_NONE          ManagerRole = 0
-	ROLE_READ          ManagerRole = 1
-	ROLE_EDIT          ManagerRole = 2
-	ROLE_MANAGE_ACCESS ManagerRole = 4
+	RoleNone         ManagerRole = 0
+	RoleRead         ManagerRole = 1
+	RoleEdit         ManagerRole = 2
+	RoleManageAccess ManagerRole = 4
+	RoleSecret       ManagerRole = 8
 )
 
 type Manager struct {
@@ -142,7 +143,7 @@ func (database *Database) GetManagerRoleOn(manager *Manager, projectId int64) Ma
 	var role ManagerRole
 	err := row.Scan(&role)
 	if err != nil {
-		return ROLE_NONE
+		return RoleNone
 	}
 
 	return role

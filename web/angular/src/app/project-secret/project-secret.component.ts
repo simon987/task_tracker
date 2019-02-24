@@ -13,6 +13,7 @@ import {MessengerService} from "../messenger.service";
 export class ProjectSecretComponent implements OnInit {
 
     secret: string;
+    webhookSecret: string;
     projectId: number;
 
     constructor(private auth: AuthService,
@@ -26,6 +27,7 @@ export class ProjectSecretComponent implements OnInit {
         this.route.params.subscribe(params => {
             this.projectId = params["id"];
             this.getSecret();
+            this.getWebhookSecret();
         });
     }
 
@@ -37,10 +39,28 @@ export class ProjectSecretComponent implements OnInit {
         })
     }
 
+    getWebhookSecret() {
+        this.apiService.getWebhookSecret(this.projectId).subscribe(data => {
+            this.webhookSecret = data["content"]["webhook_secret"]
+        }, error => {
+            this.translate.get("messenger.unauthorized").subscribe(t => this.messenger.show(t))
+        })
+    }
+
     onUpdate() {
         this.apiService.setSecret(this.projectId, this.secret).subscribe(data => {
             this.translate.get("secret.ok").subscribe(t => this.messenger.show(t))
         })
+    }
 
+    onWebhookUpdate() {
+        this.apiService.setWebhookSecret(this.projectId, this.webhookSecret).subscribe(data => {
+            this.translate.get("secret.ok").subscribe(t => this.messenger.show(t))
+        })
+    }
+
+    refresh() {
+        this.getWebhookSecret();
+        this.getSecret();
     }
 }

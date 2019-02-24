@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"github.com/Sirupsen/logrus"
+	"github.com/google/uuid"
 	"github.com/simon987/task_tracker/storage"
 	"strconv"
 )
@@ -97,7 +98,9 @@ func (api *WebAPI) CreateProject(r *Request) {
 		return
 	}
 
-	id, err := api.Database.SaveProject(project)
+	webhookSecret := makeWebhookSecret()
+
+	id, err := api.Database.SaveProject(project, webhookSecret)
 	if err != nil {
 		r.Json(JsonResponse{
 			Ok:      false,
@@ -107,7 +110,7 @@ func (api *WebAPI) CreateProject(r *Request) {
 	}
 
 	api.Database.SetManagerRoleOn(manager.(*storage.Manager).Id, id,
-		storage.ROLE_MANAGE_ACCESS|storage.ROLE_READ|storage.ROLE_EDIT)
+		storage.RoleManageAccess|storage.RoleRead|storage.RoleEdit|storage.RoleSecret)
 	r.OkJson(JsonResponse{
 		Ok: true,
 		Content: CreateProjectResponse{
@@ -117,6 +120,10 @@ func (api *WebAPI) CreateProject(r *Request) {
 	logrus.WithFields(logrus.Fields{
 		"project": project,
 	}).Debug("Created project")
+}
+
+func makeWebhookSecret() string {
+	return uuid.New().String()
 }
 
 func (api *WebAPI) UpdateProject(r *Request) {
@@ -163,7 +170,7 @@ func (api *WebAPI) UpdateProject(r *Request) {
 	sess := api.Session.StartFasthttp(r.Ctx)
 	manager := sess.Get("manager")
 
-	if !isActionOnProjectAuthorized(project.Id, manager, storage.ROLE_EDIT, api.Database) {
+	if !isActionOnProjectAuthorized(project.Id, manager, storage.RoleEdit, api.Database) {
 		r.Json(JsonResponse{
 			Ok:      false,
 			Message: "Unauthorized",
@@ -238,7 +245,7 @@ func isProjectReadAuthorized(project *storage.Project, manager interface{}, db *
 		return true
 	}
 	role := db.GetManagerRoleOn(manager.(*storage.Manager), project.Id)
-	if role&storage.ROLE_READ == 1 {
+	if role&storage.RoleRead == 1 {
 		return true
 	}
 
@@ -302,7 +309,7 @@ func (api *WebAPI) GetWorkerAccessListForProject(r *Request) {
 		return
 	}
 
-	if !isActionOnProjectAuthorized(id, manager, storage.ROLE_MANAGE_ACCESS, api.Database) {
+	if !isActionOnProjectAuthorized(id, manager, storage.RoleManageAccess, api.Database) {
 		r.Json(JsonResponse{
 			Ok:      false,
 			Message: "Unauthorized",
@@ -391,7 +398,7 @@ func (api *WebAPI) AcceptAccessRequest(r *Request) {
 	sess := api.Session.StartFasthttp(r.Ctx)
 	manager := sess.Get("manager")
 
-	if !isActionOnProjectAuthorized(pid, manager, storage.ROLE_MANAGE_ACCESS, api.Database) {
+	if !isActionOnProjectAuthorized(pid, manager, storage.RoleManageAccess, api.Database) {
 		r.Json(JsonResponse{
 			Message: "Unauthorized",
 			Ok:      false,
@@ -471,7 +478,7 @@ func (api *WebAPI) SetManagerRoleOnProject(r *Request) {
 	sess := api.Session.StartFasthttp(r.Ctx)
 	manager := sess.Get("manager")
 
-	if !isActionOnProjectAuthorized(pid, manager, storage.ROLE_MANAGE_ACCESS, api.Database) {
+	if !isActionOnProjectAuthorized(pid, manager, storage.RoleManageAccess, api.Database) {
 		r.Json(JsonResponse{
 			Message: "Unauthorized",
 			Ok:      false,
@@ -500,7 +507,7 @@ func (api *WebAPI) SetSecret(r *Request) {
 	sess := api.Session.StartFasthttp(r.Ctx)
 	manager := sess.Get("manager")
 
-	if !isActionOnProjectAuthorized(pid, manager, storage.ROLE_EDIT, api.Database) {
+	if !isActionOnProjectAuthorized(pid, manager, storage.RoleSecret, api.Database) {
 		r.Json(JsonResponse{
 			Ok:      false,
 			Message: "Unauthorized",
@@ -560,7 +567,7 @@ func (api *WebAPI) GetSecret(r *Request) {
 	sess := api.Session.StartFasthttp(r.Ctx)
 	manager := sess.Get("manager")
 
-	if !isActionOnProjectAuthorized(pid, manager, storage.ROLE_EDIT, api.Database) {
+	if !isActionOnProjectAuthorized(pid, manager, storage.RoleSecret, api.Database) {
 		r.Json(JsonResponse{
 			Ok:      false,
 			Message: "Unauthorized",
@@ -575,4 +582,80 @@ func (api *WebAPI) GetSecret(r *Request) {
 			Secret: secret,
 		},
 	})
+}
+
+func (api *WebAPI) GetWebhookSecret(r *Request) {
+
+	pid, err := strconv.ParseInt(r.Ctx.UserValue("id").(string), 10, 64)
+	if err != nil || pid <= 0 {
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: "Invalid project id",
+		}, 400)
+		return
+	}
+
+	sess := api.Session.StartFasthttp(r.Ctx)
+	manager := sess.Get("manager")
+
+	if !isActionOnProjectAuthorized(pid, manager, storage.RoleSecret, api.Database) {
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: "Unauthorized",
+		}, 403)
+		return
+	}
+
+	secret, err := api.Database.GetWebhookSecret(pid)
+	r.OkJson(JsonResponse{
+		Ok: true,
+		Content: GetWebhookSecretResponse{
+			WebhookSecret: secret,
+		},
+	})
+}
+
+func (api *WebAPI) SetWebhookSecret(r *Request) {
+
+	pid, err := strconv.ParseInt(r.Ctx.UserValue("id").(string), 10, 64)
+	if err != nil || pid <= 0 {
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: "Invalid project id",
+		}, 400)
+		return
+	}
+
+	req := &SetWebhookSecretRequest{}
+	err = json.Unmarshal(r.Ctx.Request.Body(), req)
+	if err != nil {
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: "Could not parse request",
+		}, 400)
+		return
+	}
+
+	sess := api.Session.StartFasthttp(r.Ctx)
+	manager := sess.Get("manager")
+
+	if !isActionOnProjectAuthorized(pid, manager, storage.RoleSecret, api.Database) {
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: "Unauthorized",
+		}, 403)
+		return
+	}
+
+	err = api.Database.SetWebhookSecret(pid, req.WebhookSecret)
+	if err == nil {
+		r.OkJson(JsonResponse{
+			Ok: true,
+		})
+	} else {
+		r.OkJson(JsonResponse{
+			Ok:      false,
+			Message: err.Error(),
+		})
+	}
 }

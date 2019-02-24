@@ -16,13 +16,6 @@ import (
 
 func (api *WebAPI) ReceiveGitWebHook(r *Request) {
 
-	if !signatureValid(r) {
-		logrus.Error("WebHook signature does not match!")
-		r.Ctx.SetStatusCode(403)
-		_, _ = fmt.Fprintf(r.Ctx, "Signature does not match")
-		return
-	}
-
 	payload := &GitPayload{}
 	err := json.Unmarshal(r.Ctx.Request.Body(), payload)
 	if err != nil {
@@ -35,11 +28,27 @@ func (api *WebAPI) ReceiveGitWebHook(r *Request) {
 	}).Info("Received git WebHook")
 
 	if !isProductionBranch(payload) {
+		r.Ctx.SetStatusCode(400)
 		return
 	}
 
 	project := api.getAssociatedProject(payload)
 	if project == nil {
+		r.Ctx.SetStatusCode(400)
+		return
+	}
+
+	signature, err := api.Database.GetWebhookSecret(project.Id)
+	if err != nil {
+		_, _ = fmt.Fprintf(r.Ctx, err.Error())
+		r.Ctx.SetStatusCode(400)
+		return
+	}
+
+	if !signatureValid(r, signature) {
+		logrus.Error("WebHook signature does not match!")
+		r.Ctx.SetStatusCode(403)
+		_, _ = fmt.Fprintf(r.Ctx, "Signature does not match")
 		return
 	}
 
@@ -50,7 +59,7 @@ func (api *WebAPI) ReceiveGitWebHook(r *Request) {
 	handleErr(err, r)
 }
 
-func signatureValid(r *Request) (matches bool) {
+func signatureValid(r *Request, webhookSignature string) (matches bool) {
 
 	signature := parseSignatureFromRequest(r.Ctx)
 
@@ -60,7 +69,7 @@ func signatureValid(r *Request) (matches bool) {
 
 	body := r.Ctx.PostBody()
 
-	mac := hmac.New(getHashFuncFromConfig(), config.Cfg.WebHookSecret)
+	mac := hmac.New(getHashFuncFromConfig(), []byte(webhookSignature))
 	mac.Write(body)
 
 	expectedMac := hex.EncodeToString(mac.Sum(nil))

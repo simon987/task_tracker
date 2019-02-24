@@ -33,6 +33,7 @@
                         <button mat-raised-button color="primary"
                                 *ngIf="authService.logged"
                                 [routerLink]="'/project/' + project.id + '/secret'">
+                            <mat-icon>security</mat-icon>
                             {{"project.secret" | translate}}</button>
                     </div>
                 </mat-expansion-panel>

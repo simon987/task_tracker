@@ -8,7 +8,8 @@
         "login": "Login",
         "worker_dashboard": "Workers",
         "account": "Account",
-        "manager_list": "Managers"
+        "manager_list": "Managers",
+        "back": "back"
     },
     "logs": {
         "title": "Logs",
@@ -119,6 +120,7 @@
         "read": "Read",
         "edit": "Edit",
         "manage": "Manage permissions",
+        "secret": "Configure secrets",
         "set": "Changes saved",
         "workers": "Workers",
         "no_workers": "No workers have explicit access to this project",
@@ -152,6 +154,9 @@
     "secret": {
         "title": "Project secret",
         "subtitle": "You can set project configuration here. It is only accessible by workers with ASSIGN access to this project",
+        "webhook_title": "Webhook secret",
+        "webhook_subtitle": "You need to supply this to Github/Gogs for delivery to work",
+        "webhook_secret": "Webhook secret",
         "secret": "Secret",
         "update": "Update",
         "ok": "Updated"

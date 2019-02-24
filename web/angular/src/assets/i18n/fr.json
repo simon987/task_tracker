@@ -8,7 +8,8 @@
         "login": "Ouvrir un session",
         "worker_dashboard": "Workers",
         "account": "Compte",
-        "manager_list": "Managers"
+        "manager_list": "Managers",
+        "back": "Arrière"
     },
     "logs": {
         "title": "Journaux",
@@ -116,11 +117,11 @@
         "read": "Lecture",
         "edit": "Modification",
         "manage": "Gestion des permissions",
+        "secret": "Gestion des secrets",
         "set": "Changements enregistrés",
         "workers": "Workers",
         "no_workers": "Aucun Worker n'a explicitement accès à ce projet",
-        "managers": "Managers",
-        "secret": "Secret"
+        "managers": "Managers"
     },
     "messenger": {
         "close": "Fermer",
@@ -148,8 +149,11 @@
         "alias": "Alias pertinent"
     },
     "secret": {
-        "title": "Secret",
+        "title": "Secret du projet",
         "subtitle": "Vous pouvez définir la configuration du projet ici. Ce n'est accessible que par les Workers ayant accès au projet",
+        "webhook_title": "Secret (Webhook)",
+        "webhook_subtitle": "Vous devez le donner à Github/Gogs.",
+        "webhook_secret": "Secret (Webhook)",
         "secret": "Secret",
         "update": "Mettre à jour",
         "ok": "Mis à jour"

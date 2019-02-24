@@ -51,4 +51,16 @@ export class ManagerRoleOnProject {
             this.role &= ~4
         }
     }
+
+    get secretRole(): boolean {
+        return (this.role & 8) != 0
+    }
+
+    set secretRole(role: boolean) {
+        if (role) {
+            this.role |= 8
+        } else {
+            this.role &= ~8
+        }
+    }
 }

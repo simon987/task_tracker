@@ -55,6 +55,10 @@
                                   (change)="onRoleChange(m)"
                                   [disabled]="m.manager.id==auth.account.id"
                     >{{"perms.manage"|translate}}</mat-checkbox>
+                    <mat-checkbox [(ngModel)]="m.secretRole"
+                                  (change)="onRoleChange(m)"
+                                  [disabled]="m.manager.id==auth.account.id"
+                    >{{"perms.secret"|translate}}</mat-checkbox>
                 </mat-list-item>
             </mat-list>
         </mat-card-content>

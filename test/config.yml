@@ -6,7 +6,6 @@ database:
   log_levels: ["debug", "error", "trace", "info", "warn"]
 
 git:
-  webhook_secret: "very_secret_secret"
   webhook_hash: "sha1"
   webhook_sig_header: "X-Hub-Signature"
 

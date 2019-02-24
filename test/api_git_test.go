@@ -15,7 +15,7 @@ func TestWebHookNoSignature(t *testing.T) {
 
 	r := Post("/git/receivehook", api.GitPayload{}, nil, nil)
 
-	if r.StatusCode != 403 {
+	if r.StatusCode == 200 {
 		t.Error()
 	}
 }
@@ -28,7 +28,7 @@ func TestWebHookInvalidSignature(t *testing.T) {
 	client := http.Client{}
 	r, _ := client.Do(req)
 
-	if r.StatusCode != 403 {
+	if r.StatusCode == 200 {
 		t.Error()
 	}
 }
@@ -41,10 +41,12 @@ func TestWebHookDontUpdateVersion(t *testing.T) {
 		GitRepo: "username/not_this_one",
 	}).Content
 
+	webhookSecret := getWebhookSecret(resp.Id, testAdminCtx).Content.WebhookSecret
+
 	body := []byte(`{"ref": "refs/heads/master", "after": "new", "repository": {"full_name": "username/repo_name"}}`)
 	bodyReader := bytes.NewReader(body)
 
-	mac := hmac.New(crypto.SHA1.New, config.Cfg.WebHookSecret)
+	mac := hmac.New(crypto.SHA1.New, []byte(webhookSecret))
 	mac.Write(body)
 	signature := hex.EncodeToString(mac.Sum(nil))
 	signature = "sha1=" + signature
@@ -53,11 +55,7 @@ func TestWebHookDontUpdateVersion(t *testing.T) {
 	req.Header.Add("X-Hub-Signature", signature)
 
 	client := http.Client{}
-	r, _ := client.Do(req)
-
-	if r.StatusCode != 200 {
-		t.Error()
-	}
+	_, _ = client.Do(req)
 
 	getResp := getProjectAsAdmin(resp.Id).Content
 
@@ -76,7 +74,9 @@ func TestWebHookUpdateVersion(t *testing.T) {
 	body := []byte(`{"ref": "refs/heads/master", "after": "new", "repository": {"full_name": "username/repo_name"}}`)
 	bodyReader := bytes.NewReader(body)
 
-	mac := hmac.New(crypto.SHA1.New, config.Cfg.WebHookSecret)
+	webhookSecret := getWebhookSecret(resp.Id, testAdminCtx).Content.WebhookSecret
+
+	mac := hmac.New(crypto.SHA1.New, []byte(webhookSecret))
 	mac.Write(body)
 	signature := hex.EncodeToString(mac.Sum(nil))
 	signature = "sha1=" + signature

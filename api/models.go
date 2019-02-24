@@ -292,3 +292,10 @@ type SetSecretRequest struct {
 type GetSecretResponse struct {
 	Secret string `json:"secret"`
 }
+
+type SetWebhookSecretRequest struct {
+	WebhookSecret string `json:"webhook_secret"`
+}
+type GetWebhookSecretResponse struct {
+	WebhookSecret string `json:"webhook_secret"`
+}

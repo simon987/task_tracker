@@ -3,6 +3,7 @@ package test
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/simon987/task_tracker/api"
 	"github.com/simon987/task_tracker/config"
 	"golang.org/x/net/publicsuffix"
@@ -176,4 +177,16 @@ func getSessionCtx(username string, password string, admin bool) *http.Client {
 	handleErr(err)
 
 	return client
+}
+
+func setRoleOnProject(req api.SetManagerRoleOnProjectRequest, pid int64, s *http.Client) (ar api.JsonResponse) {
+	r := Post(fmt.Sprintf("/manager/set_role_for_project/%d", pid), req, nil, s)
+	UnmarshalResponse(r, &ar)
+	return
+}
+
+func getAccountDetails(s *http.Client) (ar AccountAR) {
+	r := Get("/account", nil, s)
+	UnmarshalResponse(r, &ar)
+	return
 }

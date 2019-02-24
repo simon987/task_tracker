@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/simon987/task_tracker/api"
+	"github.com/simon987/task_tracker/storage"
 	"io/ioutil"
 	"net/http"
 	"testing"
@@ -465,6 +466,82 @@ func TestPausedProjectShouldNotDispatchTasks(t *testing.T) {
 	}, testProject, testAdminCtx)
 }
 
+func TestGetWebhookSecret(t *testing.T) {
+
+	resp := getWebhookSecret(testProject, testAdminCtx)
+
+	if resp.Ok != true {
+		t.Error()
+	}
+	if len(resp.Content.WebhookSecret) <= 0 {
+		t.Error()
+	}
+}
+
+func TestSetWebhookSecret(t *testing.T) {
+
+	resp1 := setWebhookSecret(api.SetWebhookSecretRequest{
+		WebhookSecret: "new",
+	}, testProject, testAdminCtx)
+
+	if resp1.Ok != true {
+		t.Error()
+	}
+
+	resp := getWebhookSecret(testProject, testAdminCtx)
+
+	if resp.Ok != true {
+		t.Error()
+	}
+	if resp.Content.WebhookSecret != "new" {
+		t.Error()
+	}
+}
+
+func TestGetWebhookRequiresRole(t *testing.T) {
+
+	otherUser := getSessionCtx("testwebhookrole", "testwebhookrole", false)
+	otherUserId := getAccountDetails(otherUser).Content.Id
+
+	user := getSessionCtx("testwebhookroleu", "testwebhookroleu", false)
+	userId := getAccountDetails(user).Content.Id
+
+	resp := setRoleOnProject(api.SetManagerRoleOnProjectRequest{
+		Role:    storage.RoleEdit | storage.RoleManageAccess | storage.RoleRead,
+		Manager: otherUserId,
+	}, testProject, testAdminCtx)
+	if resp.Ok != true {
+		t.Fail()
+	}
+	resp = setRoleOnProject(api.SetManagerRoleOnProjectRequest{
+		Role:    storage.RoleSecret,
+		Manager: userId,
+	}, testProject, testAdminCtx)
+	if resp.Ok != true {
+		t.Fail()
+	}
+
+	rUser := setWebhookSecret(api.SetWebhookSecretRequest{
+		WebhookSecret: "test",
+	}, testProject, user)
+	rOther := setWebhookSecret(api.SetWebhookSecretRequest{
+		WebhookSecret: "test",
+	}, testProject, otherUser)
+	rGuest := setWebhookSecret(api.SetWebhookSecretRequest{
+		WebhookSecret: "test",
+	}, testProject, nil)
+
+	if rUser.Ok != true {
+		t.Error()
+	}
+	if rOther.Ok != false {
+		t.Error()
+	}
+	if rGuest.Ok != false {
+		t.Error()
+	}
+}
+
 func createProjectAsAdmin(req api.CreateProjectRequest) CreateProjectAR {
 	return createProject(req, testAdminCtx)
 }
@@ -499,6 +576,18 @@ func updateProject(request api.UpdateProjectRequest, pid int64, s *http.Client) 
 
 func getProjectList(s *http.Client) (ar ProjectListAR) {
 	r := Get("/project/list", nil, s)
+	UnmarshalResponse(r, &ar)
+	return
+}
+
+func getWebhookSecret(pid int64, s *http.Client) (ar WebhookSecretAR) {
+	r := Get(fmt.Sprintf("/project/webhook_secret/%d", pid), nil, s)
+	UnmarshalResponse(r, &ar)
+	return
+}
+
+func setWebhookSecret(req api.SetWebhookSecretRequest, pid int64, s *http.Client) (ar api.JsonResponse) {
+	r := Post(fmt.Sprintf("/project/webhook_secret/%d", pid), req, nil, s)
 	UnmarshalResponse(r, &ar)
 	return
 }

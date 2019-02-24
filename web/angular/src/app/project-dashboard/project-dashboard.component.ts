@@ -366,13 +366,14 @@ export class ProjectDashboardComponent implements OnInit {
         this.dialog.open(AreYouSureComponent, {
             width: '250px',
         }).afterClosed().subscribe(result => {
-            if (result) {
-                this.project.paused = paused;
-                this.apiService.updateProject(this.project).subscribe(() => {
-                    this.translate.get("messenger.acknowledged").subscribe(t =>
-                        this.messenger.show(t))
-                })
-            }
+            this.project.paused = paused;
+            this.apiService.updateProject(this.project).subscribe(() => {
+                this.translate.get("messenger.acknowledged").subscribe(t =>
+                    this.messenger.show(t))
+            }, error => {
+                this.translate.get("messenger.unauthorized").subscribe(t =>
+                    this.messenger.show(t))
+            })
         });
     }
 

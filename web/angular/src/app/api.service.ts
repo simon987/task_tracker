@@ -106,4 +106,12 @@ export class ApiService {
         return this.http.post(this.url + `/project/secret/${pid}`, {"secret": secret})
     }
 
+    getWebhookSecret(pid: number) {
+        return this.http.get(this.url + `/project/webhook_secret/${pid}`,)
+    }
+
+    setWebhookSecret(pid: number, secret: string) {
+        return this.http.post(this.url + `/project/webhook_secret/${pid}`, {"webhook_secret": secret})
+    }
+
 }

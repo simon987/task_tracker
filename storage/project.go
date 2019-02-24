@@ -25,14 +25,14 @@ type AssignedTasks struct {
 	TaskCount int64  `json:"task_count"`
 }
 
-func (database *Database) SaveProject(project *Project) (int64, error) {
+func (database *Database) SaveProject(project *Project, webhookSecret string) (int64, error) {
 	db := database.getDB()
 
 	row := db.QueryRow(`INSERT INTO project (name, git_repo, clone_url, version, priority,
-                     motd, public, hidden, chain, paused)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NULLIF($9, 0),$10) RETURNING id`,
+                     motd, public, hidden, chain, paused, webhook_secret)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NULLIF($9, 0),$10,$11) RETURNING id`,
 		project.Name, project.GitRepo, project.CloneUrl, project.Version, project.Priority, project.Motd,
-		project.Public, project.Hidden, project.Chain, project.Paused)
+		project.Public, project.Hidden, project.Chain, project.Paused, webhookSecret)
 
 	var id int64
 	err := row.Scan(&id)
@@ -224,4 +224,24 @@ func (database *Database) SetSecret(pid int64, secret string) {
 		"rowsAffected": rowsAffected,
 		"project":      pid,
 	}).Info("Set secret")
+}
+
+func (database *Database) GetWebhookSecret(pid int64) (secret string, err error) {
+	db := database.getDB()
+	row := db.QueryRow(`SELECT webhook_secret FROM project WHERE id=$1`, pid)
+	err = row.Scan(&secret)
+	return
+}
+
+func (database *Database) SetWebhookSecret(pid int64, secret string) (err error) {
+	db := database.getDB()
+	res, err := db.Exec(`UPDATE project SET webhook_secret=$1 WHERE id=$2`, secret, pid)
+	handleErr(err)
+
+	rowsAffected, _ := res.RowsAffected()
+	logrus.WithFields(logrus.Fields{
+		"project":      pid,
+		"rowsAffected": rowsAffected,
+	}).Trace("Update webhook secret")
+	return
 }

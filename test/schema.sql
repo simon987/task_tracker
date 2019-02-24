@@ -25,7 +25,8 @@ CREATE TABLE project
   git_repo          TEXT               NOT NULL,
   version           TEXT               NOT NULL,
   motd              TEXT               NOT NULL,
-  secret            TEXT               NOT NULL DEFAULT '{}'
+  secret            TEXT               NOT NULL DEFAULT '{}',
+  webhook_secret    TEXT               NOT NULL
 );
 
 CREATE TABLE worker_access
