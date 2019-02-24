@@ -355,11 +355,19 @@ export class ProjectDashboardComponent implements OnInit {
     }
 
     pauseProject() {
+        this.setPaused(true)
+    }
+
+    resumeProject() {
+        this.setPaused(false)
+    }
+
+    private setPaused(paused: boolean) {
         this.dialog.open(AreYouSureComponent, {
             width: '250px',
         }).afterClosed().subscribe(result => {
             if (result) {
-                this.project.paused = true;
+                this.project.paused = paused;
                 this.apiService.updateProject(this.project).subscribe(() => {
                     this.translate.get("messenger.acknowledged").subscribe(t =>
                         this.messenger.show(t))

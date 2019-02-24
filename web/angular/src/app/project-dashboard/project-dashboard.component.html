@@ -64,10 +64,18 @@
                         color="primary"
                         (click)="pauseProject()"
                         *ngIf="!project.paused"
-                        [title]="'dashboard.pause_hint'|translate">{{"dashboard.pause"|translate}}</button>
-                <button mat-raised-button color="primary" (click)="pauseProject()">
+                        [title]="'dashboard.pause_hint'|translate">
                     <mat-icon>pause</mat-icon>
-                    {{"dashboard.pause"|translate}}</button>
+                    {{"dashboard.pause"|translate}}
+                </button>
+                <button mat-raised-button
+                        color="primary"
+                        (click)="resumeProject()"
+                        *ngIf="project.paused"
+                        [title]="'dashboard.resume_hint'|translate">
+                    <mat-icon>play_arrow</mat-icon>
+                    {{"dashboard.resume"|translate}}
+                </button>
                 <button mat-raised-button color="warn" (click)="hardReset()">
                     <mat-icon>warning</mat-icon>
                     {{"dashboard.hard_reset"|translate}}
