@@ -22,7 +22,7 @@ CREATE TABLE project
   paused            boolean            NOT NULL,
   name              TEXT UNIQUE        NOT NULL,
   clone_url         TEXT               NOT NULL,
-  git_repo          TEXT UNIQUE        NOT NULL,
+  git_repo          TEXT               NOT NULL,
   version           TEXT               NOT NULL,
   motd              TEXT               NOT NULL,
   secret            TEXT               NOT NULL DEFAULT '{}'

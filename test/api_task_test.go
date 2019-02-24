@@ -328,7 +328,7 @@ func TestTaskNoAccess(t *testing.T) {
 		Assign:  true,
 		Submit:  true,
 	}, worker)
-	acceptAccessRequest(worker.Id, pid, testAdminCtx)
+	acceptAccessRequest(pid, worker.Id, testAdminCtx)
 
 	createResp := createTask(api.SubmitTaskRequest{
 		Project:       pid,
@@ -376,7 +376,7 @@ func TestTaskHasAccess(t *testing.T) {
 		Assign:  true,
 		Project: pid,
 	}, worker)
-	acceptAccessRequest(worker.Id, pid, testAdminCtx)
+	acceptAccessRequest(pid, worker.Id, testAdminCtx)
 
 	createResp := createTask(api.SubmitTaskRequest{
 		Project:       pid,
@@ -813,6 +813,70 @@ func TestTaskReleaseBigInt(t *testing.T) {
 		t.Error()
 	}
 	if r2.Content.Updated != true {
+		t.Error()
+	}
+}
+
+func TestTaskSubmitUnauthorized(t *testing.T) {
+
+	pid := createProjectAsAdmin(api.CreateProjectRequest{
+		Name:     "testtasksubmitunauthorized",
+		GitRepo:  "testtasksubmitunauthorized",
+		CloneUrl: "testtasksubmitunauthorized",
+	}).Content.Id
+
+	w := genWid()
+
+	requestAccess(api.CreateWorkerAccessRequest{
+		Project: pid,
+		Submit:  true,
+		Assign:  true,
+	}, w)
+
+	resp := createTask(api.SubmitTaskRequest{
+		Project: pid,
+		Recipe:  "ssss",
+	}, w)
+
+	if resp.Ok != false {
+		t.Error()
+	}
+}
+
+func TestTaskGetUnauthorized(t *testing.T) {
+
+	pid := createProjectAsAdmin(api.CreateProjectRequest{
+		Name:     "testtaskgetunauthorized",
+		GitRepo:  "testtaskgetunauthorized",
+		CloneUrl: "testtaskgettunauthorized",
+		Hidden:   true,
+	}).Content.Id
+
+	w := genWid()
+	wWithAccess := genWid()
+
+	requestAccess(api.CreateWorkerAccessRequest{
+		Project: pid,
+		Submit:  true,
+		Assign:  true,
+	}, wWithAccess)
+	acceptAccessRequest(pid, wWithAccess.Id, testAdminCtx)
+
+	createTask(api.SubmitTaskRequest{
+		Project: pid,
+		Recipe:  "ssss",
+	}, wWithAccess)
+
+	requestAccess(api.CreateWorkerAccessRequest{
+		Project: pid,
+		Submit:  true,
+		Assign:  true,
+	}, w)
+
+	resp := getTaskFromProject(pid, w)
+
+	fmt.Println(resp.Message)
+	if resp.Ok != false {
 		t.Error()
 	}
 }

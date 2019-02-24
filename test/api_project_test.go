@@ -90,25 +90,6 @@ func TestCreateDuplicateProjectName(t *testing.T) {
 	}
 }
 
-func TestCreateDuplicateProjectRepo(t *testing.T) {
-	createProjectAsAdmin(api.CreateProjectRequest{
-		Name:    "different name",
-		GitRepo: "user/same",
-	})
-	resp := createProjectAsAdmin(api.CreateProjectRequest{
-		Name:    "but same repo",
-		GitRepo: "user/same",
-	})
-
-	if resp.Ok != false {
-		t.Error()
-	}
-
-	if len(resp.Message) <= 0 {
-		t.Error()
-	}
-}
-
 func TestGetProjectNotFound(t *testing.T) {
 
 	getResp := getProjectAsAdmin(12345)

@@ -6,7 +6,7 @@ import {Credentials} from "./models/credentials";
 @Injectable()
 export class ApiService {
 
-    public url: string = "https://tt.simon987.net/api";
+    public url: string = "http://localhost/api";
     private options: {
         withCredentials: true,
         responseType: "json"
