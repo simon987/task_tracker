@@ -881,6 +881,55 @@ func TestTaskGetUnauthorized(t *testing.T) {
 	}
 }
 
+func TestTaskChainCausesConflict(t *testing.T) {
+	p1 := createProjectAsAdmin(api.CreateProjectRequest{
+		Name:     "testtaskchainconflict",
+		CloneUrl: "testtaskchainconfflict",
+		Public:   false,
+	}).Content.Id
+
+	p2 := createProjectAsAdmin(api.CreateProjectRequest{
+		Name:     "testtaskchainconflict2",
+		CloneUrl: "testtaskchainconfflict2",
+		Public:   false,
+		Chain:    p1,
+	}).Content.Id
+
+	w := genWid()
+	requestAccess(api.CreateWorkerAccessRequest{
+		Project: p1,
+		Assign:  true,
+		Submit:  true,
+	}, w)
+	requestAccess(api.CreateWorkerAccessRequest{
+		Project: p2,
+		Assign:  true,
+		Submit:  true,
+	}, w)
+	acceptAccessRequest(p1, w.Id, testAdminCtx)
+	acceptAccessRequest(p2, w.Id, testAdminCtx)
+
+	createTask(api.SubmitTaskRequest{
+		Project: p2,
+		Recipe:  "  ",
+		Hash64:  1,
+	}, w)
+	createTask(api.SubmitTaskRequest{
+		Project: p1,
+		Recipe:  "  ",
+		Hash64:  1,
+	}, w)
+	tid := getTaskFromProject(p2, w).Content.Task.Id
+	resp := releaseTask(api.ReleaseTaskRequest{
+		TaskId: tid,
+		Result: storage.TR_OK,
+	}, w)
+
+	if resp.Ok != true {
+		t.Error()
+	}
+}
+
 func createTask(request api.SubmitTaskRequest, worker *storage.Worker) (ar api.JsonResponse) {
 	r := Post("/task/submit", request, worker, nil)
 	UnmarshalResponse(r, &ar)

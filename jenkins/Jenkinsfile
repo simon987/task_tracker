@@ -4,6 +4,10 @@ remote.host = 'localhost'
 remote.user = 'simon'
 remote.identityFile = '/var/lib/jenkins/.ssh/id_rsa'
 remote.knownHosts = '/var/lib/jenkins/.ssh/known_hosts'
+remote.allowAnyHosts = true
+remote.retryCount = 3
+remote.retryWaitSec = 3
+logLevel = 'FINER'
 
 pipeline {
     agent none

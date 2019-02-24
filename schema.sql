@@ -113,7 +113,8 @@ BEGIN
                         priority, retries, max_retries, status, recipe)
       VALUES (old.hash64, chain, NULL, old.max_assign_time, NULL,
               old.verification_count, old.priority, 0, old.max_retries, 1,
-              old.recipe);
+              old.recipe)
+      ON CONFLICT DO NOTHING;
     end if;
   end if;
   RETURN OLD;
