@@ -3,21 +3,24 @@ package storage
 import (
 	"database/sql"
 	"github.com/Sirupsen/logrus"
+	"golang.org/x/time/rate"
 	"strings"
 )
 
 type Project struct {
-	Id       int64  `json:"id"`
-	Priority int64  `json:"priority"`
-	Name     string `json:"name"`
-	CloneUrl string `json:"clone_url"`
-	GitRepo  string `json:"git_repo"`
-	Version  string `json:"version"`
-	Motd     string `json:"motd"`
-	Public   bool   `json:"public"`
-	Hidden   bool   `json:"hidden"`
-	Chain    int64  `json:"chain"`
-	Paused   bool   `json:"paused"`
+	Id         int64      `json:"id"`
+	Priority   int64      `json:"priority"`
+	Name       string     `json:"name"`
+	CloneUrl   string     `json:"clone_url"`
+	GitRepo    string     `json:"git_repo"`
+	Version    string     `json:"version"`
+	Motd       string     `json:"motd"`
+	Public     bool       `json:"public"`
+	Hidden     bool       `json:"hidden"`
+	Chain      int64      `json:"chain"`
+	Paused     bool       `json:"paused"`
+	AssignRate rate.Limit `json:"assign_rate"`
+	SubmitRate rate.Limit `json:"submit_rate"`
 }
 
 type AssignedTasks struct {
@@ -29,10 +32,11 @@ func (database *Database) SaveProject(project *Project, webhookSecret string) (i
 	db := database.getDB()
 
 	row := db.QueryRow(`INSERT INTO project (name, git_repo, clone_url, version, priority,
-                     motd, public, hidden, chain, paused, webhook_secret)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NULLIF($9, 0),$10,$11) RETURNING id`,
+                     motd, public, hidden, chain, paused, webhook_secret, assign_rate, submit_rate)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NULLIF($9, 0),$10,$11,$12,$13) RETURNING id`,
 		project.Name, project.GitRepo, project.CloneUrl, project.Version, project.Priority, project.Motd,
-		project.Public, project.Hidden, project.Chain, project.Paused, webhookSecret)
+		project.Public, project.Hidden, project.Chain, project.Paused, webhookSecret, project.AssignRate,
+		project.SubmitRate)
 
 	var id int64
 	err := row.Scan(&id)
@@ -58,7 +62,7 @@ func (database *Database) GetProject(id int64) *Project {
 
 	db := database.getDB()
 	row := db.QueryRow(`SELECT id, priority, name, clone_url, git_repo, version,
-       motd, public, hidden, COALESCE(chain, 0), paused
+       motd, public, hidden, COALESCE(chain, 0), paused, assign_rate, submit_rate
 		FROM project WHERE id=$1`, id)
 
 	project, err := scanProject(row)
@@ -81,7 +85,7 @@ func scanProject(row *sql.Row) (*Project, error) {
 
 	p := &Project{}
 	err := row.Scan(&p.Id, &p.Priority, &p.Name, &p.CloneUrl, &p.GitRepo, &p.Version,
-		&p.Motd, &p.Public, &p.Hidden, &p.Chain, &p.Paused)
+		&p.Motd, &p.Public, &p.Hidden, &p.Chain, &p.Paused, &p.AssignRate, &p.SubmitRate)
 
 	return p, err
 }
@@ -90,7 +94,8 @@ func (database *Database) GetProjectWithRepoName(repoName string) *Project {
 
 	db := database.getDB()
 	row := db.QueryRow(`SELECT id, priority, name, clone_url, git_repo, version,
-       motd, public, hidden, COALESCE(chain, 0), paused FROM project WHERE LOWER(git_repo)=$1`,
+       motd, public, hidden, COALESCE(chain, 0), paused, assign_rate, submit_rate
+		FROM project WHERE LOWER(git_repo)=$1`,
 		strings.ToLower(repoName))
 
 	project, err := scanProject(row)
@@ -109,11 +114,13 @@ func (database *Database) UpdateProject(project *Project) error {
 	db := database.getDB()
 
 	res, err := db.Exec(`UPDATE project 
-		SET (priority, name, clone_url, git_repo, version, motd, public, hidden, chain, paused) =
-		  ($1,$2,$3,$4,$5,$6,$7,$8,NULLIF($9, 0), $10)
-		WHERE id=$11`,
+		SET (priority, name, clone_url, git_repo, version, motd, public, hidden, chain, paused,
+		    assign_rate, submit_rate) =
+		  ($1,$2,$3,$4,$5,$6,$7,$8,NULLIF($9, 0), $10,$11,$12)
+		WHERE id=$13`,
 		project.Priority, project.Name, project.CloneUrl, project.GitRepo, project.Version, project.Motd,
-		project.Public, project.Hidden, project.Chain, project.Paused, project.Id)
+		project.Public, project.Hidden, project.Chain, project.Paused, project.AssignRate, project.SubmitRate,
+		project.Id)
 	if err != nil {
 		return err
 	}

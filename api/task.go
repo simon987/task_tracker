@@ -11,6 +11,7 @@ import (
 	"github.com/dchest/siphash"
 	"github.com/simon987/task_tracker/storage"
 	"strconv"
+	"time"
 )
 
 func (api *WebAPI) SubmitTask(r *Request) {
@@ -53,6 +54,17 @@ func (api *WebAPI) SubmitTask(r *Request) {
 		return
 	}
 
+	reservation := api.ReserveSubmit(createReq.Project)
+	delay := reservation.DelayFrom(time.Now()).Seconds()
+	if delay > 0 {
+		r.Json(JsonResponse{
+			Ok:             false,
+			Message:        "Too many requests",
+			RateLimitDelay: strconv.FormatFloat(delay, 'f', -1, 64),
+		}, 429)
+		return
+	}
+
 	if createReq.UniqueString != "" {
 		//TODO: Load key from config
 		createReq.Hash64 = int64(siphash.Hash(1, 2, []byte(createReq.UniqueString)))
@@ -65,6 +77,7 @@ func (api *WebAPI) SubmitTask(r *Request) {
 			Ok:      false,
 			Message: err.Error(),
 		}, 400)
+		reservation.Cancel()
 	} else {
 		r.OkJson(JsonResponse{
 			Ok: true,
@@ -84,47 +97,33 @@ func (api *WebAPI) GetTaskFromProject(r *Request) {
 	}
 
 	project, err := strconv.ParseInt(r.Ctx.UserValue("project").(string), 10, 64)
-	handleErr(err, r)
-	task := api.Database.GetTaskFromProject(worker, project)
-
-	if task == nil {
-
-		r.OkJson(JsonResponse{
-			Ok:      false,
-			Message: "No task available",
-		})
-
-	} else {
-
-		r.OkJson(JsonResponse{
-			Ok: true,
-			Content: GetTaskResponse{
-				Task: task,
-			},
-		})
-	}
-
-}
-
-func (api *WebAPI) GetTask(r *Request) {
-
-	worker, err := api.validateSignature(r)
-	if err != nil {
+	if err != nil || project <= 0 {
 		r.Json(JsonResponse{
 			Ok:      false,
-			Message: err.Error(),
-		}, 403)
+			Message: "Invalid project id",
+		}, 400)
 		return
 	}
 
-	task := api.Database.GetTask(worker)
-	if task == nil {
+	reservation := api.ReserveAssign(project)
+	delay := reservation.DelayFrom(time.Now()).Seconds()
+	if delay > 0 {
+		r.Json(JsonResponse{
+			Ok:             false,
+			Message:        "Too many requests",
+			RateLimitDelay: strconv.FormatFloat(delay, 'f', -1, 64),
+		}, 429)
+		return
+	}
 
+	task := api.Database.GetTaskFromProject(worker, project)
+
+	if task == nil {
 		r.OkJson(JsonResponse{
 			Ok:      false,
 			Message: "No task available",
 		})
-
+		reservation.CancelAt(time.Now())
 	} else {
 
 		r.OkJson(JsonResponse{
@@ -134,8 +133,8 @@ func (api *WebAPI) GetTask(r *Request) {
 			},
 		})
 	}
-}
 
+}
 func (api WebAPI) validateSignature(r *Request) (*storage.Worker, error) {
 
 	widStr := string(r.Ctx.Request.Header.Peek("X-Worker-Id"))

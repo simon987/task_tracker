@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"database/sql"
 	"errors"
 	"fmt"
 	"github.com/Sirupsen/logrus"
@@ -67,75 +66,6 @@ func (database *Database) SaveTask(task *Task, project int64, hash64 int64, wid 
 	}
 
 	return nil
-}
-
-func (database *Database) GetTask(worker *Worker) *Task {
-
-	db := database.getDB()
-
-	row := db.QueryRow(`
-	UPDATE task
-	SET assignee=$1, assign_time=extract(epoch from now() at time zone 'utc')
-	WHERE id IN
-	(
-		SELECT task.id
-	FROM task
-	INNER JOIN project project on task.project = project.id
-	LEFT JOIN worker_verifies_task wvt on task.id = wvt.task AND wvt.worker=$1
-	WHERE NOT project.paused AND assignee IS NULL AND task.status=1
-		AND (project.public OR (
-		  SELECT a.role_assign AND not a.request FROM worker_access a WHERE a.worker=$1 AND a.project=project.id
-		))
-		AND wvt.task IS NULL
-	ORDER BY project.priority DESC, task.priority DESC
-	LIMIT 1
-	)
-	RETURNING id`, worker.Id)
-	var id int64
-
-	err := row.Scan(&id)
-	if err != nil {
-		logrus.WithError(err).WithFields(logrus.Fields{
-			"worker": worker,
-		}).Trace("No task available")
-		return nil
-	}
-
-	logrus.WithFields(logrus.Fields{
-		"id":     id,
-		"worker": worker,
-	}).Trace("Database.getTask UPDATE task")
-
-	task := getTaskById(id, db)
-
-	return task
-}
-
-func getTaskById(id int64, db *sql.DB) *Task {
-
-	row := db.QueryRow(`
-	SELECT task.id, task.priority, task.project, assignee, retries, max_retries,
-	        status, recipe, max_assign_time, assign_time, verification_count, project.priority, project.name,
-	       project.clone_url, project.git_repo, project.version, project.motd, project.public, COALESCE(project.chain,0) FROM task 
-	  INNER JOIN project project ON task.project = project.id
-	WHERE task.id=$1`, id)
-	project := &Project{}
-	task := &Task{}
-	task.Project = project
-
-	err := row.Scan(&task.Id, &task.Priority, &project.Id, &task.Assignee,
-		&task.Retries, &task.MaxRetries, &task.Status, &task.Recipe, &task.MaxAssignTime,
-		&task.AssignTime, &task.VerificationCount, &project.Priority, &project.Name,
-		&project.CloneUrl, &project.GitRepo, &project.Version, &project.Motd, &project.Public,
-		&project.Chain)
-	handleErr(err)
-
-	logrus.WithFields(logrus.Fields{
-		"id":   id,
-		"task": task,
-	}).Trace("Database.getTaskById SELECT task")
-
-	return task
 }
 
 func (database Database) ReleaseTask(id int64, workerId int64, result TaskResult, verification int64) bool {
@@ -205,12 +135,24 @@ func (database *Database) GetTaskFromProject(worker *Worker, projectId int64) *T
 		return nil
 	}
 
-	logrus.WithFields(logrus.Fields{
-		"id":     id,
-		"worker": worker,
-	}).Trace("Database.getTask UPDATE task")
+	row = db.QueryRow(`
+	SELECT task.id, task.priority, task.project, assignee, retries, max_retries,
+	        status, recipe, max_assign_time, assign_time, verification_count, project.priority, project.name,
+	       project.clone_url, project.git_repo, project.version, project.motd, project.public, COALESCE(project.chain,0),
+	       project.assign_rate, project.submit_rate
+	FROM task 
+	  INNER JOIN project project ON task.project = project.id
+	WHERE task.id=$1`, id)
+	project := &Project{}
+	task := &Task{}
+	task.Project = project
 
-	task := getTaskById(id, db)
+	err = row.Scan(&task.Id, &task.Priority, &project.Id, &task.Assignee,
+		&task.Retries, &task.MaxRetries, &task.Status, &task.Recipe, &task.MaxAssignTime,
+		&task.AssignTime, &task.VerificationCount, &project.Priority, &project.Name,
+		&project.CloneUrl, &project.GitRepo, &project.Version, &project.Motd, &project.Public,
+		&project.Chain, &project.AssignRate, &project.SubmitRate)
+	handleErr(err)
 
 	return task
 }

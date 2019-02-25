@@ -15,17 +15,20 @@ CREATE TABLE project
 (
   id                SERIAL PRIMARY KEY NOT NULL,
   priority          INTEGER DEFAULT 0  NOT NULL,
-  closed_task_count INT     DEFAULT 0  NOT NULL,
+  closed_task_count INT     DEFAULT 0 NOT NULL,
   chain             INT     DEFAULT NULL REFERENCES project (id),
-  public            boolean            NOT NULL,
-  hidden            boolean            NOT NULL,
-  paused            boolean            NOT NULL,
-  name              TEXT UNIQUE        NOT NULL,
-  clone_url         TEXT               NOT NULL,
-  git_repo          TEXT               NOT NULL,
-  version           TEXT               NOT NULL,
-  motd              TEXT               NOT NULL,
-  secret            TEXT               NOT NULL DEFAULT '{}'
+  public            boolean           NOT NULL,
+  hidden            boolean           NOT NULL,
+  paused            boolean           NOT NULL,
+  name              TEXT UNIQUE       NOT NULL,
+  clone_url         TEXT              NOT NULL,
+  git_repo          TEXT              NOT NULL,
+  version           TEXT              NOT NULL,
+  motd              TEXT              NOT NULL,
+  secret            TEXT              NOT NULL DEFAULT '{}',
+  webhook_secret    TEXT              NOT NULL,
+  assign_rate       DOUBLE PRECISION  NOT NULL,
+  submit_rate       DOUBLE PRECISION  NOT NULL
 );
 
 CREATE TABLE worker_access

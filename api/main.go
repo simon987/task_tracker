@@ -9,15 +9,18 @@ import (
 	"github.com/simon987/task_tracker/config"
 	"github.com/simon987/task_tracker/storage"
 	"github.com/valyala/fasthttp"
+	"sync"
 )
 
 type WebAPI struct {
-	server        *fasthttp.Server
-	router        *fasthttprouter.Router
-	Database      *storage.Database
-	SessionConfig sessions.Config
-	Session       *sessions.Sessions
-	Cron          *cron.Cron
+	server         *fasthttp.Server
+	router         *fasthttprouter.Router
+	Database       *storage.Database
+	SessionConfig  sessions.Config
+	Session        *sessions.Sessions
+	Cron           *cron.Cron
+	AssignLimiters sync.Map
+	SubmitLimiters sync.Map
 }
 
 type RequestHandler func(*Request)
@@ -98,7 +101,6 @@ func New() *WebAPI {
 
 	api.router.POST("/task/submit", LogRequestMiddleware(api.SubmitTask))
 	api.router.GET("/task/get/:project", LogRequestMiddleware(api.GetTaskFromProject))
-	api.router.GET("/task/get", LogRequestMiddleware(api.GetTask))
 	api.router.POST("/task/release", LogRequestMiddleware(api.ReleaseTask))
 
 	api.router.POST("/git/receivehook", LogRequestMiddleware(api.ReceiveGitWebHook))

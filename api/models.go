@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"github.com/simon987/task_tracker/storage"
+	"golang.org/x/time/rate"
 )
 
 const (
@@ -12,9 +13,10 @@ const (
 )
 
 type JsonResponse struct {
-	Ok      bool        `json:"ok"`
-	Message string      `json:"message,omitempty"`
-	Content interface{} `json:"content,omitempty"`
+	Ok             bool        `json:"ok"`
+	Message        string      `json:"message,omitempty"`
+	RateLimitDelay string      `json:"rate_limit_delay,omitempty"`
+	Content        interface{} `json:"content,omitempty"`
 }
 
 type GitPayload struct {
@@ -115,15 +117,17 @@ type GetSnapshotsResponse struct {
 }
 
 type CreateProjectRequest struct {
-	Name     string `json:"name"`
-	CloneUrl string `json:"clone_url"`
-	GitRepo  string `json:"git_repo"`
-	Version  string `json:"version"`
-	Priority int64  `json:"priority"`
-	Motd     string `json:"motd"`
-	Public   bool   `json:"public"`
-	Hidden   bool   `json:"hidden"`
-	Chain    int64  `json:"chain"`
+	Name       string     `json:"name"`
+	CloneUrl   string     `json:"clone_url"`
+	GitRepo    string     `json:"git_repo"`
+	Version    string     `json:"version"`
+	Priority   int64      `json:"priority"`
+	Motd       string     `json:"motd"`
+	Public     bool       `json:"public"`
+	Hidden     bool       `json:"hidden"`
+	Chain      int64      `json:"chain"`
+	AssignRate rate.Limit `json:"assign_rate"`
+	SubmitRate rate.Limit `json:"submit_rate"`
 }
 
 func (req *CreateProjectRequest) isValid() bool {
@@ -140,15 +144,17 @@ func (req *CreateProjectRequest) isValid() bool {
 }
 
 type UpdateProjectRequest struct {
-	Name     string `json:"name"`
-	CloneUrl string `json:"clone_url"`
-	GitRepo  string `json:"git_repo"`
-	Priority int64  `json:"priority"`
-	Motd     string `json:"motd"`
-	Public   bool   `json:"public"`
-	Hidden   bool   `json:"hidden"`
-	Chain    int64  `json:"chain"`
-	Paused   bool   `json:"paused"`
+	Name       string     `json:"name"`
+	CloneUrl   string     `json:"clone_url"`
+	GitRepo    string     `json:"git_repo"`
+	Priority   int64      `json:"priority"`
+	Motd       string     `json:"motd"`
+	Public     bool       `json:"public"`
+	Hidden     bool       `json:"hidden"`
+	Chain      int64      `json:"chain"`
+	Paused     bool       `json:"paused"`
+	AssignRate rate.Limit `json:"assign_rate"`
+	SubmitRate rate.Limit `json:"submit_rate"`
 }
 
 func (req *UpdateProjectRequest) isValid() bool {

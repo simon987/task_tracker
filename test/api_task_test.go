@@ -57,7 +57,7 @@ func TestCreateTaskInvalidProject(t *testing.T) {
 
 func TestGetTaskInvalidWid(t *testing.T) {
 
-	resp := getTask(nil)
+	resp := getTaskFromProject(testProject, genWid())
 
 	if resp.Ok != false {
 		t.Error()
@@ -70,7 +70,7 @@ func TestGetTaskInvalidWid(t *testing.T) {
 
 func TestGetTaskInvalidWorker(t *testing.T) {
 
-	resp := getTask(&storage.Worker{
+	resp := getTaskFromProject(testProject, &storage.Worker{
 		Id: -1,
 	})
 
@@ -138,12 +138,14 @@ func TestCreateTaskInvalidRecipe(t *testing.T) {
 func TestCreateGetTask(t *testing.T) {
 
 	pid := createProjectAsAdmin(api.CreateProjectRequest{
-		Name:     "My project",
-		Version:  "1.0",
-		CloneUrl: "http://github.com/test/test",
-		GitRepo:  "myrepo",
-		Priority: 999,
-		Public:   true,
+		Name:       "My project",
+		Version:    "1.0",
+		CloneUrl:   "http://github.com/test/test",
+		GitRepo:    "myrepo",
+		Priority:   999,
+		Public:     true,
+		AssignRate: 2,
+		SubmitRate: 2,
 	}).Content.Id
 
 	worker := genWid()
@@ -195,6 +197,12 @@ func TestCreateGetTask(t *testing.T) {
 		t.Error()
 	}
 	if taskResp.Task.Project.Public != true {
+		t.Error()
+	}
+	if taskResp.Task.Project.AssignRate == 1 {
+		t.Error()
+	}
+	if taskResp.Task.Project.SubmitRate != 2 {
 		t.Error()
 	}
 }
@@ -275,36 +283,6 @@ func TestTaskProjectPriority(t *testing.T) {
 		t.Error()
 	}
 	if t4.Task.Recipe != "high1" {
-		t.Error()
-	}
-}
-
-func TestTaskPriority(t *testing.T) {
-
-	wid := genWid()
-
-	// Clean other tasks
-	for i := 0; i < 20; i++ {
-		getTask(wid)
-	}
-
-	createTasks("")
-
-	t1 := getTask(wid).Content
-	t2 := getTask(wid).Content
-	t3 := getTask(wid).Content
-	t4 := getTask(wid).Content
-
-	if t1.Task.Recipe != "high2" {
-		t.Error()
-	}
-	if t2.Task.Recipe != "high1" {
-		t.Error()
-	}
-	if t3.Task.Recipe != "low2" {
-		t.Error()
-	}
-	if t4.Task.Recipe != "low1" {
 		t.Error()
 	}
 }
@@ -397,15 +375,6 @@ func TestTaskHasAccess(t *testing.T) {
 	}
 	if tResp.Content.Task == nil {
 		t.Error()
-	}
-}
-
-func TestNoMoreTasks(t *testing.T) {
-
-	worker := genWid()
-
-	for i := 0; i < 15; i++ {
-		getTask(worker)
 	}
 }
 

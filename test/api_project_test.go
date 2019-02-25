@@ -13,14 +13,16 @@ import (
 func TestCreateGetProject(t *testing.T) {
 
 	resp := createProjectAsAdmin(api.CreateProjectRequest{
-		Name:     "Test name",
-		CloneUrl: "http://github.com/test/test",
-		GitRepo:  "drone/webhooktest",
-		Version:  "Test Version",
-		Priority: 123,
-		Motd:     "motd",
-		Public:   true,
-		Hidden:   false,
+		Name:       "Test name",
+		CloneUrl:   "http://github.com/test/test",
+		GitRepo:    "drone/webhooktest",
+		Version:    "Test Version",
+		Priority:   123,
+		Motd:       "motd",
+		Public:     true,
+		Hidden:     false,
+		AssignRate: 10.0,
+		SubmitRate: 20.0,
 	})
 
 	id := resp.Content.Id
@@ -62,6 +64,12 @@ func TestCreateGetProject(t *testing.T) {
 		t.Error()
 	}
 	if getResp.Project.Hidden != false {
+		t.Error()
+	}
+	if getResp.Project.SubmitRate != 20.0 {
+		t.Error()
+	}
+	if getResp.Project.AssignRate != 10.0 {
 		t.Error()
 	}
 }
@@ -107,24 +115,28 @@ func TestGetProjectNotFound(t *testing.T) {
 func TestUpdateProjectValid(t *testing.T) {
 
 	pid := createProjectAsAdmin(api.CreateProjectRequest{
-		Public:   true,
-		Version:  "versionA",
-		Motd:     "MotdA",
-		Name:     "NameA",
-		CloneUrl: "CloneUrlA",
-		GitRepo:  "GitRepoA",
-		Priority: 1,
+		Public:     true,
+		Version:    "versionA",
+		Motd:       "MotdA",
+		Name:       "NameA",
+		CloneUrl:   "CloneUrlA",
+		GitRepo:    "GitRepoA",
+		Priority:   1,
+		AssignRate: 3,
+		SubmitRate: 3,
 	}).Content.Id
 
 	updateResp := updateProject(api.UpdateProjectRequest{
-		Priority: 2,
-		GitRepo:  "GitRepoB",
-		CloneUrl: "CloneUrlB",
-		Name:     "NameB",
-		Motd:     "MotdB",
-		Public:   false,
-		Hidden:   true,
-		Paused:   true,
+		Priority:   2,
+		GitRepo:    "GitRepoB",
+		CloneUrl:   "CloneUrlB",
+		Name:       "NameB",
+		Motd:       "MotdB",
+		Public:     false,
+		Hidden:     true,
+		Paused:     true,
+		AssignRate: 1,
+		SubmitRate: 2,
 	}, pid, testAdminCtx)
 
 	if updateResp.Ok != true {
@@ -152,6 +164,12 @@ func TestUpdateProjectValid(t *testing.T) {
 		t.Error()
 	}
 	if proj.Project.Paused != true {
+		t.Error()
+	}
+	if proj.Project.AssignRate != 1 {
+		t.Error()
+	}
+	if proj.Project.SubmitRate != 2 {
 		t.Error()
 	}
 }

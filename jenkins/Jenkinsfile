@@ -68,7 +68,7 @@ pipeline {
                 node('master') {
                     unstash 'webdist'
                     unstash 'apidist'
-                    sshCommand remote: remote, command: "rm -rf tt_api config.yml schema.sql webroot deploy.sh"
+                    sshCommand remote: remote, command: "cd task_tracker && rm -rf tt_api config.yml schema.sql webroot deploy.sh"
                     sshPut remote: remote, from: 'tt_api', into: 'task_tracker/tt_api'
                     sshPut remote: remote, from: 'config.yml', into: 'task_tracker/config.yml'
                     sshPut remote: remote, from: 'schema.sql', into: 'task_tracker/schema.sql'

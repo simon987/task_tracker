@@ -5,6 +5,7 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/google/uuid"
 	"github.com/simon987/task_tracker/storage"
+	"golang.org/x/time/rate"
 	"strconv"
 )
 
@@ -62,16 +63,25 @@ func (api *WebAPI) CreateProject(r *Request) {
 		}, 400)
 		return
 	}
+
+	if createReq.AssignRate == 0 {
+		createReq.AssignRate = rate.Inf
+	}
+	if createReq.SubmitRate == 0 {
+		createReq.SubmitRate = rate.Inf
+	}
 	project := &storage.Project{
-		Name:     createReq.Name,
-		Version:  createReq.Version,
-		CloneUrl: createReq.CloneUrl,
-		GitRepo:  createReq.GitRepo,
-		Priority: createReq.Priority,
-		Motd:     createReq.Motd,
-		Public:   createReq.Public,
-		Hidden:   createReq.Hidden,
-		Chain:    createReq.Chain,
+		Name:       createReq.Name,
+		Version:    createReq.Version,
+		CloneUrl:   createReq.CloneUrl,
+		GitRepo:    createReq.GitRepo,
+		Priority:   createReq.Priority,
+		Motd:       createReq.Motd,
+		Public:     createReq.Public,
+		Hidden:     createReq.Hidden,
+		Chain:      createReq.Chain,
+		AssignRate: createReq.AssignRate,
+		SubmitRate: createReq.SubmitRate,
 	}
 
 	if !createReq.isValid() {
@@ -156,16 +166,18 @@ func (api *WebAPI) UpdateProject(r *Request) {
 	}
 
 	project := &storage.Project{
-		Id:       id,
-		Name:     updateReq.Name,
-		CloneUrl: updateReq.CloneUrl,
-		GitRepo:  updateReq.GitRepo,
-		Priority: updateReq.Priority,
-		Motd:     updateReq.Motd,
-		Public:   updateReq.Public,
-		Hidden:   updateReq.Hidden,
-		Chain:    updateReq.Chain,
-		Paused:   updateReq.Paused,
+		Id:         id,
+		Name:       updateReq.Name,
+		CloneUrl:   updateReq.CloneUrl,
+		GitRepo:    updateReq.GitRepo,
+		Priority:   updateReq.Priority,
+		Motd:       updateReq.Motd,
+		Public:     updateReq.Public,
+		Hidden:     updateReq.Hidden,
+		Chain:      updateReq.Chain,
+		Paused:     updateReq.Paused,
+		AssignRate: updateReq.AssignRate,
+		SubmitRate: updateReq.SubmitRate,
 	}
 	sess := api.Session.StartFasthttp(r.Ctx)
 	manager := sess.Get("manager")
