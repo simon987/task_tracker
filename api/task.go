@@ -66,7 +66,6 @@ func (api *WebAPI) SubmitTask(r *Request) {
 	}
 
 	if createReq.UniqueString != "" {
-		//TODO: Load key from config
 		createReq.Hash64 = int64(siphash.Hash(1, 2, []byte(createReq.UniqueString)))
 	}
 

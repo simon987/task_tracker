@@ -525,7 +525,6 @@ func (api *WebAPI) SetManagerRoleOnProject(r *Request) {
 func (api *WebAPI) SetSecret(r *Request) {
 
 	pid, err := strconv.ParseInt(r.Ctx.UserValue("id").(string), 10, 64)
-	handleErr(err, r) //todo handle invalid id
 	if err != nil || pid <= 0 {
 		r.Json(JsonResponse{
 			Ok:      false,

@@ -39,7 +39,6 @@ func (database *Database) SaveTask(task *Task, project int64, hash64 int64, wid 
 
 	db := database.getDB()
 
-	//TODO: For some reason it refuses to insert the 64-bit value unless I do that...
 	res, err := db.Exec(fmt.Sprintf(`
 	INSERT INTO task (project, max_retries, recipe, priority, max_assign_time, hash64,verification_count) 
 	SELECT $1,$2,$3,$4,$5,NULLIF(%d, 0),$6 FROM worker_access 

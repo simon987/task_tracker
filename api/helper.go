@@ -27,13 +27,14 @@ func (r *Request) Json(object JsonResponse, code int) {
 		logrus.WithError(err).WithFields(logrus.Fields{
 			"code": code,
 		}).Error("Error during json encoding of object")
+		return
 	}
 
 	r.Ctx.Response.SetStatusCode(code)
 	r.Ctx.Response.Header.Set("Content-Type", "application/json")
 	_, err = r.Ctx.Write(resp)
 	if err != nil {
-		panic(err) //todo handle differently
+		panic(err)
 	}
 
 }
