@@ -542,6 +542,78 @@ func TestGetWebhookRequiresRole(t *testing.T) {
 	}
 }
 
+func TestTaskChainCreateRequiresRole(t *testing.T) {
+
+	testUser := getAccountDetails(testUserCtx).Content.Manager
+
+	p1 := createProjectAsAdmin(api.CreateProjectRequest{
+		Name:     "testtaskchainrequiresrole",
+		CloneUrl: "testtaskchainrequiresrole",
+	}).Content.Id
+
+	resp := createProject(api.CreateProjectRequest{
+		Name:     "testtaskchainrequiresrole1",
+		CloneUrl: "testtaskchainrequiresrole1",
+		Chain:    p1,
+	}, testUserCtx)
+
+	if resp.Ok != false {
+		t.Error()
+	}
+	if len(resp.Message) <= 0 {
+		t.Error()
+	}
+
+	setRoleOnProject(api.SetManagerRoleOnProjectRequest{
+		Manager: testUser.Id,
+		Role:    storage.RoleEdit,
+	}, p1, testAdminCtx)
+
+	resp2 := createProject(api.CreateProjectRequest{
+		Name:     "testtaskchainrequiresrole1",
+		CloneUrl: "testtaskchainrequiresrole1",
+		Chain:    p1,
+	}, testUserCtx)
+
+	if resp2.Ok != true {
+		t.Error()
+	}
+}
+
+func TestTaskChainUpdateRequiresRole(t *testing.T) {
+
+	p1 := createProjectAsAdmin(api.CreateProjectRequest{
+		Name:     "testtaskchainrequiresroleupdate",
+		CloneUrl: "testtaskchainrequiresroleupdate",
+	}).Content.Id
+
+	p2Resp := createProject(api.CreateProjectRequest{
+		Name:     "testtaskchainrequiresrole1update",
+		CloneUrl: "testtaskchainrequiresrole1update",
+	}, testUserCtx)
+
+	p2 := getProjectAsAdmin(p2Resp.Content.Id).Content.Project
+
+	resp := updateProject(api.UpdateProjectRequest{
+		Chain:    p1,
+		Name:     p2.Name,
+		CloneUrl: p2.CloneUrl,
+		Public:   p2.Public,
+		Hidden:   p2.Hidden,
+		GitRepo:  p2.GitRepo,
+		Paused:   p2.Paused,
+		Priority: p2.Priority,
+		Motd:     p2.Motd,
+	}, p2.Id, testUserCtx)
+
+	if resp.Ok != false {
+		t.Error()
+	}
+	if len(resp.Message) <= 0 {
+		t.Error()
+	}
+}
+
 func createProjectAsAdmin(req api.CreateProjectRequest) CreateProjectAR {
 	return createProject(req, testAdminCtx)
 }

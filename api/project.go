@@ -86,7 +86,7 @@ func (api *WebAPI) CreateProject(r *Request) {
 		return
 	}
 
-	if !isProjectCreationAuthorized(project, manager) {
+	if !api.isProjectCreationAuthorized(project, manager) {
 		logrus.WithFields(logrus.Fields{
 			"project": project,
 		}).Warn("Unauthorized project creation")
@@ -175,9 +175,14 @@ func (api *WebAPI) UpdateProject(r *Request) {
 			Ok:      false,
 			Message: "Unauthorized",
 		}, 403)
-		logrus.WithError(err).WithFields(logrus.Fields{
-			"project": project,
-		}).Warn("Unauthorized project update")
+		return
+	}
+
+	if project.Chain != 0 && !isActionOnProjectAuthorized(project.Chain, manager, storage.RoleEdit, api.Database) {
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: "Unauthorized (You need RoleEdit on the project you wish to chain tasks to)",
+		}, 403)
 		return
 	}
 
@@ -202,7 +207,7 @@ func (api *WebAPI) UpdateProject(r *Request) {
 	}
 }
 
-func isProjectCreationAuthorized(project *storage.Project, manager interface{}) bool {
+func (api *WebAPI) isProjectCreationAuthorized(project *storage.Project, manager interface{}) bool {
 
 	if manager == nil {
 		return false
@@ -211,6 +216,19 @@ func isProjectCreationAuthorized(project *storage.Project, manager interface{}) 
 	if project.Public && !manager.(*storage.Manager).WebsiteAdmin {
 		return false
 	}
+
+	if project.Chain != 0 {
+		chainsTo := api.Database.GetProject(project.Chain)
+		if chainsTo == nil {
+			return false
+		}
+
+		if !isActionOnProjectAuthorized(chainsTo.Id, manager.(*storage.Manager),
+			storage.RoleEdit, api.Database) {
+			return false
+		}
+	}
+
 	return true
 }
 
