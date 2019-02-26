@@ -77,11 +77,12 @@ func (api *WebAPI) SubmitTask(r *Request) {
 			Message: err.Error(),
 		}, 400)
 		reservation.Cancel()
-	} else {
-		r.OkJson(JsonResponse{
-			Ok: true,
-		})
+		return
 	}
+
+	r.OkJson(JsonResponse{
+		Ok: true,
+	})
 }
 
 func (api *WebAPI) GetTaskFromProject(r *Request) {
@@ -123,17 +124,17 @@ func (api *WebAPI) GetTaskFromProject(r *Request) {
 			Message: "No task available",
 		})
 		reservation.CancelAt(time.Now())
-	} else {
-
-		r.OkJson(JsonResponse{
-			Ok: true,
-			Content: GetTaskResponse{
-				Task: task,
-			},
-		})
+		return
 	}
 
+	r.OkJson(JsonResponse{
+		Ok: true,
+		Content: GetTaskResponse{
+			Task: task,
+		},
+	})
 }
+
 func (api WebAPI) validateSignature(r *Request) (*storage.Worker, error) {
 
 	widStr := string(r.Ctx.Request.Header.Peek("X-Worker-Id"))

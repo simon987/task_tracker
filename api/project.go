@@ -157,7 +157,7 @@ func (api *WebAPI) UpdateProject(r *Request) {
 		return
 	}
 
-	if !updateReq.isValid() {
+	if !updateReq.isValid(id) {
 		r.Json(JsonResponse{
 			Ok:      false,
 			Message: "Invalid request",

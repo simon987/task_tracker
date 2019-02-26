@@ -157,7 +157,7 @@ type UpdateProjectRequest struct {
 	SubmitRate rate.Limit `json:"submit_rate"`
 }
 
-func (req *UpdateProjectRequest) isValid() bool {
+func (req *UpdateProjectRequest) isValid(pid int64) bool {
 	if len(req.Name) <= 0 {
 		return false
 	}
@@ -165,6 +165,9 @@ func (req *UpdateProjectRequest) isValid() bool {
 		return false
 	}
 	if req.Hidden && req.Public {
+		return false
+	}
+	if req.Chain == pid {
 		return false
 	}
 	return true
