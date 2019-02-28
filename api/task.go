@@ -60,7 +60,7 @@ func (api *WebAPI) SubmitTask(r *Request) {
 		r.Json(JsonResponse{
 			Ok:             false,
 			Message:        "Too many requests",
-			RateLimitDelay: strconv.FormatFloat(delay, 'f', -1, 64),
+			RateLimitDelay: delay,
 		}, 429)
 		return
 	}
@@ -111,7 +111,7 @@ func (api *WebAPI) GetTaskFromProject(r *Request) {
 		r.Json(JsonResponse{
 			Ok:             false,
 			Message:        "Too many requests",
-			RateLimitDelay: strconv.FormatFloat(delay, 'f', -1, 64),
+			RateLimitDelay: delay,
 		}, 429)
 		return
 	}

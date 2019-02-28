@@ -9,7 +9,7 @@
         "worker_dashboard": "Workers",
         "account": "Account",
         "manager_list": "Managers",
-        "back": "back"
+        "back": "Back"
     },
     "logs": {
         "title": "Logs",
@@ -69,7 +69,11 @@
         "chain": "Chain tasks to",
         "manager_select": "Give access to manager",
         "version": "Git version (commit hash)",
-        "secret": "Secret"
+        "secret": "Secret",
+        "reset_response": "Reset failed tasks: ",
+        "assign_rate": "Task assign rate limit",
+        "submit_rate": "Task submit rate limit",
+        "rate": "per second"
     },
     "dashboard": {
         "title": "Dashboard for",

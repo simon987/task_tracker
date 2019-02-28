@@ -120,7 +120,7 @@ func (api *WebAPI) CreateProject(r *Request) {
 	}
 
 	api.Database.SetManagerRoleOn(manager.(*storage.Manager).Id, id,
-		storage.RoleManageAccess|storage.RoleRead|storage.RoleEdit|storage.RoleSecret)
+		storage.RoleManageAccess|storage.RoleRead|storage.RoleEdit|storage.RoleSecret|storage.RoleMaintenance)
 	r.OkJson(JsonResponse{
 		Ok: true,
 		Content: CreateProjectResponse{
@@ -209,6 +209,9 @@ func (api *WebAPI) UpdateProject(r *Request) {
 			"project": project,
 		}).Warn("Error during project update")
 	} else {
+		api.SubmitLimiters.Delete(project.Id)
+		api.AssignLimiters.Delete(project.Id)
+
 		r.OkJson(JsonResponse{
 			Ok: true,
 		})
@@ -687,4 +690,36 @@ func (api *WebAPI) SetWebhookSecret(r *Request) {
 			Message: err.Error(),
 		})
 	}
+}
+
+func (api *WebAPI) ResetFailedTasks(r *Request) {
+
+	pid, err := strconv.ParseInt(r.Ctx.UserValue("id").(string), 10, 64)
+	if err != nil || pid <= 0 {
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: "Invalid project id",
+		}, 400)
+		return
+	}
+
+	sess := api.Session.StartFasthttp(r.Ctx)
+	manager := sess.Get("manager")
+
+	if !isActionOnProjectAuthorized(pid, manager, storage.RoleMaintenance, api.Database) {
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: "Unauthorized",
+		}, 403)
+		return
+	}
+
+	res := api.Database.ResetFailedTasks(pid)
+
+	r.OkJson(JsonResponse{
+		Ok: true,
+		Content: ResetFailedTaskResponse{
+			AffectedTasks: res,
+		},
+	})
 }

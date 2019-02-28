@@ -349,7 +349,16 @@ export class ProjectDashboardComponent implements OnInit {
             width: '250px',
         }).afterClosed().subscribe(result => {
             if (result) {
-                alert("yes")
+                this.apiService.resetFailedTasks(this.projectId).subscribe(
+                    data => {
+                        this.translate.get("project.reset_response").subscribe(t =>
+                            this.messenger.show(t + data["content"]["affected_tasks"]))
+                    },
+                    error => {
+                        this.translate.get("messenger.unauthorized").subscribe(t =>
+                            this.messenger.show(t))
+                    }
+                )
             }
         });
     }

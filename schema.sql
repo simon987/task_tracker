@@ -48,7 +48,7 @@ CREATE TABLE task
   project            INTEGER REFERENCES project (id),
   assignee           INTEGER REFERENCES worker (id),
   max_assign_time    INTEGER  DEFAULT 0,
-  assign_time        INTEGER  DEFAULT 0,
+  assign_time        INTEGER  DEFAULT NULL,
   verification_count INTEGER  DEFAULT 0,
   priority           SMALLINT DEFAULT 0,
   retries            SMALLINT DEFAULT 0,

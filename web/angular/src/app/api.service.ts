@@ -99,19 +99,23 @@ export class ApiService {
     }
 
     getSecret(pid: number) {
-        return this.http.get(this.url + `/project/secret/${pid}`,)
+        return this.http.get(this.url + `/project/secret/${pid}`, this.options)
     }
 
     setSecret(pid: number, secret: string) {
-        return this.http.post(this.url + `/project/secret/${pid}`, {"secret": secret})
+        return this.http.post(this.url + `/project/secret/${pid}`, {"secret": secret}, this.options)
     }
 
     getWebhookSecret(pid: number) {
-        return this.http.get(this.url + `/project/webhook_secret/${pid}`,)
+        return this.http.get(this.url + `/project/webhook_secret/${pid}`, this.options)
     }
 
     setWebhookSecret(pid: number, secret: string) {
-        return this.http.post(this.url + `/project/webhook_secret/${pid}`, {"webhook_secret": secret})
+        return this.http.post(this.url + `/project/webhook_secret/${pid}`, {"webhook_secret": secret}, this.options)
+    }
+
+    resetFailedTasks(pid: number) {
+        return this.http.post(this.url + `/project/reset_failed_tasks/${pid}`, null, this.options)
     }
 
 }

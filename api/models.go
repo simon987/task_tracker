@@ -15,7 +15,7 @@ const (
 type JsonResponse struct {
 	Ok             bool        `json:"ok"`
 	Message        string      `json:"message,omitempty"`
-	RateLimitDelay string      `json:"rate_limit_delay,omitempty"`
+	RateLimitDelay float64     `json:"rate_limit_delay,omitempty"`
 	Content        interface{} `json:"content,omitempty"`
 }
 
@@ -305,6 +305,11 @@ type GetSecretResponse struct {
 type SetWebhookSecretRequest struct {
 	WebhookSecret string `json:"webhook_secret"`
 }
+
 type GetWebhookSecretResponse struct {
 	WebhookSecret string `json:"webhook_secret"`
+}
+
+type ResetFailedTaskResponse struct {
+	AffectedTasks int64 `json:"affected_tasks"`
 }

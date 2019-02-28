@@ -10,4 +10,6 @@ export interface Project {
     chain: number;
     hidden: boolean;
     paused: boolean;
+    assign_rate: number;
+    submit_rate: number;
 }

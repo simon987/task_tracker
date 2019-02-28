@@ -16,6 +16,7 @@ const (
 	RoleEdit         ManagerRole = 2
 	RoleManageAccess ManagerRole = 4
 	RoleSecret       ManagerRole = 8
+	RoleMaintenance  ManagerRole = 16
 )
 
 type Manager struct {
