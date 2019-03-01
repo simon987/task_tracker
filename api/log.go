@@ -6,6 +6,7 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/simon987/task_tracker/config"
 	"github.com/valyala/fasthttp"
+	"os"
 	"time"
 )
 
@@ -32,7 +33,14 @@ func LogRequestMiddleware(h RequestHandler) fasthttp.RequestHandler {
 }
 
 func (api *WebAPI) SetupLogger() {
+	writer, err := os.OpenFile("log.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+	if err != nil {
+		panic(err)
+	}
+
+	logrus.SetFormatter(&logrus.JSONFormatter{})
 	logrus.SetLevel(config.Cfg.LogLevel)
+	logrus.SetOutput(writer)
 
 	api.Database.SetupLoggerHook()
 }
