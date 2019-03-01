@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"golang.org/x/time/rate"
 	"time"
 )
@@ -33,7 +32,6 @@ func (api *WebAPI) ReserveAssign(pid int64) *rate.Reservation {
 
 		limiter = rate.NewLimiter(project.AssignRate, 1)
 		api.AssignLimiters.Store(pid, limiter)
-		fmt.Printf("Create")
 	}
 
 	return limiter.(*rate.Limiter).ReserveN(time.Now(), 1)
