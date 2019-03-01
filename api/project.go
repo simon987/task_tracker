@@ -178,6 +178,7 @@ func (api *WebAPI) UpdateProject(r *Request) {
 		Paused:     updateReq.Paused,
 		AssignRate: updateReq.AssignRate,
 		SubmitRate: updateReq.SubmitRate,
+		Version:    updateReq.Version,
 	}
 	sess := api.Session.StartFasthttp(r.Ctx)
 	manager := sess.Get("manager")

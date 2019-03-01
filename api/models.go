@@ -155,6 +155,7 @@ type UpdateProjectRequest struct {
 	Paused     bool       `json:"paused"`
 	AssignRate rate.Limit `json:"assign_rate"`
 	SubmitRate rate.Limit `json:"submit_rate"`
+	Version    string     `json:"version"`
 }
 
 func (req *UpdateProjectRequest) isValid(pid int64) bool {

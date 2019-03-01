@@ -137,6 +137,7 @@ func TestUpdateProjectValid(t *testing.T) {
 		Paused:     true,
 		AssignRate: 1,
 		SubmitRate: 2,
+		Version:    "VersionB",
 	}, pid, testAdminCtx)
 
 	if updateResp.Ok != true {
@@ -155,6 +156,9 @@ func TestUpdateProjectValid(t *testing.T) {
 		t.Error()
 	}
 	if proj.Project.GitRepo != "GitRepoB" {
+		t.Error()
+	}
+	if proj.Project.Version != "VersionB" {
 		t.Error()
 	}
 	if proj.Project.Priority != 2 {
