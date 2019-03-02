@@ -14,6 +14,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 type SessionContext struct {
@@ -39,12 +40,17 @@ func Post(path string, x interface{}, worker *storage.Worker, s *http.Client) *h
 	handleErr(err)
 
 	if worker != nil {
+
+		ts := time.Now().Format(time.RFC1123)
+
 		mac := hmac.New(crypto.SHA256.New, worker.Secret)
 		mac.Write(body)
+		mac.Write([]byte(ts))
 		sig := hex.EncodeToString(mac.Sum(nil))
 
 		req.Header.Add("X-Worker-Id", strconv.FormatInt(worker.Id, 10))
 		req.Header.Add("X-Signature", sig)
+		req.Header.Add("Timestamp", ts)
 	}
 
 	r, err := s.Do(req)
@@ -64,12 +70,16 @@ func Get(path string, worker *storage.Worker, s *http.Client) *http.Response {
 
 	if worker != nil {
 
+		ts := time.Now().Format(time.RFC1123)
+
 		mac := hmac.New(crypto.SHA256.New, worker.Secret)
 		mac.Write([]byte(path))
+		mac.Write([]byte(ts))
 		sig := hex.EncodeToString(mac.Sum(nil))
 
 		req.Header.Add("X-Worker-Id", strconv.FormatInt(worker.Id, 10))
 		req.Header.Add("X-Signature", sig)
+		req.Header.Add("Timestamp", ts)
 	}
 
 	r, err := s.Do(req)

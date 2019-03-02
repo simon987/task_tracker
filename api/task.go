@@ -10,6 +10,7 @@ import (
 	"github.com/Sirupsen/logrus"
 	"github.com/dchest/siphash"
 	"github.com/simon987/task_tracker/storage"
+	"math"
 	"strconv"
 	"time"
 )
@@ -17,7 +18,7 @@ import (
 func (api *WebAPI) SubmitTask(r *Request) {
 
 	worker, err := api.validateSignature(r)
-	if worker == nil {
+	if err != nil {
 		r.Json(JsonResponse{
 			Ok:      false,
 			Message: err.Error(),
@@ -138,10 +139,31 @@ func (api *WebAPI) GetTaskFromProject(r *Request) {
 func (api WebAPI) validateSignature(r *Request) (*storage.Worker, error) {
 
 	widStr := string(r.Ctx.Request.Header.Peek("X-Worker-Id"))
+	timeStampStr := string(r.Ctx.Request.Header.Peek("Timestamp"))
 	signature := r.Ctx.Request.Header.Peek("X-Signature")
 
 	if widStr == "" {
 		return nil, errors.New("worker id not specified")
+	}
+	if timeStampStr == "" {
+		return nil, errors.New("date is not specified")
+	}
+
+	timestamp, err := time.Parse(time.RFC1123, timeStampStr)
+	if err != nil {
+		logrus.WithError(err).WithFields(logrus.Fields{
+			"date": timeStampStr,
+		}).Warn("Can't parse Timestamp")
+
+		return nil, err
+	}
+
+	if math.Abs(float64(timestamp.Unix()-time.Now().Unix())) > 60 {
+		logrus.WithError(err).WithFields(logrus.Fields{
+			"date": timeStampStr,
+		}).Warn("Invalid Timestamp")
+
+		return nil, errors.New("invalid Timestamp")
 	}
 
 	wid, err := strconv.ParseInt(widStr, 10, 64)
@@ -172,6 +194,7 @@ func (api WebAPI) validateSignature(r *Request) (*storage.Worker, error) {
 
 	mac := hmac.New(crypto.SHA256.New, worker.Secret)
 	mac.Write(body)
+	mac.Write([]byte(timeStampStr))
 
 	expectedMac := make([]byte, 64)
 	hex.Encode(expectedMac, mac.Sum(nil))
