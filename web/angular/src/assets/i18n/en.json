@@ -73,7 +73,8 @@
         "reset_response": "Reset failed tasks: ",
         "assign_rate": "Task assign rate limit",
         "submit_rate": "Task submit rate limit",
-        "rate": "per second"
+        "rate": "per second",
+        "task_per_second": "Completed tasks per second"
     },
     "dashboard": {
         "title": "Dashboard for",

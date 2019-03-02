@@ -18,6 +18,10 @@
             <p>{{"project.motd" | translate}}:</p>
             <pre *ngIf="project">{{project.motd}}</pre>
 
+            <p>{{"project.task_per_second" | translate}}:
+                <span class="text-mono" *ngIf="project">{{avgTask | number}}/s</span>
+            </p>
+
             <div style="display: flex; align-items: center; justify-content: center">
                 <div id="timeline-wrapper">
                     <canvas id="timeline"></canvas>

@@ -63,6 +63,7 @@ func (api *WebAPI) SubmitTask(r *Request) {
 			Message:        "Too many requests",
 			RateLimitDelay: delay,
 		}, 429)
+		reservation.Cancel()
 		return
 	}
 
@@ -114,6 +115,7 @@ func (api *WebAPI) GetTaskFromProject(r *Request) {
 			Message:        "Too many requests",
 			RateLimitDelay: delay,
 		}, 429)
+		reservation.Cancel()
 		return
 	}
 

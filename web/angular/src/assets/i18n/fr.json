@@ -73,7 +73,8 @@
         "reset_response": "Réinitialisé les tâches en échec: ",
         "assign_rate": "Taux d'assignation de tâches",
         "submit_rate": "Taux de soumission de tâches",
-        "rate": "par seconde"
+        "rate": "par seconde",
+        "task_per_second": "Tâches par seconde"
     },
     "dashboard": {
         "title": "Tableau de bord pour ",

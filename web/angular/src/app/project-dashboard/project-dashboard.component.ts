@@ -26,6 +26,7 @@ export class ProjectDashboardComponent implements OnInit {
     private timeline: Chart;
     private statusPie: Chart;
     private assigneesPie: Chart;
+    private avgTask: number;
 
 
     private colors = {
@@ -336,6 +337,8 @@ export class ProjectDashboardComponent implements OnInit {
                                 this.assignees = data.content.assignees;
                                 this.setupAssigneesPie();
                             });
+
+                        this.averageTaskPerSecond();
                     })
             },
             error => {
@@ -369,6 +372,27 @@ export class ProjectDashboardComponent implements OnInit {
 
     resumeProject() {
         this.setPaused(false)
+    }
+
+    private averageTaskPerSecond() {
+
+        const averageDelta = ([x, ...xs]) => {
+            if (x === undefined)
+                return NaN;
+            else
+                return xs.reduce(
+                    ([acc, last], x) => [acc + (x - last), x],
+                    [0, x]
+                ) [0] / xs.length
+        };
+
+        let interval = this.snapshots.length > 1 ? this.snapshots[0].time_stamp - this.snapshots[1].time_stamp : 0;
+
+        if (interval != 0) {
+            this.avgTask = averageDelta(this.snapshots.reverse().map(s => s.closed_task_count) as any) / interval;
+        } else {
+            return 0
+        }
     }
 
     private setPaused(paused: boolean) {
