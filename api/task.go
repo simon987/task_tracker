@@ -230,13 +230,12 @@ func (api *WebAPI) ReleaseTask(r *Request) {
 
 	if !res {
 		response.Message = "Task was not marked as closed"
-	} else {
-
-		logrus.WithFields(logrus.Fields{
-			"releaseTaskRequest": req,
-			"taskUpdated":        res,
-		}).Trace("Release task")
 	}
+
+	logrus.WithFields(logrus.Fields{
+		"releaseTaskRequest": req,
+		"taskUpdated":        res,
+	}).Trace("Release task")
 
 	r.OkJson(response)
 }

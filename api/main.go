@@ -40,13 +40,19 @@ func Index(r *Request) {
 func (api *WebAPI) setupMonitoring() {
 
 	api.Cron = cron.New()
-	schedule := cron.Every(config.Cfg.MonitoringInterval)
-	api.Cron.Schedule(schedule, cron.FuncJob(api.Database.MakeProjectSnapshots))
+	monSchedule := cron.Every(config.Cfg.MonitoringInterval)
+	api.Cron.Schedule(monSchedule, cron.FuncJob(api.Database.MakeProjectSnapshots))
+
+	timeoutSchedule := cron.Every(config.Cfg.ResetTimedOutTasksInterval)
+	api.Cron.Schedule(timeoutSchedule, cron.FuncJob(api.Database.ResetTimedOutTasks))
 	api.Cron.Start()
 
 	logrus.WithFields(logrus.Fields{
 		"every": config.Cfg.MonitoringInterval.String(),
 	}).Info("Started monitoring")
+	logrus.WithFields(logrus.Fields{
+		"every": config.Cfg.ResetTimedOutTasksInterval.String(),
+	}).Info("Started task cleanup cron")
 }
 
 func New() *WebAPI {

@@ -113,7 +113,7 @@ func (database *Database) GetTaskFromProject(worker *Worker, projectId int64) *T
 	(
 		SELECT task.id
 	FROM task
-	INNER JOIN project project on task.project = project.id
+	INNER JOIN project on task.project = project.id
 	LEFT JOIN worker_verifies_task wvt on task.id = wvt.task AND wvt.worker=$1
 	WHERE NOT project.paused AND assignee IS NULL AND project.id=$2 AND status=1
 		AND (project.public OR (

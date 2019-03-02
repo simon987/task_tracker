@@ -23,3 +23,6 @@ session:
 monitoring:
   snapshot_interval: "120s"
   history_length: "400h"
+
+maintenance:
+  reset_timed_out_tasks_interval: "5m"

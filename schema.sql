@@ -155,7 +155,8 @@ BEGIN
     INSERT INTO worker_verifies_task (worker, verification_hash, task)
     SELECT wid, ver, task.id
     FROM task
-    WHERE assignee = wid;
+    WHERE assignee = wid
+      AND task.id = tid;
 
     DELETE
     FROM task
