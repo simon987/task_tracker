@@ -7,6 +7,7 @@ import (
 	"github.com/simon987/task_tracker/config"
 	"io/ioutil"
 	"os"
+	"sync"
 )
 
 type Database struct {
@@ -14,12 +15,14 @@ type Database struct {
 	saveTaskStmt *sql.Stmt
 
 	workerCache map[int64]*Worker
+	assignMutex *sync.Mutex
 }
 
 func New() *Database {
 
 	d := Database{}
 	d.workerCache = make(map[int64]*Worker)
+	d.assignMutex = &sync.Mutex{}
 
 	d.init()
 
