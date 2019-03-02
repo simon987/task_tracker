@@ -129,9 +129,9 @@ func (database *Database) GetTaskFromProject(worker *Worker, projectId int64) *T
 
 	var id int64
 	err := row.Scan(&id)
+	database.assignMutex.Unlock()
 
 	if err != nil {
-		database.assignMutex.Unlock()
 		return nil
 	}
 
@@ -143,8 +143,6 @@ func (database *Database) GetTaskFromProject(worker *Worker, projectId int64) *T
 		FROM task 
 		  INNER JOIN project project ON task.project = project.id
 		WHERE task.id=$1`, id)
-
-	database.assignMutex.Unlock()
 
 	project := &Project{}
 	task := &Task{}
