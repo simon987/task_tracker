@@ -11,6 +11,8 @@ import {AuthService} from "../auth.service";
 import {MatDialog} from "@angular/material";
 import {AreYouSureComponent} from "../are-you-sure/are-you-sure.component";
 
+import * as moment from "moment"
+
 
 @Component({
     selector: 'app-project-dashboard',
@@ -27,6 +29,7 @@ export class ProjectDashboardComponent implements OnInit {
     private statusPie: Chart;
     private assigneesPie: Chart;
     private avgTask: number;
+    eta: string;
 
 
     private colors = {
@@ -74,6 +77,7 @@ export class ProjectDashboardComponent implements OnInit {
             .subscribe((data: any) => {
                 this.snapshots = data.content.snapshots;
                 this.averageTaskPerSecond();
+                this.calculateEta();
                 this.lastSnapshot = this.snapshots ? this.snapshots.sort((a, b) => {
                     return b.time_stamp - a.time_stamp
                 })[0] : null;
@@ -340,6 +344,7 @@ export class ProjectDashboardComponent implements OnInit {
                             });
 
                         this.averageTaskPerSecond();
+                        this.calculateEta();
                     })
             },
             error => {
@@ -393,6 +398,14 @@ export class ProjectDashboardComponent implements OnInit {
             this.avgTask = averageDelta(this.snapshots.reverse().map(s => s.closed_task_count) as any) / interval;
         } else {
             return 0
+        }
+    }
+
+    private calculateEta() {
+        if (this.snapshots.length > 0) {
+            this.eta = moment.utc(this.snapshots[0].new_task_count / this.avgTask * 1000).format("D[d] HH[h]mm[m]ss[s]")
+        } else {
+            this.eta = "N/A"
         }
     }
 

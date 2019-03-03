@@ -19,7 +19,8 @@
             <pre *ngIf="project">{{project.motd}}</pre>
 
             <p>{{"project.task_per_second" | translate}}:
-                <span class="text-mono" *ngIf="project">{{avgTask | number}}/s</span>
+                <span class="text-mono" *ngIf="project">{{avgTask | number}}/s</span>,
+                {{"project.eta"|translate}}: <span class="text-mono">{{eta}}</span>
             </p>
 
             <div style="display: flex; align-items: center; justify-content: center">

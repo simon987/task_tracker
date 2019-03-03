@@ -74,7 +74,8 @@
         "assign_rate": "Task assign rate limit",
         "submit_rate": "Task submit rate limit",
         "rate": "per second",
-        "task_per_second": "Completed tasks per second"
+        "task_per_second": "Tasks per second",
+        "eta": "ETA"
     },
     "dashboard": {
         "title": "Dashboard for",
