@@ -73,6 +73,7 @@ export class ProjectDashboardComponent implements OnInit {
         this.apiService.getMonitoringSnapshots(60, this.projectId)
             .subscribe((data: any) => {
                 this.snapshots = data.content.snapshots;
+                this.averageTaskPerSecond();
                 this.lastSnapshot = this.snapshots ? this.snapshots.sort((a, b) => {
                     return b.time_stamp - a.time_stamp
                 })[0] : null;
