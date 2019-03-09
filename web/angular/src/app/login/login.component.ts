@@ -33,6 +33,6 @@ export class LoginComponent implements OnInit {
 
     canCreate(): boolean {
         return this.credentials.username && this.credentials.username != '' &&
-            this.credentials.password == this.credentials.repeatPassword;
+            this.credentials.password === this.credentials.repeatPassword;
     }
 }

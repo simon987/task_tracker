@@ -4,7 +4,7 @@
                 [placeholder]="'perms.manager_select' | translate"
                 (opened)="loadManagerList()">
         <mat-select-trigger></mat-select-trigger>
-        <mat-option disabled *ngIf="managerList == undefined">
+        <mat-option disabled *ngIf="managerList === undefined">
             {{"project_select.loading" | translate}}
         </mat-option>
         <mat-option *ngFor="let m of managerList" [value]="m">

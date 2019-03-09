@@ -42,7 +42,7 @@ export class ManagerListComponent implements OnInit {
     }
 
     canDemote(manager: Manager) {
-        return manager.tracker_admin && manager.username != this.authService.account.username;
+        return manager.tracker_admin && manager.username !== this.authService.account.username;
     }
 
     public promote(manager: Manager) {
@@ -61,7 +61,7 @@ export class ManagerListComponent implements OnInit {
                     this.data.data = data['content']['managers'];
                 },
                 error => {
-                    if (error && (error.status == 401 || error.status == 403)) {
+                    if (error && (error.status === 401 || error.status === 403)) {
                         console.log(error.error.message);
                         this.translate.get('manager_list.unauthorized')
                             .subscribe(t => this.messengerService.show(t));

@@ -52,7 +52,7 @@ export class AppRoutingModule {
 
     private updateTitle(tr: TranslateService, title: Title, url: string) {
         url = url.substr(1);
-        tr.get('title.' + url.substring(0, url.indexOf('/') == -1 ? url.length : url.indexOf('/')))
+        tr.get('title.' + url.substring(0, url.indexOf('/') === -1 ? url.length : url.indexOf('/')))
             .subscribe((t) => title.setTitle(t));
     }
 }

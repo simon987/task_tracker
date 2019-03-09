@@ -68,7 +68,7 @@ export class ProjectPermsComponent implements OnInit {
                 this.accesses = data['content']['accesses'];
             },
             error => {
-                if (error && (error.status == 401 || error.status == 403)) {
+                if (error && (error.status === 401 || error.status === 403)) {
                     this.unauthorized = true;
                 }
             });
@@ -88,7 +88,7 @@ export class ProjectPermsComponent implements OnInit {
     }
 
     public onSelectManager(manager: Manager) {
-        if (manager.id != this.auth.account.id) {
+        if (manager.id !== this.auth.account.id) {
             this.apiService.setManagerRoleOnProject(this.projectId, 1, manager.id)
                 .subscribe(() => this.refresh());
         }

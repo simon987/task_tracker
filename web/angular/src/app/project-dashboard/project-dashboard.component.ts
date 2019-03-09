@@ -66,7 +66,7 @@ export class ProjectDashboardComponent implements OnInit {
     }
 
     public isSafeUrl(url: string) {
-        if (url.substr(0, 'http'.length) == 'http') {
+        if (url.substr(0, 'http'.length) === 'http') {
             return true;
         }
     }
@@ -82,10 +82,10 @@ export class ProjectDashboardComponent implements OnInit {
                     return b.time_stamp - a.time_stamp;
                 })[0] : null;
 
-                if (this.lastSnapshot == null || (this.lastSnapshot.awaiting_verification_count == 0 &&
-                    this.lastSnapshot.closed_task_count == 0 &&
-                    this.lastSnapshot.new_task_count == 0 &&
-                    this.lastSnapshot.failed_task_count == 0)) {
+                if (this.lastSnapshot === null || (this.lastSnapshot.awaiting_verification_count === 0 &&
+                    this.lastSnapshot.closed_task_count === 0 &&
+                    this.lastSnapshot.new_task_count === 0 &&
+                    this.lastSnapshot.failed_task_count === 0)) {
                     this.noTasks = true;
                     return;
                 }
@@ -114,8 +114,8 @@ export class ProjectDashboardComponent implements OnInit {
                 this.statusPie.update();
 
                 this.apiService.getAssigneeStats(this.projectId)
-                    .subscribe((data: any) => {
-                        this.assignees = data.content.assignees;
+                    .subscribe((statsData: any) => {
+                        this.assignees = statsData.content.assignees;
                         const colors = this.assignees.map(() => {
                             return this.colors.random[Math.floor(Math.random() * this.colors.random.length)];
                         });
@@ -218,10 +218,10 @@ export class ProjectDashboardComponent implements OnInit {
 
     private setupStatusPie() {
 
-        if (this.lastSnapshot == undefined || (this.lastSnapshot.awaiting_verification_count == 0 &&
-            this.lastSnapshot.closed_task_count == 0 &&
-            this.lastSnapshot.new_task_count == 0 &&
-            this.lastSnapshot.failed_task_count == 0)) {
+        if (this.lastSnapshot === undefined || (this.lastSnapshot.awaiting_verification_count === 0 &&
+            this.lastSnapshot.closed_task_count === 0 &&
+            this.lastSnapshot.new_task_count === 0 &&
+            this.lastSnapshot.failed_task_count === 0)) {
             this.noTasks = true;
 
             this.lastSnapshot = {
@@ -324,8 +324,8 @@ export class ProjectDashboardComponent implements OnInit {
                 this.project = data.content.project;
 
                 this.apiService.getMonitoringSnapshots(60, this.projectId)
-                    .subscribe((data: any) => {
-                        this.snapshots = data.content.snapshots;
+                    .subscribe((monitoringData: any) => {
+                        this.snapshots = monitoringData.content.snapshots;
                         this.lastSnapshot = this.snapshots ? this.snapshots.sort((a, b) => {
                             return b.time_stamp - a.time_stamp;
                         })[0] : null;
@@ -338,8 +338,8 @@ export class ProjectDashboardComponent implements OnInit {
                         }
 
                         this.apiService.getAssigneeStats(this.projectId)
-                            .subscribe((data: any) => {
-                                this.assignees = data.content.assignees;
+                            .subscribe((assigneeData: any) => {
+                                this.assignees = assigneeData.content.assignees;
                                 this.setupAssigneesPie();
                             });
 
@@ -387,7 +387,7 @@ export class ProjectDashboardComponent implements OnInit {
                 return NaN;
             } else {
                 return xs.reduce(
-                    ([acc, last], x) => [acc + (x - last), x],
+                    ([acc, last], y) => [acc + (y - last), y],
                     [0, x]
                 ) [0] / xs.length;
             }
@@ -395,7 +395,7 @@ export class ProjectDashboardComponent implements OnInit {
 
         const interval = this.snapshots.length > 1 ? this.snapshots[0].time_stamp - this.snapshots[1].time_stamp : 0;
 
-        if (interval != 0) {
+        if (interval !== 0) {
             this.avgTask = averageDelta(this.snapshots.reverse().map(s => s.closed_task_count) as any) / interval;
         } else {
             return 0;

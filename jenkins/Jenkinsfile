@@ -36,6 +36,7 @@ pipeline {
                     agent {
                         docker {
                             image 'golang:latest'
+                            args '--network "host"'
                         }
                     }
                     steps {

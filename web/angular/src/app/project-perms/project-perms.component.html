@@ -33,7 +33,7 @@
                     </button>
                 </mat-list-item>
             </mat-list>
-            <p *ngIf="!accesses || accesses.length == 0">{{"perms.no_workers"|translate}}</p>
+            <p *ngIf="!accesses || accesses.length === 0">{{"perms.no_workers"|translate}}</p>
 
             <h3>{{"perms.managers" | translate}}</h3>
             <manager-select (managerChange)="onSelectManager($event)"></manager-select>

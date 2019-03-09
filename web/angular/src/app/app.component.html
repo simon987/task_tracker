@@ -1,17 +1,17 @@
 <mat-toolbar color="primary">
     <div class="large-nav">
-        <button mat-button [class.mat-accent]="router.url == '/'" class="nav-title"
+        <button mat-button [class.mat-accent]="router.url === '/'" class="nav-title"
                 [routerLink]="''">{{"nav.title" | translate}}</button>
-        <button mat-button [class.mat-accent]="router.url == '/log'" class="nav-link"
+        <button mat-button [class.mat-accent]="router.url === '/log'" class="nav-link"
                 [routerLink]="'log'">{{"nav.logs" | translate}}</button>
-        <button mat-button [class.mat-accent]="router.url == '/projects'" class="nav-link"
+        <button mat-button [class.mat-accent]="router.url === '/projects'" class="nav-link"
                 [routerLink]="'projects'">{{"nav.project_list" | translate}}</button>
-        <button mat-button [class.mat-accent]="router.url == '/workers'" class="nav-link"
+        <button mat-button [class.mat-accent]="router.url === '/workers'" class="nav-link"
                 [routerLink]="'workers'">{{"nav.worker_dashboard" | translate}}</button>
-        <button mat-button [class.mat-accent]="router.url == '/new_project'" class="nav-link"
+        <button mat-button [class.mat-accent]="router.url === '/new_project'" class="nav-link"
                 [routerLink]="'new_project'"
                 *ngIf="authService.logged">{{"nav.new_project" | translate}}</button>
-        <button mat-button [class.mat-accent]="router.url == '/manager_list'" class="nav-link"
+        <button mat-button [class.mat-accent]="router.url === '/manager_list'" class="nav-link"
                 [routerLink]="'manager_list'"
                 *ngIf="authService.logged && authService.account.tracker_admin"
         >{{"nav.manager_list" | translate}}</button>
@@ -21,28 +21,28 @@
             <mat-icon>more_vert</mat-icon>
         </button>
         <mat-menu #smallNav>
-            <button mat-menu-item [class.mat-accent]="router.url == '/'" class="nav-title"
+            <button mat-menu-item [class.mat-accent]="router.url === '/'" class="nav-title"
                     [routerLink]="''">{{"nav.title" | translate}}</button>
-            <button mat-menu-item [class.mat-accent]="router.url == '/log'" class="nav-link"
+            <button mat-menu-item [class.mat-accent]="router.url === '/log'" class="nav-link"
                     [routerLink]="'log'">{{"nav.logs" | translate}}</button>
-            <button mat-menu-item [class.mat-accent]="router.url == '/projects'" class="nav-link"
+            <button mat-menu-item [class.mat-accent]="router.url === '/projects'" class="nav-link"
                     [routerLink]="'projects'">{{"nav.project_list" | translate}}</button>
-            <button mat-menu-item [class.mat-accent]="router.url == '/workers'" class="nav-link"
+            <button mat-menu-item [class.mat-accent]="router.url === '/workers'" class="nav-link"
                     [routerLink]="'workers'">{{"nav.worker_dashboard" | translate}}</button>
-            <button mat-menu-item [class.mat-accent]="router.url == '/new_project'" class="nav-link"
+            <button mat-menu-item [class.mat-accent]="router.url === '/new_project'" class="nav-link"
                     [routerLink]="'new_project'"
                     *ngIf="authService.logged">{{"nav.new_project" | translate}}</button>
-            <button mat-button [class.mat-accent]="router.url == '/manager_list'" class="nav-link"
+            <button mat-button [class.mat-accent]="router.url === '/manager_list'" class="nav-link"
                     [routerLink]="'manager_list'"
                     *ngIf="authService.logged && authService.account.tracker_admin"
             >{{"nav.manager_list" | translate}}</button>
         </mat-menu>
     </div>
     <span class="spacer"></span>
-    <button mat-button [class.mat-accent]="router.url == '/login'"
+    <button mat-button [class.mat-accent]="router.url === '/login'"
             class="nav-link" *ngIf="!authService.account"
             [routerLink]="'login'">{{"nav.login" | translate}}</button>
-    <button mat-button [class.mat-accent]="router.url == '/account'"
+    <button mat-button [class.mat-accent]="router.url === '/account'"
             class="nav-link" *ngIf="authService.account"
             [routerLink]="'account'">{{"nav.account" | translate}}</button>
 

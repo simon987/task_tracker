@@ -17,7 +17,7 @@ export class ManagerRoleOnProject {
     }
 
     get readRole(): boolean {
-        return (this.role & 1) != 0;
+        return (this.role & 1) !== 0;
     }
 
     set readRole(role: boolean) {
@@ -29,7 +29,7 @@ export class ManagerRoleOnProject {
     }
 
     get editRole(): boolean {
-        return (this.role & 2) != 0;
+        return (this.role & 2) !== 0;
     }
 
     set editRole(role: boolean) {
@@ -41,7 +41,7 @@ export class ManagerRoleOnProject {
     }
 
     get manageRole(): boolean {
-        return (this.role & 4) != 0;
+        return (this.role & 4) !== 0;
     }
 
     set manageRole(role: boolean) {
@@ -53,7 +53,7 @@ export class ManagerRoleOnProject {
     }
 
     get secretRole(): boolean {
-        return (this.role & 8) != 0;
+        return (this.role & 8) !== 0;
     }
 
     set secretRole(role: boolean) {

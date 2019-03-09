@@ -138,7 +138,7 @@ func (api *WebAPI) GetTaskFromProject(r *Request) {
 	})
 }
 
-func (api WebAPI) validateSignature(r *Request) (*storage.Worker, error) {
+func (api *WebAPI) validateSignature(r *Request) (*storage.Worker, error) {
 
 	widStr := string(r.Ctx.Request.Header.Peek("X-Worker-Id"))
 	timeStampStr := string(r.Ctx.Request.Header.Peek("Timestamp"))

@@ -4,7 +4,7 @@
                 [placeholder]="'project.chain' | translate"
                 (opened)="loadProjectList()">
         <mat-select-trigger>{{project?.name}}</mat-select-trigger>
-        <mat-option disabled *ngIf="projectList == undefined">
+        <mat-option disabled *ngIf="projectList === undefined">
             {{"project_select.loading" | translate}}
         </mat-option>
         <mat-option [value]="null" *ngIf="projectList">
