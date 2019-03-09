@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import {Router} from '@angular/router';
-import {TranslateService} from "@ngx-translate/core";
-import {AuthService} from "./auth.service";
+import {TranslateService} from '@ngx-translate/core';
+import {AuthService} from './auth.service';
 
 @Component({
     selector: 'app-root',
@@ -10,25 +10,25 @@ import {AuthService} from "./auth.service";
 })
 export class AppComponent {
 
-    langChange(lang: any) {
-        this.translate.use(lang.lang)
-    }
-
-    langList: any[] = [
-        {lang: "fr", display: "Français"},
-        {lang: "en", display: "English"},
-    ];
-
     constructor(private translate: TranslateService,
                 public router: Router,
                 public authService: AuthService) {
 
         translate.addLangs([
-            "en",
-            "fr"
+            'en',
+            'fr'
         ]);
 
-        translate.setDefaultLang("en");
+        translate.setDefaultLang('en');
+    }
+
+    langList: any[] = [
+        {lang: 'fr', display: 'Français'},
+        {lang: 'en', display: 'English'},
+    ];
+
+    langChange(lang: any) {
+        this.translate.use(lang.lang);
     }
 
 }

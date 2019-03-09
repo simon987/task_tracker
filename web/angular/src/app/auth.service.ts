@@ -1,9 +1,9 @@
 import {Injectable} from '@angular/core';
-import {ApiService} from "./api.service";
-import {Credentials} from "./models/credentials";
-import {MessengerService} from "./messenger.service";
-import {Router} from "@angular/router";
-import {Manager} from "./models/manager";
+import {ApiService} from './api.service';
+import {Credentials} from './models/credentials';
+import {MessengerService} from './messenger.service';
+import {Router} from '@angular/router';
+import {Manager} from './models/manager';
 
 @Injectable({
     providedIn: 'root'
@@ -20,7 +20,7 @@ export class AuthService {
             .subscribe((data: any) => {
                 this.account = data.content.manager;
                 this.logged = data.content.logged_in;
-            })
+            });
     }
 
     public login(credentials: Credentials) {
@@ -31,14 +31,14 @@ export class AuthService {
                         .subscribe((data: any) => {
                             this.account = data.content.manager;
                             this.logged = true;
-                            this.router.navigateByUrl("/account");
-                        })
+                            this.router.navigateByUrl('/account');
+                        });
                 },
                 error => {
                     console.log(error);
                     this.messengerService.show(error.error.message);
                 }
-            )
+            );
     }
 
     public logout() {
@@ -47,13 +47,13 @@ export class AuthService {
                 () => {
                     this.account = null;
                     this.logged = false;
-                    this.router.navigateByUrl("login");
+                    this.router.navigateByUrl('login');
                 },
                 error => {
                     console.log(error);
                     this.messengerService.show(error.error.message);
                 }
-            )
+            );
     }
 
     public register(credentials: Credentials) {
@@ -63,12 +63,12 @@ export class AuthService {
                         .subscribe((data: any) => {
                             this.logged = true;
                             this.account = data.content.manager;
-                            this.router.navigateByUrl("/account");
+                            this.router.navigateByUrl('/account');
                         }),
                 error => {
                     console.log(error);
                     this.messengerService.show(error.error.message);
                 }
-            )
+            );
     }
 }

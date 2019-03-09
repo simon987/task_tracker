@@ -33,19 +33,19 @@ import {
     MatTabsModule,
     MatToolbarModule,
     MatTreeModule
-} from "@angular/material";
-import {ApiService} from "./api.service";
-import {MessengerService} from "./messenger.service";
-import {HttpClient, HttpClientModule} from "@angular/common/http";
+} from '@angular/material';
+import {ApiService} from './api.service';
+import {MessengerService} from './messenger.service';
+import {HttpClient, HttpClientModule} from '@angular/common/http';
 import {ProjectDashboardComponent} from './project-dashboard/project-dashboard.component';
 import {ProjectListComponent} from './project-list/project-list.component';
 import {CreateProjectComponent} from './create-project/create-project.component';
-import {FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {UpdateProjectComponent} from './update-project/update-project.component';
-import {SnackBarComponent} from "./messenger/snack-bar.component";
-import {TranslateLoader, TranslateModule, TranslateService} from "@ngx-translate/core";
-import {TranslateHttpLoader} from "@ngx-translate/http-loader";
-import {TranslatedPaginator} from "./TranslatedPaginatorConfiguration";
+import {SnackBarComponent} from './messenger/snack-bar.component';
+import {TranslateLoader, TranslateModule, TranslateService} from '@ngx-translate/core';
+import {TranslateHttpLoader} from '@ngx-translate/http-loader';
+import {TranslatedPaginator} from './TranslatedPaginatorConfiguration';
 import {LoginComponent} from './login/login.component';
 import {AccountDetailsComponent} from './account-details/account-details.component';
 import {WorkerDashboardComponent} from './worker-dashboard/worker-dashboard.component';

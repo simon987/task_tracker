@@ -1,6 +1,6 @@
 import {Component, EventEmitter, OnInit, Output} from '@angular/core';
-import {ApiService} from "../api.service";
-import {Manager} from "../models/manager";
+import {ApiService} from '../api.service';
+import {Manager} from '../models/manager';
 
 @Component({
     selector: 'manager-select',
@@ -23,7 +23,7 @@ export class ManagerSelectComponent implements OnInit {
 
     loadManagerList() {
         this.apiService.getManagerList()
-            .subscribe(data => this.managerList = data["content"]["managers"])
+            .subscribe(data => this.managerList = data['content']['managers']);
     }
 
 

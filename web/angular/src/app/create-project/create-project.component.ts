@@ -1,9 +1,9 @@
 import {Component, OnInit} from '@angular/core';
-import {Project} from "../models/project";
-import {ApiService} from "../api.service";
-import {MessengerService} from "../messenger.service";
-import {Router} from "@angular/router";
-import {AuthService} from "../auth.service";
+import {Project} from '../models/project';
+import {ApiService} from '../api.service';
+import {MessengerService} from '../messenger.service';
+import {Router} from '@angular/router';
+import {AuthService} from '../auth.service';
 
 
 @Component({
@@ -26,10 +26,10 @@ export class CreateProjectComponent implements OnInit {
     }
 
     cloneUrlChange() {
-        let tokens = this.project.clone_url.split("/");
+        const tokens = this.project.clone_url.split('/');
 
         if (tokens.length > 2) {
-            this.project.git_repo = tokens[tokens.length - 2] + "/" + tokens[tokens.length - 1]
+            this.project.git_repo = tokens[tokens.length - 2] + '/' + tokens[tokens.length - 1];
         }
     }
 
@@ -38,13 +38,13 @@ export class CreateProjectComponent implements OnInit {
 
         this.apiService.createProject(this.project).subscribe(
             data => {
-                this.router.navigateByUrl("/project/" + data["content"]["id"]);
+                this.router.navigateByUrl('/project/' + data['content']['id']);
             },
             error => {
                 console.log(error.error.message);
                 this.messengerService.show(error.error.message);
             }
-        )
+        );
     }
 
 }

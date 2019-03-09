@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {MatDialogRef} from "@angular/material";
+import {MatDialogRef} from '@angular/material';
 
 @Component({
     selector: 'app-are-you-sure',
@@ -16,10 +16,10 @@ export class AreYouSureComponent implements OnInit {
     }
 
     onNoClick() {
-        this.dialogRef.close(false)
+        this.dialogRef.close(false);
     }
 
     onYesClick() {
-        this.dialogRef.close(true)
+        this.dialogRef.close(true);
     }
 }

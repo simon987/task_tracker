@@ -1,12 +1,12 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {ApiService} from "../api.service";
-import {MessengerService} from "../messenger.service";
-import {TranslateService} from "@ngx-translate/core";
-import {MatPaginator, MatSort, MatTableDataSource} from "@angular/material";
+import {ApiService} from '../api.service';
+import {MessengerService} from '../messenger.service';
+import {TranslateService} from '@ngx-translate/core';
+import {MatPaginator, MatSort, MatTableDataSource} from '@angular/material';
 
-import * as moment from "moment"
-import {AuthService} from "../auth.service";
-import {Manager} from "../models/manager";
+import * as moment from 'moment';
+import {AuthService} from '../auth.service';
+import {Manager} from '../models/manager';
 
 @Component({
     selector: 'app-manager-list',
@@ -28,7 +28,7 @@ export class ManagerListComponent implements OnInit {
                 private translate: TranslateService,
                 private authService: AuthService
     ) {
-        this.data = new MatTableDataSource<Manager>()
+        this.data = new MatTableDataSource<Manager>();
     }
 
     ngOnInit() {
@@ -38,34 +38,34 @@ export class ManagerListComponent implements OnInit {
     }
 
     canPromote(manager: Manager) {
-        return !manager.tracker_admin
+        return !manager.tracker_admin;
     }
 
     canDemote(manager: Manager) {
-        return manager.tracker_admin && manager.username != this.authService.account.username
+        return manager.tracker_admin && manager.username != this.authService.account.username;
     }
 
     public promote(manager: Manager) {
         this.apiService.promote(manager.id)
-            .subscribe(() => this.getManagers())
+            .subscribe(() => this.getManagers());
     }
 
     public demote(manager: Manager) {
         this.apiService.demote(manager.id)
-            .subscribe(() => this.getManagers())
+            .subscribe(() => this.getManagers());
     }
 
     private getManagers() {
         this.apiService.getManagerList()
             .subscribe(data => {
-                    this.data.data = data["content"]["managers"]
+                    this.data.data = data['content']['managers'];
                 },
                 error => {
                     if (error && (error.status == 401 || error.status == 403)) {
                         console.log(error.error.message);
-                        this.translate.get("manager_list.unauthorized")
+                        this.translate.get('manager_list.unauthorized')
                             .subscribe(t => this.messengerService.show(t));
                     }
-                })
+                });
     }
 }
