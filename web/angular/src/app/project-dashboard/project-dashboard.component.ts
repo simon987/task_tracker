@@ -1,17 +1,17 @@
 import {Component, OnInit} from '@angular/core';
-import {ApiService} from "../api.service";
-import {Project} from "../models/project";
-import {ActivatedRoute} from "@angular/router";
+import {ApiService} from '../api.service';
+import {Project} from '../models/project';
+import {ActivatedRoute} from '@angular/router';
 
-import {Chart} from "chart.js";
-import {AssignedTasks, MonitoringSnapshot} from "../models/monitoring";
-import {TranslateService} from "@ngx-translate/core";
-import {MessengerService} from "../messenger.service";
-import {AuthService} from "../auth.service";
-import {MatDialog} from "@angular/material";
-import {AreYouSureComponent} from "../are-you-sure/are-you-sure.component";
+import {Chart} from 'chart.js';
+import {AssignedTasks, MonitoringSnapshot} from '../models/monitoring';
+import {TranslateService} from '@ngx-translate/core';
+import {MessengerService} from '../messenger.service';
+import {AuthService} from '../auth.service';
+import {MatDialog} from '@angular/material';
+import {AreYouSureComponent} from '../are-you-sure/are-you-sure.component';
 
-import * as moment from "moment"
+import * as moment from 'moment';
 
 
 @Component({
@@ -33,16 +33,16 @@ export class ProjectDashboardComponent implements OnInit {
 
 
     private colors = {
-        new: "#76FF03",
-        failed: "#FF3D00",
-        closed: "#E0E0E0",
-        awaiting: "#FFB74D",
+        new: '#76FF03',
+        failed: '#FF3D00',
+        closed: '#E0E0E0',
+        awaiting: '#FFB74D',
         random: [
-            "#3D5AFE", "#2979FF", "#2196F3",
-            "#7C4DFF", "#673AB7", "#7C4DFF",
-            "#FFC400", "#FFD740", "#FFC107",
-            "#FF3D00", "#FF6E40", "#FF5722",
-            "#76FF03", "#B2FF59", "#8BC34A"
+            '#3D5AFE', '#2979FF', '#2196F3',
+            '#7C4DFF', '#673AB7', '#7C4DFF',
+            '#FFC400', '#FFD740', '#FFC107',
+            '#FF3D00', '#FF6E40', '#FF5722',
+            '#76FF03', '#B2FF59', '#8BC34A'
         ]
     };
 
@@ -60,14 +60,14 @@ export class ProjectDashboardComponent implements OnInit {
 
     ngOnInit(): void {
         this.route.params.subscribe(params => {
-            this.projectId = params["id"];
+            this.projectId = params['id'];
             this.getProject();
         });
     }
 
     public isSafeUrl(url: string) {
-        if (url.substr(0, "http".length) == "http") {
-            return true
+        if (url.substr(0, 'http'.length) == 'http') {
+            return true;
         }
     }
 
@@ -79,7 +79,7 @@ export class ProjectDashboardComponent implements OnInit {
                 this.averageTaskPerSecond();
                 this.calculateEta();
                 this.lastSnapshot = this.snapshots ? this.snapshots.sort((a, b) => {
-                    return b.time_stamp - a.time_stamp
+                    return b.time_stamp - a.time_stamp;
                 })[0] : null;
 
                 if (this.lastSnapshot == null || (this.lastSnapshot.awaiting_verification_count == 0 &&
@@ -87,7 +87,7 @@ export class ProjectDashboardComponent implements OnInit {
                     this.lastSnapshot.new_task_count == 0 &&
                     this.lastSnapshot.failed_task_count == 0)) {
                     this.noTasks = true;
-                    return
+                    return;
                 }
                 this.noTasks = false;
 
@@ -96,7 +96,7 @@ export class ProjectDashboardComponent implements OnInit {
                 this.timeline.update();
                 this.statusPie.data.datasets = [
                     {
-                        label: "Task status",
+                        label: 'Task status',
                         data: [
                             this.lastSnapshot.new_task_count,
                             this.lastSnapshot.failed_task_count,
@@ -116,27 +116,27 @@ export class ProjectDashboardComponent implements OnInit {
                 this.apiService.getAssigneeStats(this.projectId)
                     .subscribe((data: any) => {
                         this.assignees = data.content.assignees;
-                        let colors = this.assignees.map(() => {
-                            return this.colors.random[Math.floor(Math.random() * this.colors.random.length)]
+                        const colors = this.assignees.map(() => {
+                            return this.colors.random[Math.floor(Math.random() * this.colors.random.length)];
                         });
                         this.assigneesPie.data.labels = this.assignees.map(x => x.assignee);
                         this.assigneesPie.data.datasets = [
                             {
-                                label: "Task status",
+                                label: 'Task status',
                                 data: this.assignees.map(x => x.task_count),
                                 backgroundColor: colors,
                             }
                         ];
                         this.assigneesPie.update();
                     });
-            })
+            });
     }
 
     private makeTimelineDataset(snapshots: MonitoringSnapshot[]) {
         return [
             {
-                label: "New",
-                type: "line",
+                label: 'New',
+                type: 'line',
                 fill: false,
                 borderColor: this.colors.new,
                 backgroundColor: this.colors.new,
@@ -145,8 +145,8 @@ export class ProjectDashboardComponent implements OnInit {
                 lineTension: 0.2,
             },
             {
-                label: "Failed",
-                type: "line",
+                label: 'Failed',
+                type: 'line',
                 fill: false,
                 borderColor: this.colors.failed,
                 backgroundColor: this.colors.failed,
@@ -155,8 +155,8 @@ export class ProjectDashboardComponent implements OnInit {
                 lineTension: 0.2,
             },
             {
-                label: "Closed",
-                type: "line",
+                label: 'Closed',
+                type: 'line',
                 fill: false,
                 borderColor: this.colors.closed,
                 backgroundColor: this.colors.closed,
@@ -165,8 +165,8 @@ export class ProjectDashboardComponent implements OnInit {
                 lineTension: 0.2,
             },
             {
-                label: "Awaiting verification",
-                type: "line",
+                label: 'Awaiting verification',
+                type: 'line',
                 fill: false,
                 borderColor: this.colors.awaiting,
                 backgroundColor: this.colors.awaiting,
@@ -174,15 +174,15 @@ export class ProjectDashboardComponent implements OnInit {
                 pointRadius: 0,
                 lineTension: 0.2,
             },
-        ]
+        ];
     }
 
     private setupTimeline() {
-        let elem = document.getElementById("timeline") as any;
-        let ctx = elem.getContext("2d");
+        const elem = document.getElementById('timeline') as any;
+        const ctx = elem.getContext('2d');
 
         this.timeline = new Chart(ctx, {
-            type: "bar",
+            type: 'bar',
             data: {
                 labels: this.snapshots.map(s => s.time_stamp * 1000 as any),
                 datasets: this.makeTimelineDataset(this.snapshots),
@@ -190,30 +190,30 @@ export class ProjectDashboardComponent implements OnInit {
             options: {
                 title: {
                     display: true,
-                    text: "Task status timeline",
-                    position: "bottom"
+                    text: 'Task status timeline',
+                    position: 'bottom'
                 },
                 legend: {
                     position: 'left',
                 },
                 scales: {
                     xAxes: [{
-                        type: "time",
-                        distribution: "series",
+                        type: 'time',
+                        distribution: 'series',
                         ticks: {
-                            source: "auto"
+                            source: 'auto'
                         },
                     }]
                 },
                 tooltips: {
                     enabled: true,
                     intersect: false,
-                    mode: "index",
-                    position: "nearest",
+                    mode: 'index',
+                    position: 'nearest',
                 },
                 responsive: true
             }
-        })
+        });
     }
 
     private setupStatusPie() {
@@ -227,24 +227,24 @@ export class ProjectDashboardComponent implements OnInit {
             this.lastSnapshot = {
                 closed_task_count: 0, time_stamp: 0, failed_task_count: 0,
                 new_task_count: 0, awaiting_verification_count: 0
-            }
+            };
         }
 
-        let elem = document.getElementById("status-pie") as any;
-        let ctx = elem.getContext("2d");
+        const elem = document.getElementById('status-pie') as any;
+        const ctx = elem.getContext('2d');
 
         this.statusPie = new Chart(ctx, {
-            type: "doughnut",
+            type: 'doughnut',
             data: {
                 labels: [
-                    "New",
-                    "Failed",
-                    "Closed",
-                    "Awaiting verification",
+                    'New',
+                    'Failed',
+                    'Closed',
+                    'Awaiting verification',
                 ],
                 datasets: [
                     {
-                        label: "Task status",
+                        label: 'Task status',
                         data: [
                             this.lastSnapshot.new_task_count,
                             this.lastSnapshot.failed_task_count,
@@ -267,8 +267,8 @@ export class ProjectDashboardComponent implements OnInit {
                 },
                 title: {
                     display: true,
-                    text: "Current task status",
-                    position: "bottom"
+                    text: 'Current task status',
+                    position: 'bottom'
 
                 },
                 animation: {
@@ -281,20 +281,20 @@ export class ProjectDashboardComponent implements OnInit {
 
     private setupAssigneesPie() {
 
-        let elem = document.getElementById("assignees-pie") as any;
-        let ctx = elem.getContext("2d");
+        const elem = document.getElementById('assignees-pie') as any;
+        const ctx = elem.getContext('2d');
 
-        let colors = this.assignees.map(() => {
-            return this.colors.random[Math.floor(Math.random() * this.colors.random.length)]
+        const colors = this.assignees.map(() => {
+            return this.colors.random[Math.floor(Math.random() * this.colors.random.length)];
         });
 
         this.assigneesPie = new Chart(ctx, {
-            type: "doughnut",
+            type: 'doughnut',
             data: {
                 labels: this.assignees.map(x => x.assignee),
                 datasets: [
                     {
-                        label: "Task status",
+                        label: 'Task status',
                         data: this.assignees.map(x => x.task_count),
                         backgroundColor: colors,
                     }
@@ -307,8 +307,8 @@ export class ProjectDashboardComponent implements OnInit {
                 },
                 title: {
                     display: true,
-                    text: "Task assignment",
-                    position: "bottom"
+                    text: 'Task assignment',
+                    position: 'bottom'
 
                 },
                 animation: {
@@ -327,14 +327,14 @@ export class ProjectDashboardComponent implements OnInit {
                     .subscribe((data: any) => {
                         this.snapshots = data.content.snapshots;
                         this.lastSnapshot = this.snapshots ? this.snapshots.sort((a, b) => {
-                            return b.time_stamp - a.time_stamp
+                            return b.time_stamp - a.time_stamp;
                         })[0] : null;
 
                         this.setupTimeline();
                         this.setupStatusPie();
 
                         if (!this.snapshots) {
-                            return
+                            return;
                         }
 
                         this.apiService.getAssigneeStats(this.projectId)
@@ -345,12 +345,12 @@ export class ProjectDashboardComponent implements OnInit {
 
                         this.averageTaskPerSecond();
                         this.calculateEta();
-                    })
+                    });
             },
             error => {
-                this.translate.get("messenger.unauthorized").subscribe(t =>
-                    this.messenger.show(t))
-            })
+                this.translate.get('messenger.unauthorized').subscribe(t =>
+                    this.messenger.show(t));
+            });
     }
 
     resetFailedTasks() {
@@ -360,52 +360,54 @@ export class ProjectDashboardComponent implements OnInit {
             if (result) {
                 this.apiService.resetFailedTasks(this.projectId).subscribe(
                     data => {
-                        this.translate.get("project.reset_response").subscribe(t =>
-                            this.messenger.show(t + data["content"]["affected_tasks"]))
+                        this.translate.get('project.reset_response').subscribe(t =>
+                            this.messenger.show(t + data['content']['affected_tasks']));
                     },
                     error => {
-                        this.translate.get("messenger.unauthorized").subscribe(t =>
-                            this.messenger.show(t))
+                        this.translate.get('messenger.unauthorized').subscribe(t =>
+                            this.messenger.show(t));
                     }
-                )
+                );
             }
         });
     }
 
     pauseProject() {
-        this.setPaused(true)
+        this.setPaused(true);
     }
 
     resumeProject() {
-        this.setPaused(false)
+        this.setPaused(false);
     }
 
     private averageTaskPerSecond() {
 
         const averageDelta = ([x, ...xs]) => {
-            if (x === undefined)
+            if (x === undefined) {
                 return NaN;
-            else
+            }
+            else {
                 return xs.reduce(
                     ([acc, last], x) => [acc + (x - last), x],
                     [0, x]
-                ) [0] / xs.length
+                ) [0] / xs.length;
+            }
         };
 
-        let interval = this.snapshots.length > 1 ? this.snapshots[0].time_stamp - this.snapshots[1].time_stamp : 0;
+        const interval = this.snapshots.length > 1 ? this.snapshots[0].time_stamp - this.snapshots[1].time_stamp : 0;
 
         if (interval != 0) {
             this.avgTask = averageDelta(this.snapshots.reverse().map(s => s.closed_task_count) as any) / interval;
         } else {
-            return 0
+            return 0;
         }
     }
 
     private calculateEta() {
         if (this.snapshots.length > 0) {
-            this.eta = moment.utc(this.snapshots[0].new_task_count / this.avgTask * 1000).format("D[d] HH[h]mm[m]ss[s]")
+            this.eta = moment.utc(this.snapshots[0].new_task_count / this.avgTask * 1000).format('D[d] HH[h]mm[m]ss[s]');
         } else {
-            this.eta = "N/A"
+            this.eta = 'N/A';
         }
     }
 
@@ -415,12 +417,12 @@ export class ProjectDashboardComponent implements OnInit {
         }).afterClosed().subscribe(result => {
             this.project.paused = paused;
             this.apiService.updateProject(this.project).subscribe(() => {
-                this.translate.get("messenger.acknowledged").subscribe(t =>
-                    this.messenger.show(t))
+                this.translate.get('messenger.acknowledged').subscribe(t =>
+                    this.messenger.show(t));
             }, error => {
-                this.translate.get("messenger.unauthorized").subscribe(t =>
-                    this.messenger.show(t))
-            })
+                this.translate.get('messenger.unauthorized').subscribe(t =>
+                    this.messenger.show(t));
+            });
         });
     }
 
