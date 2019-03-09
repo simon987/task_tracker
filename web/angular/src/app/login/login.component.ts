@@ -1,9 +1,9 @@
 import {Component, OnInit} from '@angular/core';
-import {Credentials} from "../models/credentials";
-import {ApiService} from "../api.service";
-import {MessengerService} from "../messenger.service";
-import {Router} from "@angular/router";
-import {AuthService} from "../auth.service";
+import {Credentials} from '../models/credentials';
+import {ApiService} from '../api.service';
+import {MessengerService} from '../messenger.service';
+import {Router} from '@angular/router';
+import {AuthService} from '../auth.service';
 
 @Component({
     selector: 'app-login',
@@ -24,15 +24,15 @@ export class LoginComponent implements OnInit {
     }
 
     login() {
-        this.authService.login(this.credentials)
+        this.authService.login(this.credentials);
     }
 
     register() {
-        this.authService.register(this.credentials)
+        this.authService.register(this.credentials);
     }
 
     canCreate(): boolean {
-        return this.credentials.username && this.credentials.username != "" &&
-            this.credentials.password == this.credentials.repeatPassword
+        return this.credentials.username && this.credentials.username != '' &&
+            this.credentials.password == this.credentials.repeatPassword;
     }
 }

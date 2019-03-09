@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
-import {AuthService} from "../auth.service";
+import {AuthService} from '../auth.service';
 
-import * as moment from "moment"
+import * as moment from 'moment';
 
 @Component({
     selector: 'app-account-details',

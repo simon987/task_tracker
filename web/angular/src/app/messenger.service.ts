@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
-import {Subject} from "rxjs";
-import {MessengerState} from "./messenger/messenger";
+import {Subject} from 'rxjs';
+import {MessengerState} from './messenger/messenger';
 
 @Injectable()
 export class MessengerService {
@@ -11,12 +11,12 @@ export class MessengerService {
         this.messengerSubject.next({
             message: message,
             hidden: false,
-        })
+        });
     }
 
     hide() {
         this.messengerSubject.next({
             hidden: true,
-        })
+        });
     }
 }

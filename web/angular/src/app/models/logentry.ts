@@ -1,18 +1,18 @@
 export interface LogEntry {
-    level: string,
-    message: string,
-    data: any,
-    timestamp: string,
+    level: string;
+    message: string;
+    data: any;
+    timestamp: string;
 }
 
 export enum LogLevel {
-    FATAL = "fatal",
-    PANIC = "panic",
-    ERROR = "error",
-    WARN = "warn",
-    INFO = "info",
-    DEBUG = "debug",
-    TRACE = "trace",
+    FATAL = 'fatal',
+    PANIC = 'panic',
+    ERROR = 'error',
+    WARN = 'warn',
+    INFO = 'info',
+    DEBUG = 'debug',
+    TRACE = 'trace',
 }
 
 export function getLogLevel(level: number): string {

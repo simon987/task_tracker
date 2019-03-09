@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
-import {ApiService} from "../api.service";
-import {Project} from "../models/project";
-import {AuthService} from "../auth.service";
+import {ApiService} from '../api.service';
+import {Project} from '../models/project';
+import {AuthService} from '../auth.service';
 
 @Component({
     selector: 'app-project-list',
@@ -17,7 +17,7 @@ export class ProjectListComponent implements OnInit {
     projects: Project[];
 
     ngOnInit() {
-        this.getProjects()
+        this.getProjects();
     }
 
     refresh() {
@@ -26,7 +26,7 @@ export class ProjectListComponent implements OnInit {
 
     getProjects() {
         this.apiService.getProjects().subscribe(data =>
-            this.projects = data["content"]["projects"]);
+            this.projects = data['content']['projects']);
     }
 
 }

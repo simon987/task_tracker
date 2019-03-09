@@ -1,6 +1,6 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {ApiService} from "../api.service";
-import {Project} from "../models/project";
+import {ApiService} from '../api.service';
+import {Project} from '../models/project';
 
 @Component({
     selector: 'project-select',
@@ -22,7 +22,7 @@ export class ProjectSelectComponent implements OnInit {
 
     loadProjectList() {
         this.apiService.getProjects().subscribe(data => {
-            this.projectList = data["content"]["projects"]
-        })
+            this.projectList = data['content']['projects'];
+        });
     }
 }

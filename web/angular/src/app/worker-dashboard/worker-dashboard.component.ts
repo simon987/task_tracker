@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
-import {ApiService} from "../api.service";
+import {ApiService} from '../api.service';
 
-import {Chart} from "chart.js";
+import {Chart} from 'chart.js';
 
 @Component({
     selector: 'app-worker-dashboard',
@@ -17,24 +17,24 @@ export class WorkerDashboardComponent implements OnInit {
 
     ngOnInit() {
         this.setupChart();
-        this.refresh()
+        this.refresh();
     }
 
     public refresh() {
         this.apiService.getWorkerStats()
             .subscribe(data => {
-                this.updateChart(data["content"]["stats"])
+                this.updateChart(data['content']['stats']);
                 }
-            )
+            );
     }
 
     private setupChart() {
 
-        let elem = document.getElementById("worker-stats") as any;
-        let ctx = elem.getContext("2d");
+        const elem = document.getElementById('worker-stats') as any;
+        const ctx = elem.getContext('2d');
 
         this.chart = new Chart(ctx, {
-            type: "bar",
+            type: 'bar',
             data: {
                 labels: [],
                 datasets: [],
@@ -51,7 +51,7 @@ export class WorkerDashboardComponent implements OnInit {
                 },
                 responsive: true
             }
-        })
+        });
     }
 
     private updateChart(data) {
@@ -59,7 +59,7 @@ export class WorkerDashboardComponent implements OnInit {
         this.chart.data.labels = data.map(w => w.alias);
         this.chart.data.datasets = [{
             data: data.map(w => w.closed_task_count),
-            backgroundColor: "#FF3D00"
+            backgroundColor: '#FF3D00'
         }];
         this.chart.update();
     }
