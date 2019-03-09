@@ -385,8 +385,7 @@ export class ProjectDashboardComponent implements OnInit {
         const averageDelta = ([x, ...xs]) => {
             if (x === undefined) {
                 return NaN;
-            }
-            else {
+            } else {
                 return xs.reduce(
                     ([acc, last], x) => [acc + (x - last), x],
                     [0, x]
