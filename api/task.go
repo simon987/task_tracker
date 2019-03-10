@@ -56,6 +56,13 @@ func (api *WebAPI) SubmitTask(r *Request) {
 	}
 
 	reservation := api.ReserveSubmit(createReq.Project)
+	if reservation == nil {
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: "Project not found",
+		}, 404)
+		return
+	}
 	delay := reservation.DelayFrom(time.Now()).Seconds()
 	if delay > 0 {
 		r.Json(JsonResponse{
@@ -108,6 +115,13 @@ func (api *WebAPI) GetTaskFromProject(r *Request) {
 	}
 
 	reservation := api.ReserveAssign(project)
+	if reservation == nil {
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: "Project not found",
+		}, 404)
+		return
+	}
 	delay := reservation.DelayFrom(time.Now()).Seconds()
 	if delay > 0 {
 		r.Json(JsonResponse{

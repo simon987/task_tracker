@@ -168,9 +168,10 @@ type ProjectListAR struct {
 }
 
 type TaskAR struct {
-	Ok      bool   `json:"ok"`
-	Message string `json:"message"`
-	Content struct {
+	Ok             bool    `json:"ok"`
+	Message        string  `json:"message"`
+	RateLimitDelay float64 `json:"rate_limit_delay,omitempty"`
+	Content        struct {
 		Task *storage.Task `json:"task"`
 	} `json:"content"`
 }

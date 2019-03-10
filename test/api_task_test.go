@@ -899,6 +899,26 @@ func TestTaskChainCausesConflict(t *testing.T) {
 	}
 }
 
+func TestTaskAssignInvalidDoesntGiveRateLimit(t *testing.T) {
+
+	task := getTaskFromProject(13247, testWorker)
+
+	if task.RateLimitDelay != 0 {
+		t.Error()
+	}
+}
+
+func TestTaskSubmitInvalidDoesntGiveRateLimit(t *testing.T) {
+
+	resp := createTask(api.SubmitTaskRequest{
+		Recipe:  "  ",
+		Project: 133453,
+	}, testWorker)
+
+	if resp.RateLimitDelay != 0 {
+		t.Error()
+	}
+}
 func createTask(request api.SubmitTaskRequest, worker *storage.Worker) (ar api.JsonResponse) {
 	r := Post("/task/submit", request, worker, nil)
 	UnmarshalResponse(r, &ar)

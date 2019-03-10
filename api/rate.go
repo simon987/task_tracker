@@ -11,7 +11,7 @@ func (api *WebAPI) ReserveSubmit(pid int64) *rate.Reservation {
 	if !ok {
 		project := api.Database.GetProject(pid)
 		if project == nil {
-			return &rate.Reservation{}
+			return nil
 		}
 
 		limiter = rate.NewLimiter(project.SubmitRate, 1)
@@ -27,7 +27,7 @@ func (api *WebAPI) ReserveAssign(pid int64) *rate.Reservation {
 	if !ok {
 		project := api.Database.GetProject(pid)
 		if project == nil {
-			return &rate.Reservation{}
+			return nil
 		}
 
 		limiter = rate.NewLimiter(project.AssignRate, 1)
