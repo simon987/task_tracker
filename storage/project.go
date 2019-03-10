@@ -143,13 +143,15 @@ func (database Database) GetAllProjects(managerId int64) *[]Project {
 	var err error
 	if managerId == 0 {
 		rows, err = db.Query(`SELECT 
-       	Id, priority, name, clone_url, git_repo, version, motd, public, hidden, COALESCE(chain,0), paused
+       	Id, priority, name, clone_url, git_repo, version, motd, public, hidden, COALESCE(chain,0), paused,
+       	assign_rate, submit_rate
 		FROM project
 		WHERE NOT hidden
 		ORDER BY name`)
 	} else {
 		rows, err = db.Query(`SELECT 
-       	Id, priority, name, clone_url, git_repo, version, motd, public, hidden, COALESCE(chain,0), paused
+       	Id, priority, name, clone_url, git_repo, version, motd, public, hidden, COALESCE(chain,0), paused,
+       assign_rate, submit_rate
 		FROM project
 		LEFT JOIN manager_has_role_on_project mhrop ON mhrop.project = id AND mhrop.manager=$1
 		WHERE NOT hidden OR mhrop.role & 1 = 1 OR (SELECT tracker_admin FROM manager WHERE id=$1)
@@ -161,7 +163,7 @@ func (database Database) GetAllProjects(managerId int64) *[]Project {
 		p := Project{}
 		err := rows.Scan(&p.Id, &p.Priority, &p.Name, &p.CloneUrl,
 			&p.GitRepo, &p.Version, &p.Motd, &p.Public, &p.Hidden,
-			&p.Chain, &p.Paused)
+			&p.Chain, &p.Paused, &p.AssignRate, &p.SubmitRate)
 		handleErr(err)
 		projects = append(projects, p)
 	}
