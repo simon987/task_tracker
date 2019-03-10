@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"runtime/debug"
 )
 

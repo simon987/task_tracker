@@ -1,7 +1,7 @@
 package storage
 
 import (
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 func (database *Database) ResetFailedTasks(pid int64) int64 {

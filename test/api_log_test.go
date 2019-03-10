@@ -2,9 +2,9 @@ package test
 
 import (
 	"fmt"
-	"github.com/Sirupsen/logrus"
 	"github.com/simon987/task_tracker/api"
 	"github.com/simon987/task_tracker/storage"
+	"github.com/sirupsen/logrus"
 	"testing"
 	"time"
 )

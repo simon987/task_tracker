@@ -3,8 +3,8 @@ package api
 import (
 	"encoding/json"
 	"errors"
-	"github.com/Sirupsen/logrus"
 	"github.com/simon987/task_tracker/config"
+	"github.com/sirupsen/logrus"
 	"github.com/valyala/fasthttp"
 	"os"
 	"time"

@@ -2,12 +2,12 @@ package api
 
 import (
 	"fmt"
-	"github.com/Sirupsen/logrus"
 	"github.com/buaazp/fasthttprouter"
 	"github.com/kataras/go-sessions"
 	"github.com/robfig/cron"
 	"github.com/simon987/task_tracker/config"
 	"github.com/simon987/task_tracker/storage"
+	"github.com/sirupsen/logrus"
 	"github.com/valyala/fasthttp"
 	"sync"
 )

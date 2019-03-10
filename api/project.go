@@ -2,9 +2,9 @@ package api
 
 import (
 	"encoding/json"
-	"github.com/Sirupsen/logrus"
 	"github.com/google/uuid"
 	"github.com/simon987/task_tracker/storage"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/time/rate"
 	"strconv"
 )

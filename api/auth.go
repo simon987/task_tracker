@@ -2,8 +2,8 @@ package api
 
 import (
 	"encoding/json"
-	"github.com/Sirupsen/logrus"
 	"github.com/simon987/task_tracker/storage"
+	"github.com/sirupsen/logrus"
 	"strconv"
 )
 

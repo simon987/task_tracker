@@ -2,7 +2,7 @@ package storage
 
 import (
 	"database/sql"
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/time/rate"
 	"strings"
 )
