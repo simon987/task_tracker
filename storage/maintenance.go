@@ -32,3 +32,21 @@ func (database *Database) ResetTimedOutTasks() {
 		"rowsAffected": rowsAffected,
 	}).Info("Reset timed out tasks")
 }
+
+func (database Database) HardReset(pid int64) int64 {
+
+	db := database.getDB()
+
+	_, err := db.Exec(`UPDATE task SET assignee=NULL WHERE project=$1`, pid)
+	handleErr(err)
+	res, err := db.Exec(`DELETE FROM task WHERE project=$1`, pid)
+
+	rowsAffected, _ := res.RowsAffected()
+
+	logrus.WithFields(logrus.Fields{
+		"rowsAffected": rowsAffected,
+		"project":      pid,
+	}).Info("Hard reset")
+
+	return rowsAffected
+}

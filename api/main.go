@@ -105,6 +105,7 @@ func New() *WebAPI {
 	api.router.GET("/project/webhook_secret/:id", LogRequestMiddleware(api.GetWebhookSecret))
 	api.router.POST("/project/webhook_secret/:id", LogRequestMiddleware(api.SetWebhookSecret))
 	api.router.POST("/project/reset_failed_tasks/:id", LogRequestMiddleware(api.ResetFailedTasks))
+	api.router.POST("/project/hard_reset/:id", LogRequestMiddleware(api.HardReset))
 
 	api.router.POST("/task/submit", LogRequestMiddleware(api.SubmitTask))
 	api.router.GET("/task/get/:project", LogRequestMiddleware(api.GetTaskFromProject))

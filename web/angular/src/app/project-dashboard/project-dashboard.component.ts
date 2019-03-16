@@ -414,18 +414,32 @@ export class ProjectDashboardComponent implements OnInit {
         this.dialog.open(AreYouSureComponent, {
             width: '250px',
         }).afterClosed().subscribe(result => {
-            this.project.paused = paused;
-            this.apiService.updateProject(this.project).subscribe(() => {
-                this.translate.get('messenger.acknowledged').subscribe(t =>
-                    this.messenger.show(t));
-            }, error => {
-                this.translate.get('messenger.unauthorized').subscribe(t =>
-                    this.messenger.show(t));
-            });
+            if (result) {
+                this.project.paused = paused;
+                this.apiService.updateProject(this.project).subscribe(() => {
+                    this.translate.get('messenger.acknowledged').subscribe(t =>
+                        this.messenger.show(t));
+                }, error => {
+                    this.translate.get('messenger.unauthorized').subscribe(t =>
+                        this.messenger.show(t));
+                });
+            }
         });
     }
 
     hardReset() {
-
+        this.dialog.open(AreYouSureComponent, {
+            width: '250px',
+        }).afterClosed().subscribe(result => {
+            if (result) {
+                this.apiService.hardReset(this.project.id).subscribe(data => {
+                    this.translate.get('project.hard_reset_response').subscribe(t =>
+                        this.messenger.show(t + data['content']['affected_tasks']));
+                }, error => {
+                    this.translate.get('messenger.unauthorized').subscribe(t =>
+                        this.messenger.show(t));
+                });
+            }
+        });
     }
 }

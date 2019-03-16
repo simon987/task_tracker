@@ -71,6 +71,7 @@
         "manager_select": "Donner accès à",
         "version": "Version git (hash du commit)",
         "reset_response": "Réinitialisé les tâches en échec: ",
+        "hard_reset_response": "Supprimé toutes les tâches: ",
         "assign_rate": "Taux d'assignation de tâches",
         "submit_rate": "Taux de soumission de tâches",
         "rate": "par seconde",

@@ -314,3 +314,7 @@ type GetWebhookSecretResponse struct {
 type ResetFailedTaskResponse struct {
 	AffectedTasks int64 `json:"affected_tasks"`
 }
+
+type HardResetResponse struct {
+	AffectedTasks int64 `json:"affected_tasks"`
+}

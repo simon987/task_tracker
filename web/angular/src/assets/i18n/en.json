@@ -71,6 +71,7 @@
         "version": "Git version (commit hash)",
         "secret": "Secret",
         "reset_response": "Reset failed tasks: ",
+        "hard_reset_response": "Deleted tasks: ",
         "assign_rate": "Task assign rate limit",
         "submit_rate": "Task submit rate limit",
         "rate": "per second",
