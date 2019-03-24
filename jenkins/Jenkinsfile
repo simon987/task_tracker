@@ -1,7 +1,7 @@
 def remote = [:]
 remote.name = 'remote'
-remote.host = 'localhost'
-remote.user = 'simon'
+remote.host = env.DEPLOY_HOST
+remote.user = env.DEPLOY_USER
 remote.identityFile = '/var/lib/jenkins/.ssh/id_rsa'
 remote.knownHosts = '/var/lib/jenkins/.ssh/known_hosts'
 remote.allowAnyHosts = true
