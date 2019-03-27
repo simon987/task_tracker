@@ -50,3 +50,21 @@ func (database Database) HardReset(pid int64) int64 {
 
 	return rowsAffected
 }
+
+func (database Database) ReclaimAssignedTasks(pid int64) int64 {
+
+	db := database.getDB()
+
+	res, err := db.Exec(`UPDATE task SET assignee=NULL, assign_time=NULL 
+		WHERE project=$1 AND status=1`, pid)
+	handleErr(err)
+
+	rowsAffected, _ := res.RowsAffected()
+
+	logrus.WithFields(logrus.Fields{
+		"rowsAffected": rowsAffected,
+		"project":      pid,
+	}).Info("Reclaim assigned tasks")
+
+	return rowsAffected
+}

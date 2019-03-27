@@ -442,4 +442,20 @@ export class ProjectDashboardComponent implements OnInit {
             }
         });
     }
+
+    reclaimAssignedTasks() {
+        this.dialog.open(AreYouSureComponent, {
+            width: '250px',
+        }).afterClosed().subscribe(result => {
+            if (result) {
+                this.apiService.reclaimAssignedTasks(this.project.id).subscribe(data => {
+                    this.translate.get('project.reclaim_response').subscribe(t =>
+                        this.messenger.show(t + data['content']['affected_tasks']));
+                }, error => {
+                    this.translate.get('messenger.unauthorized').subscribe(t =>
+                        this.messenger.show(t));
+                });
+            }
+        });
+    }
 }

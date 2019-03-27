@@ -318,3 +318,7 @@ type ResetFailedTaskResponse struct {
 type HardResetResponse struct {
 	AffectedTasks int64 `json:"affected_tasks"`
 }
+
+type ReclaimAssignedTasksResponse struct {
+	AffectedTasks int64 `json:"affected_tasks"`
+}

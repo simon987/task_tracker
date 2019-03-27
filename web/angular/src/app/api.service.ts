@@ -122,4 +122,8 @@ export class ApiService {
         return this.http.post(this.url + `/project/hard_reset/${pid}`, null, this.options);
     }
 
+    reclaimAssignedTasks(pid: number) {
+        return this.http.post(this.url + `/project/reclaim_assigned_tasks/${pid}`, null, this.options);
+    }
+
 }

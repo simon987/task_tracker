@@ -72,6 +72,7 @@
         "version": "Version git (hash du commit)",
         "reset_response": "Réinitialisé les tâches en échec: ",
         "hard_reset_response": "Supprimé toutes les tâches: ",
+        "reclaim_response": "Désaffecté les tâches: ",
         "assign_rate": "Taux d'assignation de tâches",
         "submit_rate": "Taux de soumission de tâches",
         "rate": "par seconde",
@@ -83,7 +84,8 @@
         "metadata": "Métadonnés du projet",
         "empty": "Aucune tâche",
         "refresh": "Rafraîchir",
-        "actions": "Actions"
+        "actions": "Actions",
+        "reclaim": "Déaffecter les tâches"
     },
     "login": {
         "title": "Ouvrir un session",

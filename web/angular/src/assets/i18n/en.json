@@ -72,6 +72,7 @@
         "secret": "Secret",
         "reset_response": "Reset failed tasks: ",
         "hard_reset_response": "Deleted tasks: ",
+        "reclaim_response": "Reclaimed tasks: ",
         "assign_rate": "Task assign rate limit",
         "submit_rate": "Task submit rate limit",
         "rate": "per second",
@@ -87,7 +88,8 @@
         "reset_failed": "Reset failed tasks",
         "pause": "Pause",
         "resume": "Resume",
-        "hard_reset": "Hard_reset"
+        "hard_reset": "Hard reset",
+        "reclaim": "Reclaim assigned tasks"
     },
     "login": {
         "title": "Login",

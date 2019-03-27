@@ -756,3 +756,35 @@ func (api *WebAPI) HardReset(r *Request) {
 		},
 	})
 }
+
+func (api *WebAPI) ReclaimAssignedTasks(r *Request) {
+
+	pid, err := strconv.ParseInt(r.Ctx.UserValue("id").(string), 10, 64)
+	if err != nil || pid <= 0 {
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: "Invalid project id",
+		}, 400)
+		return
+	}
+
+	sess := api.Session.StartFasthttp(r.Ctx)
+	manager := sess.Get("manager")
+
+	if !isActionOnProjectAuthorized(pid, manager, storage.RoleMaintenance, api.Database) {
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: "Unauthorized",
+		}, 403)
+		return
+	}
+
+	res := api.Database.ReclaimAssignedTasks(pid)
+
+	r.OkJson(JsonResponse{
+		Ok: true,
+		Content: ReclaimAssignedTasksResponse{
+			AffectedTasks: res,
+		},
+	})
+}
