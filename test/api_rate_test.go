@@ -3,6 +3,7 @@ package test
 import (
 	"fmt"
 	"github.com/simon987/task_tracker/api"
+	"github.com/simon987/task_tracker/client"
 	"testing"
 )
 
@@ -31,7 +32,7 @@ func TestAssignRateLimit(t *testing.T) {
 		}, w)
 	}
 
-	var lastResp TaskAR
+	var lastResp client.AssignTaskResponse
 	for i := 0; i < 3; i++ {
 		lastResp = getTaskFromProject(project, w)
 	}

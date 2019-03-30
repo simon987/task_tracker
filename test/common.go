@@ -94,14 +94,6 @@ func UnmarshalResponse(r *http.Response, result interface{}) {
 	handleErr(err)
 }
 
-type WorkerAR struct {
-	Ok      bool   `json:"ok"`
-	Message string `json:"message"`
-	Content struct {
-		Worker *storage.Worker `json:"worker"`
-	} `json:"content"`
-}
-
 type RegisterAR struct {
 	Ok      bool   `json:"ok"`
 	Message string `json:"message"`
@@ -145,23 +137,6 @@ type ProjectListAR struct {
 	Message string `json:"message"`
 	Content struct {
 		Projects *[]storage.Project `json:"projects"`
-	} `json:"content"`
-}
-
-type TaskAR struct {
-	Ok             bool    `json:"ok"`
-	Message        string  `json:"message"`
-	RateLimitDelay float64 `json:"rate_limit_delay,omitempty"`
-	Content        struct {
-		Task *storage.Task `json:"task"`
-	} `json:"content"`
-}
-
-type ReleaseAR struct {
-	Ok      bool   `json:"ok"`
-	Message string `json:"message"`
-	Content struct {
-		Updated bool `json:"updated"`
 	} `json:"content"`
 }
 

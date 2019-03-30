@@ -3,6 +3,7 @@ package test
 import (
 	"fmt"
 	"github.com/simon987/task_tracker/api"
+	"github.com/simon987/task_tracker/client"
 	"github.com/simon987/task_tracker/storage"
 	"net/http"
 	"testing"
@@ -108,13 +109,13 @@ func TestInvalidAccessRequest(t *testing.T) {
 	}
 }
 
-func createWorker(req api.CreateWorkerRequest) (ar WorkerAR) {
+func createWorker(req api.CreateWorkerRequest) (ar client.CreateWorkerResponse) {
 	r := Post("/worker/create", req, nil, nil)
 	UnmarshalResponse(r, &ar)
 	return
 }
 
-func getWorker(id int64) (ar WorkerAR) {
+func getWorker(id int64) (ar client.CreateWorkerResponse) {
 	r := Get(fmt.Sprintf("/worker/get/%d", id), nil, nil)
 	UnmarshalResponse(r, &ar)
 	return
@@ -125,7 +126,7 @@ func genWid() *storage.Worker {
 	return resp.Content.Worker
 }
 
-func requestAccess(req api.CreateWorkerAccessRequest, w *storage.Worker) (ar WorkerAR) {
+func requestAccess(req api.CreateWorkerAccessRequest, w *storage.Worker) (ar client.CreateWorkerResponse) {
 	r := Post(fmt.Sprintf("/project/request_access"), req, w, nil)
 	UnmarshalResponse(r, &ar)
 	return

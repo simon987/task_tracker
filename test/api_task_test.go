@@ -3,6 +3,7 @@ package test
 import (
 	"fmt"
 	"github.com/simon987/task_tracker/api"
+	"github.com/simon987/task_tracker/client"
 	"github.com/simon987/task_tracker/storage"
 	"math"
 	"testing"
@@ -925,19 +926,19 @@ func createTask(request api.SubmitTaskRequest, worker *storage.Worker) (ar api.J
 	return
 }
 
-func getTask(worker *storage.Worker) (ar TaskAR) {
+func getTask(worker *storage.Worker) (ar client.AssignTaskResponse) {
 	r := Get("/task/get", worker, nil)
 	UnmarshalResponse(r, &ar)
 	return
 }
 
-func getTaskFromProject(project int64, worker *storage.Worker) (ar TaskAR) {
+func getTaskFromProject(project int64, worker *storage.Worker) (ar client.AssignTaskResponse) {
 	r := Get(fmt.Sprintf("/task/get/%d", project), worker, nil)
 	UnmarshalResponse(r, &ar)
 	return
 }
 
-func releaseTask(request api.ReleaseTaskRequest, worker *storage.Worker) (ar ReleaseAR) {
+func releaseTask(request api.ReleaseTaskRequest, worker *storage.Worker) (ar client.ReleaseTaskResponse) {
 	r := Post("/task/release", request, worker, nil)
 	UnmarshalResponse(r, &ar)
 	return
