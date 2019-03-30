@@ -2,22 +2,19 @@ package api
 
 import (
 	"bytes"
-	"crypto"
-	"crypto/hmac"
-	"encoding/hex"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"github.com/dchest/siphash"
 	"github.com/simon987/task_tracker/storage"
 	"github.com/sirupsen/logrus"
-	"math"
 	"strconv"
 	"time"
 )
 
 func (api *WebAPI) SubmitTask(r *Request) {
 
-	worker, err := api.validateSignature(r)
+	worker, err := api.validateSecret(r)
 	if err != nil {
 		r.Json(JsonResponse{
 			Ok:      false,
@@ -96,7 +93,7 @@ func (api *WebAPI) SubmitTask(r *Request) {
 
 func (api *WebAPI) GetTaskFromProject(r *Request) {
 
-	worker, err := api.validateSignature(r)
+	worker, err := api.validateSecret(r)
 	if err != nil {
 		r.Json(JsonResponse{
 			Ok:      false,
@@ -152,34 +149,16 @@ func (api *WebAPI) GetTaskFromProject(r *Request) {
 	})
 }
 
-func (api *WebAPI) validateSignature(r *Request) (*storage.Worker, error) {
+func (api *WebAPI) validateSecret(r *Request) (*storage.Worker, error) {
 
 	widStr := string(r.Ctx.Request.Header.Peek("X-Worker-Id"))
-	timeStampStr := string(r.Ctx.Request.Header.Peek("Timestamp"))
-	signature := r.Ctx.Request.Header.Peek("X-Signature")
+	secretHeader := r.Ctx.Request.Header.Peek("X-Secret")
 
 	if widStr == "" {
 		return nil, errors.New("worker id not specified")
 	}
-	if timeStampStr == "" {
-		return nil, errors.New("date is not specified")
-	}
-
-	timestamp, err := time.Parse(time.RFC1123, timeStampStr)
-	if err != nil {
-		logrus.WithError(err).WithFields(logrus.Fields{
-			"date": timeStampStr,
-		}).Warn("Can't parse Timestamp")
-
-		return nil, err
-	}
-
-	if math.Abs(float64(timestamp.Unix()-time.Now().Unix())) > 60 {
-		logrus.WithError(err).WithFields(logrus.Fields{
-			"date": timeStampStr,
-		}).Warn("Invalid Timestamp")
-
-		return nil, errors.New("invalid Timestamp")
+	if bytes.Equal(secretHeader, []byte("")) {
+		return nil, errors.New("secret is not specified")
 	}
 
 	wid, err := strconv.ParseInt(widStr, 10, 64)
@@ -201,29 +180,18 @@ func (api *WebAPI) validateSignature(r *Request) (*storage.Worker, error) {
 		return nil, errors.New("worker id does not match any valid worker")
 	}
 
-	var body []byte
-	if r.Ctx.Request.Header.IsGet() {
-		body = r.Ctx.Request.RequestURI()
-	} else {
-		body = r.Ctx.Request.Body()
-	}
-
-	mac := hmac.New(crypto.SHA256.New, worker.Secret)
-	mac.Write(body)
-	mac.Write([]byte(timeStampStr))
-
-	expectedMac := make([]byte, 64)
-	hex.Encode(expectedMac, mac.Sum(nil))
-	matches := bytes.Compare(expectedMac, signature) == 0
+	secret := make([]byte, base64.StdEncoding.EncodedLen(len(worker.Secret)))
+	secretLen, _ := base64.StdEncoding.Decode(secret, secretHeader)
+	matches := bytes.Equal(worker.Secret, secret[:secretLen])
 
 	logrus.WithFields(logrus.Fields{
-		"expected":  string(expectedMac),
-		"signature": string(signature),
-		"matches":   matches,
-	}).Trace("Validating Worker signature")
+		"expected": string(worker.Secret),
+		"header":   string(secretHeader),
+		"matches":  matches,
+	}).Trace("Validating Worker secret")
 
 	if !matches {
-		return nil, errors.New("invalid signature")
+		return nil, errors.New("invalid secret")
 	}
 
 	return worker, nil
@@ -231,7 +199,7 @@ func (api *WebAPI) validateSignature(r *Request) (*storage.Worker, error) {
 
 func (api *WebAPI) ReleaseTask(r *Request) {
 
-	worker, err := api.validateSignature(r)
+	worker, err := api.validateSecret(r)
 	if err != nil {
 		r.Json(JsonResponse{
 			Ok:      false,

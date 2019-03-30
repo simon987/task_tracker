@@ -47,7 +47,7 @@ func (api *WebAPI) SetupLogger() {
 
 func (api *WebAPI) parseLogEntry(r *Request) (*LogRequest, error) {
 
-	worker, err := api.validateSignature(r)
+	worker, err := api.validateSecret(r)
 	if err != nil {
 		return nil, err
 	}

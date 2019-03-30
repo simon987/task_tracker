@@ -92,7 +92,7 @@ func (api *WebAPI) GetWorker(r *Request) {
 
 func (api *WebAPI) UpdateWorker(r *Request) {
 
-	worker, err := api.validateSignature(r)
+	worker, err := api.validateSecret(r)
 	if err != nil {
 		r.Json(JsonResponse{
 			Ok:      false,

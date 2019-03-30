@@ -2,9 +2,7 @@ package test
 
 import (
 	"bytes"
-	"crypto"
-	"crypto/hmac"
-	"encoding/hex"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"github.com/simon987/task_tracker/api"
@@ -14,7 +12,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
-	"time"
 )
 
 type SessionContext struct {
@@ -40,17 +37,9 @@ func Post(path string, x interface{}, worker *storage.Worker, s *http.Client) *h
 	handleErr(err)
 
 	if worker != nil {
-
-		ts := time.Now().Format(time.RFC1123)
-
-		mac := hmac.New(crypto.SHA256.New, worker.Secret)
-		mac.Write(body)
-		mac.Write([]byte(ts))
-		sig := hex.EncodeToString(mac.Sum(nil))
-
 		req.Header.Add("X-Worker-Id", strconv.FormatInt(worker.Id, 10))
-		req.Header.Add("X-Signature", sig)
-		req.Header.Add("Timestamp", ts)
+		secretHeader := base64.StdEncoding.EncodeToString(worker.Secret)
+		req.Header.Add("X-Secret", string(secretHeader))
 	}
 
 	r, err := s.Do(req)
@@ -69,17 +58,9 @@ func Get(path string, worker *storage.Worker, s *http.Client) *http.Response {
 	req, err := http.NewRequest("GET", url, nil)
 
 	if worker != nil {
-
-		ts := time.Now().Format(time.RFC1123)
-
-		mac := hmac.New(crypto.SHA256.New, worker.Secret)
-		mac.Write([]byte(path))
-		mac.Write([]byte(ts))
-		sig := hex.EncodeToString(mac.Sum(nil))
-
 		req.Header.Add("X-Worker-Id", strconv.FormatInt(worker.Id, 10))
-		req.Header.Add("X-Signature", sig)
-		req.Header.Add("Timestamp", ts)
+		secretHeader := base64.StdEncoding.EncodeToString(worker.Secret)
+		req.Header.Add("X-Secret", string(secretHeader))
 	}
 
 	r, err := s.Do(req)

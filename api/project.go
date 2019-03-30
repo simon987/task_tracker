@@ -380,7 +380,7 @@ func (api *WebAPI) CreateWorkerAccess(r *Request) {
 		return
 	}
 
-	worker, err := api.validateSignature(r)
+	worker, err := api.validateSecret(r)
 	if err != nil {
 		r.Json(JsonResponse{
 			Ok:      false,
@@ -578,7 +578,7 @@ func (api *WebAPI) GetSecret(r *Request) {
 
 	var secret string
 
-	worker, err := api.validateSignature(r)
+	worker, err := api.validateSecret(r)
 	if err == nil {
 		secret, err = api.Database.GetSecret(pid, worker.Id)
 		if err != nil {
