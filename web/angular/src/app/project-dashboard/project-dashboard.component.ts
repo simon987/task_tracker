@@ -404,7 +404,11 @@ export class ProjectDashboardComponent implements OnInit {
 
     private calculateEta() {
         if (this.snapshots.length > 0) {
-            this.eta = moment.utc(this.snapshots[0].new_task_count / this.avgTask * 1000).format('D[d] HH[h]mm[m]ss[s]');
+            let new_tasks = this.snapshots[this.snapshots.length - 1].new_task_count;
+            if (new_tasks === 0) {
+                this.eta = 'N/A';
+            }
+            this.eta = moment.utc(new_tasks / this.avgTask * 1000).format('D[d] HH[h]mm[m]ss[s]');
         } else {
             this.eta = 'N/A';
         }
