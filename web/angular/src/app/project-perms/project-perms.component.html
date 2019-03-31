@@ -13,8 +13,8 @@
             <h3>{{"perms.workers" | translate}}</h3>
             <mat-list *ngIf="accesses && accesses.length>0">
                 <mat-list-item *ngFor="let wa of accesses" [class.request]="wa.request">
-                    <mat-icon mat-list-icon *ngIf="wa.submit" [title]="'perms.assign'|translate">library_add</mat-icon>
-                    <mat-icon mat-list-icon *ngIf="wa.assign" [title]="'perms.submit'|translate">get_app</mat-icon>
+                    <mat-icon mat-list-icon *ngIf="wa.submit" [title]="'perms.submit'|translate">library_add</mat-icon>
+                    <mat-icon mat-list-icon *ngIf="wa.assign" [title]="'perms.assign'|translate">get_app</mat-icon>
                     <h4 mat-line>{{wa.worker.alias}} {{wa.request ? ('perms.pending' | translate) : ''}}</h4>
                     <div mat-line>
                         Id=<span class="text-mono">{{wa.worker.id}}</span>, {{"perms.created" | translate}}
