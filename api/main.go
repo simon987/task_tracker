@@ -109,6 +109,7 @@ func New() *WebAPI {
 	api.router.POST("/project/reclaim_assigned_tasks/:id", LogRequestMiddleware(api.ReclaimAssignedTasks))
 
 	api.router.POST("/task/submit", LogRequestMiddleware(api.SubmitTask))
+	api.router.POST("/task/bulk_submit", LogRequestMiddleware(api.BulkSubmitTask))
 	api.router.GET("/task/get/:project", LogRequestMiddleware(api.GetTaskFromProject))
 	api.router.POST("/task/release", LogRequestMiddleware(api.ReleaseTask))
 

@@ -920,6 +920,107 @@ func TestTaskSubmitInvalidDoesntGiveRateLimit(t *testing.T) {
 		t.Error()
 	}
 }
+
+func TestBulkTaskSubmitValid(t *testing.T) {
+
+	proj := createProjectAsAdmin(api.CreateProjectRequest{
+		Name:     "testbulksubmit",
+		CloneUrl: "testbulkprojectsubmit",
+		GitRepo:  "testbulkprojectsubmit",
+	}).Content.Id
+
+	r := bulkSubmitTask(api.BulkSubmitTaskRequest{
+		Requests: []api.SubmitTaskRequest{
+			{
+				Recipe:  "1234",
+				Project: proj,
+			},
+			{
+				Recipe:  "1234",
+				Project: proj,
+			},
+			{
+				Recipe:  "1234",
+				Project: proj,
+			},
+		},
+	}, testWorker)
+
+	if r.Ok != true {
+		t.Error()
+	}
+}
+
+func TestBulkTaskSubmitNotTheSameProject(t *testing.T) {
+
+	proj := createProjectAsAdmin(api.CreateProjectRequest{
+		Name:     "testbulksubmitnotprj",
+		CloneUrl: "testbulkprojectsubmitnotprj",
+		GitRepo:  "testbulkprojectsubmitnotprj",
+	}).Content.Id
+
+	r := bulkSubmitTask(api.BulkSubmitTaskRequest{
+		Requests: []api.SubmitTaskRequest{
+			{
+				Recipe:  "1234",
+				Project: proj,
+			},
+			{
+				Recipe:  "1234",
+				Project: 348729,
+			},
+		},
+	}, testWorker)
+
+	if r.Ok != false {
+		t.Error()
+	}
+}
+
+func TestBulkTaskSubmitInvalid(t *testing.T) {
+
+	proj := createProjectAsAdmin(api.CreateProjectRequest{
+		Name:     "testbulksubmitinvalid",
+		CloneUrl: "testbulkprojectsubmitinvalid",
+		GitRepo:  "testbulkprojectsubmitinvalid",
+	}).Content.Id
+
+	r := bulkSubmitTask(api.BulkSubmitTaskRequest{
+		Requests: []api.SubmitTaskRequest{
+			{
+				Recipe:  "1234",
+				Project: proj,
+			},
+			{
+
+				Recipe:  "",
+				Project: proj,
+			},
+		},
+	}, testWorker)
+
+	if r.Ok != false {
+		t.Error()
+	}
+}
+
+func TestBulkTaskSubmitInvalid2(t *testing.T) {
+
+	r := bulkSubmitTask(api.BulkSubmitTaskRequest{
+		Requests: []api.SubmitTaskRequest{},
+	}, testWorker)
+
+	if r.Ok != false {
+		t.Error()
+	}
+}
+
+func bulkSubmitTask(request api.BulkSubmitTaskRequest, worker *storage.Worker) (ar api.JsonResponse) {
+	r := Post("/task/bulk_submit", request, worker, nil)
+	UnmarshalResponse(r, &ar)
+	return
+}
+
 func createTask(request api.SubmitTaskRequest, worker *storage.Worker) (ar api.JsonResponse) {
 	r := Post("/task/submit", request, worker, nil)
 	UnmarshalResponse(r, &ar)

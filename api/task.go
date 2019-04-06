@@ -32,6 +32,18 @@ func (api *WebAPI) SubmitTask(r *Request) {
 		}, 400)
 		return
 	}
+
+	if !createReq.IsValid() {
+		logrus.WithFields(logrus.Fields{
+			"req": createReq,
+		}).Warn("Invalid task")
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: "Invalid task",
+		}, 400)
+		return
+	}
+
 	task := &storage.Task{
 		MaxRetries:        createReq.MaxRetries,
 		Recipe:            createReq.Recipe,
@@ -41,18 +53,7 @@ func (api *WebAPI) SubmitTask(r *Request) {
 		VerificationCount: createReq.VerificationCount,
 	}
 
-	if !createReq.IsValid() {
-		logrus.WithFields(logrus.Fields{
-			"task": task,
-		}).Warn("Invalid task")
-		r.Json(JsonResponse{
-			Ok:      false,
-			Message: "Invalid task",
-		}, 400)
-		return
-	}
-
-	reservation := api.ReserveSubmit(createReq.Project)
+	reservation := api.ReserveSubmit(createReq.Project, 1)
 	if reservation == nil {
 		r.Json(JsonResponse{
 			Ok:      false,
@@ -81,6 +82,103 @@ func (api *WebAPI) SubmitTask(r *Request) {
 		r.Json(JsonResponse{
 			Ok:      false,
 			Message: err.Error(),
+		}, 400)
+		reservation.Cancel()
+		return
+	}
+
+	r.OkJson(JsonResponse{
+		Ok: true,
+	})
+}
+
+func (api *WebAPI) BulkSubmitTask(r *Request) {
+
+	worker, err := api.validateSecret(r)
+	if err != nil {
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: err.Error(),
+		}, 401)
+		return
+	}
+
+	createReq := &BulkSubmitTaskRequest{}
+	err = json.Unmarshal(r.Ctx.Request.Body(), createReq)
+	if err != nil || createReq.Requests == nil || len(createReq.Requests) == 0 {
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: "Could not parse request",
+		}, 400)
+		return
+	}
+	if !createReq.IsValid() {
+		logrus.WithFields(logrus.Fields{
+			"req": createReq,
+		}).Warn("Invalid request")
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: "Invalid request",
+		}, 400)
+		return
+	}
+
+	saveRequests := make([]storage.SaveTaskRequest, len(createReq.Requests))
+	projectId := createReq.Requests[0].Project
+	for i, req := range createReq.Requests {
+
+		if req.Project != projectId {
+			r.Json(JsonResponse{
+				Ok:      false,
+				Message: "All the tasks in a bulk submit must be of the same project",
+			}, 400)
+			return
+		}
+
+		if req.UniqueString != "" {
+			req.Hash64 = int64(siphash.Hash(1, 2, []byte(req.UniqueString)))
+		}
+
+		saveRequests[i] = storage.SaveTaskRequest{
+			Task: &storage.Task{
+				MaxRetries:        req.MaxRetries,
+				Recipe:            req.Recipe,
+				Priority:          req.Priority,
+				AssignTime:        0,
+				MaxAssignTime:     req.MaxAssignTime,
+				VerificationCount: req.VerificationCount,
+			},
+			Project:  projectId,
+			WorkerId: worker.Id,
+			Hash64:   req.Hash64,
+		}
+	}
+
+	reservation := api.ReserveSubmit(projectId, len(saveRequests))
+	if reservation == nil {
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: "Project not found",
+		}, 404)
+		return
+	}
+	delay := reservation.DelayFrom(time.Now()).Seconds()
+	if delay > 0 {
+		r.Json(JsonResponse{
+			Ok:             false,
+			Message:        "Too many requests",
+			RateLimitDelay: delay,
+		}, 429)
+		reservation.Cancel()
+		return
+	}
+
+	saveErrors := api.Database.BulkSaveTask(saveRequests)
+
+	if saveErrors == nil {
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: "Fatal error during bulk insert, see server logs",
 		}, 400)
 		reservation.Cancel()
 		return

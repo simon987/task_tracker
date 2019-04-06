@@ -222,6 +222,28 @@ func (req *SubmitTaskRequest) IsValid() bool {
 	return true
 }
 
+type BulkSubmitTaskRequest struct {
+	Requests []SubmitTaskRequest `json:"requests"`
+}
+
+func (reqs BulkSubmitTaskRequest) IsValid() bool {
+
+	if reqs.Requests == nil {
+		return false
+	}
+
+	if len(reqs.Requests) == 0 {
+		return false
+	}
+
+	for _, req := range reqs.Requests {
+		if !req.IsValid() {
+			return false
+		}
+	}
+	return true
+}
+
 type ReleaseTaskRequest struct {
 	TaskId       int64              `json:"task_id"`
 	Result       storage.TaskResult `json:"result"`

@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func (api *WebAPI) ReserveSubmit(pid int64) *rate.Reservation {
+func (api *WebAPI) ReserveSubmit(pid int64, count int) *rate.Reservation {
 
 	limiter, ok := api.SubmitLimiters.Load(pid)
 	if !ok {
@@ -18,7 +18,7 @@ func (api *WebAPI) ReserveSubmit(pid int64) *rate.Reservation {
 		api.SubmitLimiters.Store(pid, limiter)
 	}
 
-	return limiter.(*rate.Limiter).ReserveN(time.Now(), 1)
+	return limiter.(*rate.Limiter).ReserveN(time.Now(), count)
 }
 
 func (api *WebAPI) ReserveAssign(pid int64) *rate.Reservation {

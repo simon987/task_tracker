@@ -35,6 +35,13 @@ const (
 	TR_SKIP TaskResult = 2
 )
 
+type SaveTaskRequest struct {
+	Task     *Task
+	Project  int64
+	Hash64   int64
+	WorkerId int64
+}
+
 func (database *Database) SaveTask(task *Task, project int64, hash64 int64, wid int64) error {
 
 	db := database.getDB()
@@ -65,6 +72,38 @@ func (database *Database) SaveTask(task *Task, project int64, hash64 int64, wid 
 	}
 
 	return nil
+}
+
+func (database Database) BulkSaveTask(bulkSaveTaskReqs []SaveTaskRequest) []error {
+
+	db := database.getDB()
+
+	tx, err := db.Begin()
+	if err != nil {
+		handleErr(err)
+		return nil
+	}
+
+	errs := make([]error, len(bulkSaveTaskReqs))
+
+	for i, req := range bulkSaveTaskReqs {
+		res, err := tx.Exec(fmt.Sprintf(`
+		INSERT INTO task (project, max_retries, recipe, priority, max_assign_time, hash64,verification_count) 
+		SELECT $1,$2,$3,$4,$5,NULLIF(%d, 0),$6 FROM worker_access 
+		WHERE role_submit AND NOT request AND worker=$7 AND project=$1`, req.Hash64),
+			req.Project, req.Task.MaxRetries, req.Task.Recipe, req.Task.Priority,
+			req.Task.MaxAssignTime, req.Task.VerificationCount,
+			req.WorkerId)
+		errs[i] = err
+
+		rowsAffected, _ := res.RowsAffected()
+		if rowsAffected == 0 {
+			errs[i] = errors.New("unauthorized task submit")
+		}
+	}
+	_ = tx.Commit()
+
+	return errs
 }
 
 func (database Database) ReleaseTask(id int64, workerId int64, result TaskResult, verification int64) bool {
