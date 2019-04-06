@@ -76,7 +76,9 @@ func (database Database) ReleaseTask(id int64, workerId int64, result TaskResult
 		row := db.QueryRow(fmt.Sprintf(`SELECT release_task_ok(%d,%d,%d)`, workerId, id, verification))
 
 		err := row.Scan(&taskUpdated)
-		handleErr(err)
+		if err != nil {
+			taskUpdated = false
+		}
 	} else if result == TR_FAIL {
 		res, err := db.Exec(`UPDATE task SET (status, assignee, retries) = 
 			(CASE WHEN retries+1 >= max_retries THEN 2 ELSE 1 END, NULL, retries+1)
