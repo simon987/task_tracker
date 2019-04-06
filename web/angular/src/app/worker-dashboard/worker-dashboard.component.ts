@@ -56,7 +56,9 @@ export class WorkerDashboardComponent implements OnInit {
 
     private updateChart(data) {
 
-        data = data.sort((a, b) => b.closed_task_count - a.closed_task_count);
+        data = data
+            .filter(w => !w.alias.startsWith("$"))
+            .sort((a, b) => b.closed_task_count - a.closed_task_count);
 
         this.chart.data.labels = data.map(w => w.alias);
         this.chart.data.datasets = [{
