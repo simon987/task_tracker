@@ -78,16 +78,10 @@ func (database Database) BulkSaveTask(bulkSaveTaskReqs []SaveTaskRequest) []erro
 
 	db := database.getDB()
 
-	tx, err := db.Begin()
-	if err != nil {
-		handleErr(err)
-		return nil
-	}
-
 	errs := make([]error, len(bulkSaveTaskReqs))
 
 	for i, req := range bulkSaveTaskReqs {
-		res, err := tx.Exec(fmt.Sprintf(`
+		res, err := db.Exec(fmt.Sprintf(`
 		INSERT INTO task (project, max_retries, recipe, priority, max_assign_time, hash64,verification_count) 
 		SELECT $1,$2,$3,$4,$5,NULLIF(%d, 0),$6 FROM worker_access 
 		WHERE role_submit AND NOT request AND worker=$7 AND project=$1`, req.Hash64),
@@ -96,12 +90,13 @@ func (database Database) BulkSaveTask(bulkSaveTaskReqs []SaveTaskRequest) []erro
 			req.WorkerId)
 		errs[i] = err
 
-		rowsAffected, _ := res.RowsAffected()
-		if rowsAffected == 0 {
-			errs[i] = errors.New("unauthorized task submit")
+		if res != nil {
+			rowsAffected, _ := res.RowsAffected()
+			if rowsAffected == 0 {
+				errs[i] = errors.New("unauthorized task submit")
+			}
 		}
 	}
-	_ = tx.Commit()
 
 	return errs
 }
