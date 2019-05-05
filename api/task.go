@@ -200,6 +200,14 @@ func (api *WebAPI) GetTaskFromProject(r *Request) {
 		return
 	}
 
+	if worker.Paused {
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: "A manager has paused you",
+		}, 400)
+		return
+	}
+
 	project, err := strconv.ParseInt(r.Ctx.UserValue("project").(string), 10, 64)
 	if err != nil || project <= 0 {
 		r.Json(JsonResponse{

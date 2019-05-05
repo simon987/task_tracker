@@ -269,6 +269,11 @@ type UpdateWorkerRequest struct {
 	Alias string `json:"alias"`
 }
 
+type WorkerSetPausedRequest struct {
+	Worker int64 `json:"worker"`
+	Paused bool  `json:"paused"`
+}
+
 type CreateWorkerRequest struct {
 	Alias string `json:"alias"`
 }

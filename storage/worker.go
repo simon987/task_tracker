@@ -9,6 +9,7 @@ type Worker struct {
 	Created int64  `json:"created"`
 	Alias   string `json:"alias,omitempty"`
 	Secret  []byte `json:"secret"`
+	Paused  bool   `json:"paused"`
 }
 
 type WorkerStats struct {
@@ -96,8 +97,8 @@ func (database *Database) GrantAccess(workerId int64, projectId int64) bool {
 func (database *Database) UpdateWorker(worker *Worker) bool {
 
 	db := database.getDB()
-	res, err := db.Exec(`UPDATE worker SET alias=$1 WHERE id=$2`,
-		worker.Alias, worker.Id)
+	res, err := db.Exec(`UPDATE worker SET alias=$1, paused=$2 WHERE id=$3`,
+		worker.Alias, worker.Paused, worker.Id)
 	handleErr(err)
 
 	rowsAffected, _ := res.RowsAffected()

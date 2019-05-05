@@ -6,6 +6,7 @@ import (
 	"github.com/simon987/task_tracker/client"
 	"github.com/simon987/task_tracker/storage"
 	"net/http"
+	"strings"
 	"testing"
 )
 
@@ -27,6 +28,10 @@ func TestCreateGetWorker(t *testing.T) {
 	}
 
 	if w.Alias != "my_worker_alias" {
+		t.Error()
+	}
+
+	if w.Paused != false {
 		t.Error()
 	}
 }
@@ -66,6 +71,10 @@ func TestUpdateAliasValid(t *testing.T) {
 	w := getWorker(wid.Id).Content.Worker
 
 	if w.Alias != "new alias" {
+		t.Error()
+	}
+
+	if w.Paused != false {
 		t.Error()
 	}
 }
@@ -109,6 +118,74 @@ func TestInvalidAccessRequest(t *testing.T) {
 	}
 }
 
+func TestAssignTaskWhenPaused(t *testing.T) {
+
+	w := genWid()
+
+	pid := createProjectAsAdmin(api.CreateProjectRequest{
+		Name:     "testassigntaskwhenpaused",
+		CloneUrl: "testassigntaskwhenpaused",
+		GitRepo:  "testassigntaskwhenpaused",
+	}).Content.Id
+
+	requestAccess(api.CreateWorkerAccessRequest{
+		Submit:  true,
+		Assign:  true,
+		Project: pid,
+	}, w)
+	acceptAccessRequest(pid, w.Id, testAdminCtx)
+
+	r := createTask(api.SubmitTaskRequest{
+		Project: pid,
+		Recipe:  "a",
+		Hash64:  1,
+	}, w)
+
+	if r.Ok != true {
+		t.Error()
+	}
+
+	pauseWorker(&api.WorkerSetPausedRequest{
+		Paused: true,
+		Worker: w.Id,
+	}, testAdminCtx)
+
+	resp := getTaskFromProject(pid, w)
+
+	if resp.Ok != false {
+		t.Error()
+	}
+	if !strings.Contains(resp.Message, "paused") {
+		t.Error()
+	}
+}
+
+func TestPauseInvalidWorker(t *testing.T) {
+
+	r := pauseWorker(&api.WorkerSetPausedRequest{
+		Paused: true,
+		Worker: 9999111,
+	}, testAdminCtx)
+
+	if r.Ok != false {
+		t.Error()
+	}
+}
+
+func TestPauseUnauthorized(t *testing.T) {
+
+	w := genWid()
+
+	r := pauseWorker(&api.WorkerSetPausedRequest{
+		Paused: true,
+		Worker: w.Id,
+	}, testUserCtx)
+
+	if r.Ok != false {
+		t.Error()
+	}
+}
+
 func createWorker(req api.CreateWorkerRequest) (ar client.CreateWorkerResponse) {
 	r := Post("/worker/create", req, nil, nil)
 	UnmarshalResponse(r, &ar)
@@ -147,8 +224,13 @@ func rejectAccessRequest(pid int64, wid int64, s *http.Client) (ar api.JsonRespo
 }
 
 func updateWorker(request api.UpdateWorkerRequest, w *storage.Worker) (ar api.JsonResponse) {
-
 	r := Post("/worker/update", request, w, nil)
+	UnmarshalResponse(r, &ar)
+	return
+}
+
+func pauseWorker(request *api.WorkerSetPausedRequest, s *http.Client) (ar api.JsonResponse) {
+	r := Post("/worker/set_paused", request, nil, s)
 	UnmarshalResponse(r, &ar)
 	return
 }

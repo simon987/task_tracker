@@ -86,6 +86,7 @@ func New() *WebAPI {
 
 	api.router.POST("/worker/create", LogRequestMiddleware(api.CreateWorker))
 	api.router.POST("/worker/update", LogRequestMiddleware(api.UpdateWorker))
+	api.router.POST("/worker/set_paused", LogRequestMiddleware(api.WorkerSetPaused))
 	api.router.GET("/worker/get/:id", LogRequestMiddleware(api.GetWorker))
 	api.router.GET("/worker/stats", LogRequestMiddleware(api.GetAllWorkerStats))
 

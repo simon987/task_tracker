@@ -126,6 +126,54 @@ func (api *WebAPI) UpdateWorker(r *Request) {
 	}
 }
 
+func (api *WebAPI) WorkerSetPaused(r *Request) {
+
+	sess := api.Session.StartFasthttp(r.Ctx)
+	manager := sess.Get("manager")
+
+	if manager == nil || !manager.(*storage.Manager).WebsiteAdmin {
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: "Unauthorized",
+		}, 403)
+		return
+	}
+
+	req := &WorkerSetPausedRequest{}
+	err := json.Unmarshal(r.Ctx.Request.Body(), req)
+	if err != nil {
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: "Could not parse request",
+		}, 400)
+		return
+	}
+
+	worker := api.Database.GetWorker(req.Worker)
+	if worker == nil {
+		r.Json(JsonResponse{
+			Ok:      false,
+			Message: "Invalid worker",
+		}, 400)
+		return
+	}
+
+	worker.Paused = req.Paused
+
+	ok := api.Database.UpdateWorker(worker)
+
+	if ok {
+		r.OkJson(JsonResponse{
+			Ok: true,
+		})
+	} else {
+		r.OkJson(JsonResponse{
+			Ok:      false,
+			Message: "Could not update worker",
+		})
+	}
+}
+
 func (api *WebAPI) GetAllWorkerStats(r *Request) {
 
 	stats := api.Database.GetAllWorkerStats()
