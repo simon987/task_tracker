@@ -2,6 +2,10 @@ import {Component, OnInit} from '@angular/core';
 import {ApiService} from '../api.service';
 
 import {Chart} from 'chart.js';
+import {AuthService} from "../auth.service";
+import {Worker} from "../models/worker";
+import {TranslateService} from "@ngx-translate/core";
+import {MessengerService} from "../messenger.service";
 
 @Component({
     selector: 'app-worker-dashboard',
@@ -11,8 +15,13 @@ import {Chart} from 'chart.js';
 export class WorkerDashboardComponent implements OnInit {
 
     private chart: Chart;
+    workers: Worker[];
+    workerInfo: Worker;
 
-    constructor(private apiService: ApiService) {
+    constructor(private apiService: ApiService,
+                private translate: TranslateService,
+                private messenger: MessengerService,
+                public authService: AuthService) {
     }
 
     ngOnInit() {
@@ -20,10 +29,36 @@ export class WorkerDashboardComponent implements OnInit {
         this.refresh();
     }
 
+    public togglePaused(w: Worker) {
+
+        this.workerInfo = undefined;
+
+        this.apiService.workerSetPaused(w.id, !w.paused)
+            .subscribe(() => {
+                this.refresh();
+                this.translate.get('perms.set').subscribe(t => this.messenger.show(t));
+            });
+    }
+
+    public getInfo(w: Worker) {
+
+        if (this.workerInfo && this.workerInfo.id == w.id) {
+            this.workerInfo = undefined;
+            return
+        }
+
+        this.apiService.getWorker(w.id)
+            .subscribe(data => {
+                this.workerInfo = data['content']['worker'];
+            });
+    }
+
     public refresh() {
         this.apiService.getWorkerStats()
             .subscribe(data => {
                 this.updateChart(data['content']['stats']);
+                this.workers = data['content']['stats'].sort((a, b) =>
+                    (a.alias > b.alias) ? 1 : -1);
                 }
             );
     }

@@ -3,4 +3,5 @@ export interface Worker {
     alias: string;
     created: number;
     secret: string;
+    paused: boolean;
 }

@@ -12,16 +12,24 @@
         <mat-card-content *ngIf="!(unauthorized || !auth.account)">
             <h3>{{"perms.workers" | translate}}</h3>
             <mat-list *ngIf="accesses && accesses.length>0">
-                <mat-list-item *ngFor="let wa of accesses" [class.request]="wa.request">
+                <mat-list-item *ngFor="let wa of accesses" [class.request]="wa.request"
+                               [class.paused]="wa.worker.paused">
+                    <mat-icon mat-list-icon *ngIf="wa.worker.paused" [title]="'workers.paused'|translate">pause
+                    </mat-icon>
                     <mat-icon mat-list-icon *ngIf="wa.submit" [title]="'perms.submit'|translate">library_add</mat-icon>
                     <mat-icon mat-list-icon *ngIf="wa.assign" [title]="'perms.assign'|translate">get_app</mat-icon>
-                    <h4 mat-line>{{wa.worker.alias}} {{wa.request ? ('perms.pending' | translate) : ''}}</h4>
+                    <h4 mat-line>{{wa.worker.alias}} {{wa.request ? ('perms.pending' | translate) : ''}}
+                        {{wa.worker.paused ? ('workers.paused' | translate) : ''}}</h4>
                     <div mat-line>
                         Id=<span class="text-mono">{{wa.worker.id}}</span>, {{"perms.created" | translate}}
                         <span
                             class="text-mono">{{moment.unix(wa.worker.created).utc().format("UTC YYYY-MM-DD HH:mm:ss")}}</span>
                     </div>
                     <span style="flex: 1 1 auto;"></span>
+                    <button mat-raised-button color="secondary" [title]="'workers.pause' | translate"
+                            (click)="togglePaused(wa.worker)">
+                        <mat-icon>pause</mat-icon>
+                    </button>
                     <button mat-raised-button color="primary" [title]="'perms.grant' | translate"
                             *ngIf="wa.request" (click)="acceptRequest(wa)">
                         <mat-icon>check</mat-icon>

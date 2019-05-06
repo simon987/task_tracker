@@ -72,6 +72,14 @@ func (api *WebAPI) GetWorker(r *Request) {
 
 	if worker != nil {
 
+		sess := api.Session.StartFasthttp(r.Ctx)
+		manager := sess.Get("manager")
+
+		var secret []byte = nil
+		if manager != nil && manager.(*storage.Manager).WebsiteAdmin {
+			secret = worker.Secret
+		}
+
 		r.OkJson(JsonResponse{
 			Ok: true,
 			Content: GetWorkerResponse{
@@ -79,6 +87,8 @@ func (api *WebAPI) GetWorker(r *Request) {
 					Alias:   worker.Alias,
 					Id:      worker.Id,
 					Created: worker.Created,
+					Paused:  worker.Paused,
+					Secret:  secret,
 				},
 			},
 		})

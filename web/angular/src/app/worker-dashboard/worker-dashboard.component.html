@@ -14,5 +14,32 @@
         <mat-card-content>
             <canvas id="worker-stats"></canvas>
         </mat-card-content>
+
+
+        <mat-expansion-panel *ngIf="authService.logged" class="">
+            <mat-expansion-panel-header>
+                <mat-panel-title>{{"workers.manage" | translate}}</mat-panel-title>
+            </mat-expansion-panel-header>
+
+            <mat-list>
+                <mat-list-item *ngFor="let worker of workers" [class.paused]="worker.paused">
+                    <mat-icon mat-list-icon *ngIf="worker.paused" [title]="'workers.paused'|translate">pause</mat-icon>
+                    <mat-icon mat-list-icon *ngIf="!worker.paused">_blank_</mat-icon>
+                    <h4 mat-line>{{worker.alias}}</h4>
+                    <div mat-line *ngIf="workerInfo && workerInfo.id === worker.id">
+                        <p class="text-mono">{{workerInfo|json}}</p>
+                    </div>
+                    <span style="flex: 1 1 auto;"></span>
+                    <button mat-raised-button color="secondary" [title]="'workers.pause' | translate"
+                            (click)="togglePaused(worker)">
+                        <mat-icon>pause</mat-icon>
+                    </button>
+                    <button mat-raised-button color="secondary" [title]="'workers.info' | translate"
+                            (click)="getInfo(worker)">
+                        <mat-icon>info</mat-icon>
+                    </button>
+                </mat-list-item>
+            </mat-list>
+        </mat-expansion-panel>
     </mat-card>
 </div>

@@ -9,6 +9,7 @@ import {AuthService} from '../auth.service';
 import {Manager, ManagerRoleOnProject} from '../models/manager';
 import {MessengerService} from '../messenger.service';
 import {TranslateService} from '@ngx-translate/core';
+import {Worker} from "../models/worker";
 
 @Component({
     selector: 'app-project-perms',
@@ -50,6 +51,14 @@ export class ProjectPermsComponent implements OnInit {
 
     public rejectRequest(wa: WorkerAccess) {
         this.apiService.rejectWorkerAccessRequest(wa.worker.id, this.projectId)
+            .subscribe(() => {
+                this.getProjectAccesses();
+                this.translate.get('perms.set').subscribe(t => this.messenger.show(t));
+            });
+    }
+
+    public togglePaused(w: Worker) {
+        this.apiService.workerSetPaused(w.id, !w.paused)
             .subscribe(() => {
                 this.getProjectAccesses();
                 this.translate.get('perms.set').subscribe(t => this.messenger.show(t));

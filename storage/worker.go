@@ -15,6 +15,8 @@ type Worker struct {
 type WorkerStats struct {
 	Alias           string `json:"alias"`
 	ClosedTaskCount int64  `json:"closed_task_count"`
+	Paused          bool   `json:"paused"`
+	Id              int64  `json:"id"`
 }
 
 type WorkerAccess struct {
@@ -173,7 +175,7 @@ func (database *Database) GetAllAccesses(projectId int64) *[]WorkerAccess {
 
 	db := database.getDB()
 
-	rows, err := db.Query(`SELECT id, alias, created, role_assign, role_submit, request
+	rows, err := db.Query(`SELECT id, alias, created, paused, role_assign, role_submit, request
 		FROM worker_access
 		INNER JOIN worker w on worker_access.worker = w.id
 		WHERE project=$1 ORDER BY request, alias`,
@@ -186,7 +188,7 @@ func (database *Database) GetAllAccesses(projectId int64) *[]WorkerAccess {
 		wa := WorkerAccess{
 			Project: projectId,
 		}
-		_ = rows.Scan(&wa.Worker.Id, &wa.Worker.Alias, &wa.Worker.Created,
+		_ = rows.Scan(&wa.Worker.Id, &wa.Worker.Alias, &wa.Worker.Created, &wa.Worker.Paused,
 			&wa.Assign, &wa.Submit, &wa.Request)
 		requests = append(requests, wa)
 	}
@@ -197,13 +199,15 @@ func (database *Database) GetAllAccesses(projectId int64) *[]WorkerAccess {
 func (database *Database) GetAllWorkerStats() *[]WorkerStats {
 
 	db := database.getDB()
-	rows, err := db.Query(`SELECT alias, closed_task_count FROM worker WHERE closed_task_count>0 LIMIT 50`)
+	rows, err := db.Query(`SELECT alias, closed_task_count, paused, worker.id 
+		FROM worker WHERE closed_task_count>0 LIMIT 50`)
+
 	handleErr(err)
 
 	stats := make([]WorkerStats, 0)
 	for rows.Next() {
 		s := WorkerStats{}
-		_ = rows.Scan(&s.Alias, &s.ClosedTaskCount)
+		_ = rows.Scan(&s.Alias, &s.ClosedTaskCount, &s.Paused, &s.Id)
 		stats = append(stats, s)
 	}
 

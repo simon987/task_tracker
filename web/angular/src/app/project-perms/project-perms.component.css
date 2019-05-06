@@ -7,6 +7,10 @@ button {
     color: #757575;
 }
 
+.paused {
+    color: #757575;
+}
+
 mat-checkbox {
     margin-right: 10px;
 }

@@ -109,7 +109,10 @@
     },
     "workers": {
         "title": "Tâches complétés par worker",
-        "subtitle": "Données en temps réél pour tous les projets"
+        "subtitle": "Données en temps réél pour tous les projets",
+        "paused": "(en pause)",
+        "pause": "Pauser",
+        "manage": "Gérer les workers"
     },
     "perms": {
         "title": "Permissions du projet",

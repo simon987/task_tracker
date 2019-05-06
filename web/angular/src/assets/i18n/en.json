@@ -112,7 +112,10 @@
     },
     "workers": {
         "title": "Completed tasks per worker",
-        "subtitle": "Real-time data for all projects"
+        "subtitle": "Real-time data for all projects",
+        "paused": "(paused)",
+        "pause": "Pause",
+        "manage": "Manager workers"
     },
     "perms": {
         "title": "Project permissions",

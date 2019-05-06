@@ -126,4 +126,13 @@ export class ApiService {
         return this.http.post(this.url + `/project/reclaim_assigned_tasks/${pid}`, null, this.options);
     }
 
+    workerSetPaused(wid: number, paused: boolean) {
+        return this.http.post(this.url + '/worker/set_paused',
+            {'worker': wid, 'paused': paused}, this.options);
+    }
+
+    getWorker(wid: number) {
+        return this.http.get(this.url + `/worker/get/${wid}`, this.options);
+    }
+
 }
