@@ -404,7 +404,7 @@ export class ProjectDashboardComponent implements OnInit {
 
     private calculateEta() {
         if (this.snapshots.length > 0) {
-            let new_tasks = this.snapshots[this.snapshots.length - 1].new_task_count;
+            const new_tasks = this.snapshots[this.snapshots.length - 1].new_task_count;
             if (new_tasks === 0) {
                 this.eta = 'N/A';
             }

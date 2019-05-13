@@ -9,7 +9,7 @@ import {AuthService} from '../auth.service';
 import {Manager, ManagerRoleOnProject} from '../models/manager';
 import {MessengerService} from '../messenger.service';
 import {TranslateService} from '@ngx-translate/core';
-import {Worker} from "../models/worker";
+import {Worker} from '../models/worker';
 
 @Component({
     selector: 'app-project-perms',

@@ -2,10 +2,10 @@ import {Component, OnInit} from '@angular/core';
 import {ApiService} from '../api.service';
 
 import {Chart} from 'chart.js';
-import {AuthService} from "../auth.service";
-import {Worker} from "../models/worker";
-import {TranslateService} from "@ngx-translate/core";
-import {MessengerService} from "../messenger.service";
+import {AuthService} from '../auth.service';
+import {Worker} from '../models/worker';
+import {TranslateService} from '@ngx-translate/core';
+import {MessengerService} from '../messenger.service';
 
 @Component({
     selector: 'app-worker-dashboard',
@@ -42,9 +42,9 @@ export class WorkerDashboardComponent implements OnInit {
 
     public getInfo(w: Worker) {
 
-        if (this.workerInfo && this.workerInfo.id == w.id) {
+        if (this.workerInfo && this.workerInfo.id === w.id) {
             this.workerInfo = undefined;
-            return
+            return;
         }
 
         this.apiService.getWorker(w.id)
@@ -92,7 +92,7 @@ export class WorkerDashboardComponent implements OnInit {
     private updateChart(data) {
 
         data = data
-            .filter(w => !w.alias.startsWith("$"))
+            .filter(w => !w.alias.startsWith('$'))
             .sort((a, b) => b.closed_task_count - a.closed_task_count);
 
         this.chart.data.labels = data.map(w => w.alias);
