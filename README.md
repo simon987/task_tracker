@@ -5,6 +5,13 @@
 
 Fast task tracker (job queue) with authentication, statistics and web frontend
 
+### Documentation
+
+* Go client: [client](https://github.com/simon987/task_tracker/tree/master/client)
+* Python client: [task_tracker_drone](https://github.com/simon987/task_tracker_drone)
+* API specs: [API_DOCS](API_DOCS.md)
+* Installation/Usage: [DOCS](DOCS.md)
+
 ### Features
 
 * Stateless/Fault tolerent
@@ -32,34 +39,6 @@ max_assign_time | TTR (time-to-run) | Visibility timeout | Timeout
 \- | Delay | Delivery delay | Delay
 \- | - | Retention Period | Expires in
 
-
-### Postgres setup
-```bash
-sudo su postgres
-createuser task_tracker
-createdb task_tracker
-psql task_tracker
-> ALTER USER "task_tracker" WITH PASSWORD 'task_tracker';
-```
-
-### Nginx Setup
-
-```nginx
-index index.html;
-
-root /path/to/webroot;
-
-location / {
-        try_files $uri $uri/ /index.html;
-}
-location ~ /api(.*)$ {
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_pass http://127.0.0.1:3010$1?$args; # Change host/port if necessary
-}
-```
 
 ### Running tests
 ```bash

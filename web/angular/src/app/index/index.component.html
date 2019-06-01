@@ -2,32 +2,30 @@
     <mat-card>
         <mat-card-header>
             <mat-card-title>task_tracker</mat-card-title>
-            <mat-card-subtitle>"simple tracker that aims to blah blah"</mat-card-subtitle>
+            <mat-card-subtitle>Fast task tracker (job queue) with authentication, statistics and web frontend
+            </mat-card-subtitle>
         </mat-card-header>
 
         <mat-card-content>
+            <h3>Documentation</h3>
+            <p>Installation instructions <a href="https://github.com/simon987/task_tracker/blob/master/DOCS.md">here</a>,
+                API documentation <a href="https://github.com/simon987/task_tracker/blob/master/API_DOCS.md">here</a>.
+            </p>
+            <p>Go client documentation <a href="https://github.com/simon987/task_tracker/tree/master/client">here</a>.
+            </p>
+            <p>Python client documentation <a href="https://github.com/simon987/task_tracker_drone">here</a>.</p>
+
             <h3>Get started</h3>
 
             <mat-vertical-stepper>
                 <mat-step [label]="'Create a project'">
-                    <p>Create a project and associate it to a git repository.
-                        Payload URL for webhooks is is: </p>
-                    <pre>{{apiService.url}}/receivewebhook</pre>
+                    <p>Login and create a project from the <span style="font-weight: bold">New project</span> tab</p>
 
-                    <p>Workers will be made aware of version changes on the master branch
-                        when they assign themselves to new tasks:</p>
+                    <p>To enable Webhooks (See step 4), enter a git url and a repository name</p>
 
-                    <pre>{{
-                        'GET /task/get\n\n{\n' +
-                        '  "id": 24,\n' +
-                        '  "priority": 1,\n' +
-                        '  ...\n' +
-                        '  "project": {\n' +
-                        '    "id": 1,\n' +
-                        '    ...\n' +
-                        '    "version": "<' + ('index.version'|translate) +
-                        '>",\n  }\n}'}}
-                    </pre>
+                    <p>You can chain tasks to another project if you also have permissions on that project.
+                        Tasks will be duplicated on this project when they are marked as closed.</p>
+
                 </mat-step>
                 <mat-step [label]="'Setup worker(s)'">
 
@@ -63,6 +61,29 @@
                 <mat-step [label]="'Setup permissions'">
                     <p>You will be given READ, EDIT and MANAGE_ACCESS roles from projects you create.
                         You can also give access to other project managers from the project permissions page</p>
+
+                </mat-step>
+                <mat-step [label]="'Setup Webhooks'">
+                    <p>A webhook secret is auto-generated when the project is created, you
+                        can consult/update it from the project's dashboard. Point Github/Gogs/Gitea
+                        payloads to this address:</p>
+
+                    <pre>{{apiService.url}}/receivewebhook</pre>
+
+                    <p>Workers will be made aware of version changes on the master branch
+                        when they assign themselves to new tasks:</p>
+
+                    <pre>{{
+                        'GET /task/get\n\n{\n' +
+                        '  "id": 24,\n' +
+                        '  "priority": 1,\n' +
+                        '  ...\n' +
+                        '  "project": {\n' +
+                        '    "id": 1,\n' +
+                        '    ...\n' +
+                        '    "version": "<' + ('index.version'|translate) +
+                        '>",\n  }\n}'}}
+                    </pre>
                 </mat-step>
 
                 <ng-template matStepperIcon="edit" let-index="index">
