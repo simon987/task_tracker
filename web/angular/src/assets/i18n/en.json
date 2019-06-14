@@ -57,7 +57,7 @@
         "git_repo_placeholder": "Example: \"simon987/task_tracker\"",
         "git_repo_hint": "Changes in the master branch will be tracked if webhooks are enabled",
         "create_title": "Create new project",
-        "create_subtitle": "Todo: subtitle",
+        "create_subtitle": "",
         "public": "Public",
         "private": "Private",
         "hidden": "Hidden",

@@ -59,7 +59,7 @@
         "git_repo": "Nom du repository git",
         "git_repo_hint": "Les changements dans la branche master vont êtres pris en compte si les webhooks sont activés",
         "create_title": "Créer un nouveau projet",
-        "create_subtitle": "todo: sous-titre",
+        "create_subtitle": "",
         "public": "Publique",
         "private": "Privé",
         "hidden": "Caché",
