@@ -165,6 +165,12 @@ func (api *WebAPI) UpdateProject(r *Request) {
 		return
 	}
 
+	if updateReq.AssignRate == 0 {
+		updateReq.AssignRate = rate.Inf
+	}
+	if updateReq.SubmitRate == 0 {
+		updateReq.SubmitRate = rate.Inf
+	}
 	project := &storage.Project{
 		Id:         id,
 		Name:       updateReq.Name,

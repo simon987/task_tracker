@@ -7,6 +7,7 @@ remote.knownHosts = '/var/lib/jenkins/.ssh/known_hosts'
 remote.allowAnyHosts = true
 remote.retryCount = 3
 remote.retryWaitSec = 3
+remote.port = 2299
 logLevel = 'FINER'
 
 pipeline {

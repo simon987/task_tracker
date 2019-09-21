@@ -33,6 +33,10 @@ func (api *WebAPI) SubmitTask(r *Request) {
 		return
 	}
 
+	if createReq.VerificationCount == 0 {
+		createReq.VerificationCount = 1
+	}
+
 	if !createReq.IsValid() {
 		logrus.WithFields(logrus.Fields{
 			"req": createReq,
@@ -46,7 +50,7 @@ func (api *WebAPI) SubmitTask(r *Request) {
 
 	task := &storage.Task{
 		MaxRetries:        createReq.MaxRetries,
-		Recipe:            createReq.Recipe,
+		Recipe:            string(createReq.Recipe),
 		Priority:          createReq.Priority,
 		AssignTime:        0,
 		MaxAssignTime:     createReq.MaxAssignTime,
@@ -72,7 +76,7 @@ func (api *WebAPI) SubmitTask(r *Request) {
 		return
 	}
 
-	if createReq.UniqueString != "" {
+	if len(createReq.UniqueString) != 0 {
 		createReq.Hash64 = int64(siphash.Hash(1, 2, []byte(createReq.UniqueString)))
 	}
 
@@ -135,14 +139,17 @@ func (api *WebAPI) BulkSubmitTask(r *Request) {
 			return
 		}
 
-		if req.UniqueString != "" {
+		if len(req.UniqueString) != 0 {
 			req.Hash64 = int64(siphash.Hash(1, 2, []byte(req.UniqueString)))
+		}
+		if req.VerificationCount == 0 {
+			req.VerificationCount = 1
 		}
 
 		saveRequests[i] = storage.SaveTaskRequest{
 			Task: &storage.Task{
 				MaxRetries:        req.MaxRetries,
-				Recipe:            req.Recipe,
+				Recipe:            string(req.Recipe),
 				Priority:          req.Priority,
 				AssignTime:        0,
 				MaxAssignTime:     req.MaxAssignTime,
@@ -183,6 +190,8 @@ func (api *WebAPI) BulkSubmitTask(r *Request) {
 		reservation.Cancel()
 		return
 	}
+
+	logrus.Info(saveErrors)
 
 	r.OkJson(JsonResponse{
 		Ok: true,
@@ -263,7 +272,7 @@ func (api *WebAPI) validateSecret(r *Request) (*storage.Worker, error) {
 	if widStr == "" {
 		return nil, errors.New("worker id not specified")
 	}
-	if bytes.Equal(secretHeader, []byte("")) {
+	if len(secretHeader) == 0 {
 		return nil, errors.New("secret is not specified")
 	}
 
@@ -289,12 +298,6 @@ func (api *WebAPI) validateSecret(r *Request) (*storage.Worker, error) {
 	secret := make([]byte, base64.StdEncoding.EncodedLen(len(worker.Secret)))
 	secretLen, _ := base64.StdEncoding.Decode(secret, secretHeader)
 	matches := bytes.Equal(worker.Secret, secret[:secretLen])
-
-	logrus.WithFields(logrus.Fields{
-		"expected": string(worker.Secret),
-		"header":   string(secretHeader),
-		"matches":  matches,
-	}).Trace("Validating Worker secret")
 
 	if !matches {
 		return nil, errors.New("invalid secret")

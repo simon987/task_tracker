@@ -196,13 +196,13 @@ type GetWorkerAccessListForProjectResponse struct {
 
 type SubmitTaskRequest struct {
 	Project           int64  `json:"project"`
-	MaxRetries        int64  `json:"max_retries"`
+	MaxRetries        int16  `json:"max_retries"`
 	Recipe            string `json:"recipe"`
-	Priority          int64  `json:"priority"`
+	Priority          int16  `json:"priority"`
 	MaxAssignTime     int64  `json:"max_assign_time"`
 	Hash64            int64  `json:"hash_u64"`
 	UniqueString      string `json:"unique_string"`
-	VerificationCount int64  `json:"verification_count"`
+	VerificationCount int16  `json:"verification_count"`
 }
 
 func (req *SubmitTaskRequest) IsValid() bool {
@@ -212,7 +212,7 @@ func (req *SubmitTaskRequest) IsValid() bool {
 	if len(req.Recipe) <= 0 {
 		return false
 	}
-	if req.Hash64 != 0 && req.UniqueString != "" {
+	if req.Hash64 != 0 && len(req.UniqueString) != 0 {
 		return false
 	}
 	if req.Project == 0 {

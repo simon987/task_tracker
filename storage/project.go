@@ -55,10 +55,16 @@ func (database *Database) SaveProject(project *Project, webhookSecret string) (i
 		"project": project,
 	}).Trace("Database.saveProject INSERT project")
 
+	database.projectCache[id] = project
+
 	return id, nil
 }
 
 func (database *Database) GetProject(id int64) *Project {
+
+	if database.projectCache[id] != nil {
+		return database.projectCache[id]
+	}
 
 	db := database.getDB()
 	row := db.QueryRow(`SELECT id, priority, name, clone_url, git_repo, version,
@@ -76,7 +82,9 @@ func (database *Database) GetProject(id int64) *Project {
 	logrus.WithFields(logrus.Fields{
 		"id":      id,
 		"project": project,
-	}).Trace("Database.saveProject SELECT project")
+	}).Trace("Database.getProject SELECT project")
+
+	database.projectCache[id] = project
 
 	return project
 }
@@ -131,6 +139,8 @@ func (database *Database) UpdateProject(project *Project) error {
 		"project":      project,
 		"rowsAffected": rowsAffected,
 	}).Trace("Database.updateProject UPDATE project")
+
+	database.projectCache[project.Id] = project
 
 	return nil
 }

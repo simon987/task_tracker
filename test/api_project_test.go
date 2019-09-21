@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/simon987/task_tracker/api"
 	"github.com/simon987/task_tracker/storage"
+	"golang.org/x/time/rate"
 	"io/ioutil"
 	"net/http"
 	"testing"
@@ -136,7 +137,7 @@ func TestUpdateProjectValid(t *testing.T) {
 		Hidden:     true,
 		Paused:     true,
 		AssignRate: 1,
-		SubmitRate: 2,
+		SubmitRate: 0,
 		Version:    "VersionB",
 	}, pid, testAdminCtx)
 
@@ -173,7 +174,7 @@ func TestUpdateProjectValid(t *testing.T) {
 	if proj.Project.AssignRate != 1 {
 		t.Error()
 	}
-	if proj.Project.SubmitRate != 2 {
+	if proj.Project.SubmitRate != rate.Inf {
 		t.Error()
 	}
 }

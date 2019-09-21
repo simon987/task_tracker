@@ -41,6 +41,8 @@ CREATE TABLE worker_access
     request     boolean,
     primary key (worker, project)
 );
+CREATE INDEX worker_index ON worker_access (worker);
+CREATE INDEX project_index ON worker_access (project);
 
 CREATE TABLE task
 (
@@ -50,21 +52,27 @@ CREATE TABLE task
     assignee           INTEGER REFERENCES worker (id),
     max_assign_time    INTEGER  DEFAULT 0,
     assign_time        INTEGER  DEFAULT NULL,
-    verification_count INTEGER  DEFAULT 0,
+    verification_count SMALLINT DEFAULT 0,
     priority           SMALLINT DEFAULT 0,
     retries            SMALLINT DEFAULT 0,
     max_retries        SMALLINT,
     status             SMALLINT DEFAULT 1,
-    recipe             TEXT,
-    UNIQUE (project, hash64)
+    recipe             TEXT
 );
+
+CREATE INDEX priority_desc_index ON task (priority DESC);
+CREATE INDEX assignee_index ON task (assignee);
+CREATE INDEX verifcnt_index ON task (verification_count);
+CREATE UNIQUE INDEX project_hash_unique ON task (project, hash64);
 
 CREATE TABLE worker_verifies_task
 (
-    verification_hash BIGINT                                        NOT NULL,
-    task              BIGINT REFERENCES task (id) ON DELETE CASCADE NOT NULL,
-    worker            INT REFERENCES worker (id)                    NOT NULL
+    verification_hash BIGINT                                     NOT NULL,
+    task              INT REFERENCES task (id) ON DELETE CASCADE NOT NULL,
+    worker            INT REFERENCES worker (id)                 NOT NULL
 );
+
+CREATE INDEX task_index ON worker_verifies_task (task);
 
 CREATE TABLE log_entry
 (
@@ -150,7 +158,7 @@ $$
 DECLARE
     res INT = NULL;
 BEGIN
-    DELETE FROM task WHERE id = tid AND assignee = wid AND verification_count < 2 RETURNING project INTO res;
+    DELETE FROM task WHERE id = tid AND assignee = wid AND verification_count = 1 RETURNING project INTO res;
 
     IF res IS NULL THEN
         INSERT INTO worker_verifies_task (worker, verification_hash, task)
@@ -171,7 +179,7 @@ BEGIN
                LIMIT 1) >= task.verification_count RETURNING task.id INTO res;
 
         IF res IS NULL THEN
-            UPDATE task SET assignee= NULL WHERE id = tid AND assignee = wid;
+            UPDATE task SET assignee=NULL WHERE id = tid AND assignee = wid;
         end if;
     end if;
 

@@ -405,6 +405,7 @@ func TestReleaseTaskSuccess(t *testing.T) {
 		Project:    pid,
 		Recipe:     "{}",
 		MaxRetries: 3,
+		Hash64:     math.MaxInt64,
 	}, worker)
 
 	task := getTaskFromProject(pid, worker).Content.Task
@@ -923,25 +924,20 @@ func TestTaskSubmitInvalidDoesntGiveRateLimit(t *testing.T) {
 
 func TestBulkTaskSubmitValid(t *testing.T) {
 
-	proj := createProjectAsAdmin(api.CreateProjectRequest{
-		Name:     "testbulksubmit",
-		CloneUrl: "testbulkprojectsubmit",
-		GitRepo:  "testbulkprojectsubmit",
-	}).Content.Id
-
 	r := bulkSubmitTask(api.BulkSubmitTaskRequest{
 		Requests: []api.SubmitTaskRequest{
 			{
 				Recipe:  "1234",
-				Project: proj,
+				Project: testProject,
 			},
 			{
 				Recipe:  "1234",
-				Project: proj,
+				Project: testProject,
 			},
 			{
 				Recipe:  "1234",
-				Project: proj,
+				Project: testProject,
+				Hash64:  8565956259293726066,
 			},
 		},
 	}, testWorker)
@@ -1011,6 +1007,44 @@ func TestBulkTaskSubmitInvalid2(t *testing.T) {
 	}, testWorker)
 
 	if r.Ok != false {
+		t.Error()
+	}
+}
+
+func TestTaskGetUnauthorizedWithCache(t *testing.T) {
+
+	pid := createProjectAsAdmin(api.CreateProjectRequest{
+		Name:     "testtaskgetunauthorizedcache",
+		GitRepo:  "testtaskgetunauthorizedcache",
+		CloneUrl: "testtaskgettunauthorizedcache",
+	}).Content.Id
+
+	w := genWid()
+
+	requestAccess(api.CreateWorkerAccessRequest{
+		Project: pid,
+		Submit:  true,
+		Assign:  true,
+	}, w)
+	acceptAccessRequest(pid, w.Id, testAdminCtx)
+
+	r1 := createTask(api.SubmitTaskRequest{
+		Project: pid,
+		Recipe:  "ssss",
+	}, w)
+
+	// removed access, cache should be invalidated
+	rejectAccessRequest(pid, w.Id, testAdminCtx)
+
+	r2 := createTask(api.SubmitTaskRequest{
+		Project: pid,
+		Recipe:  "ssss",
+	}, w)
+
+	if r1.Ok != true {
+		t.Error()
+	}
+	if r2.Ok != false {
 		t.Error()
 	}
 }

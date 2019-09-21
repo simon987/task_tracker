@@ -71,31 +71,6 @@ func (database *Database) GetWorker(id int64) *Worker {
 	return worker
 }
 
-func (database *Database) GrantAccess(workerId int64, projectId int64) bool {
-
-	db := database.getDB()
-	res, err := db.Exec(`UPDATE worker_access SET
-  		request=FALSE WHERE worker=$1 AND project=$2`,
-		workerId, projectId)
-	if err != nil {
-		logrus.WithFields(logrus.Fields{
-			"workerId":  workerId,
-			"projectId": projectId,
-		}).WithError(err).Warn("Database.GrantAccess INSERT")
-		return false
-	}
-
-	rowsAffected, _ := res.RowsAffected()
-
-	logrus.WithFields(logrus.Fields{
-		"rowsAffected": rowsAffected,
-		"workerId":     workerId,
-		"projectId":    projectId,
-	}).Trace("Database.GrantAccess INSERT")
-
-	return rowsAffected == 1
-}
-
 func (database *Database) UpdateWorker(worker *Worker) bool {
 
 	db := database.getDB()
@@ -139,6 +114,7 @@ func (database *Database) SaveAccessRequest(wa *WorkerAccess) bool {
 func (database *Database) AcceptAccessRequest(worker int64, projectId int64) bool {
 
 	db := database.getDB()
+	database.invalidateAccessCache(worker)
 
 	res, err := db.Exec(`UPDATE worker_access SET request=FALSE 
 		WHERE worker=$1 AND project=$2`, worker, projectId)
@@ -156,6 +132,8 @@ func (database *Database) AcceptAccessRequest(worker int64, projectId int64) boo
 func (database *Database) RejectAccessRequest(workerId int64, projectId int64) bool {
 
 	db := database.getDB()
+	database.invalidateAccessCache(workerId)
+
 	res, err := db.Exec(`DELETE FROM worker_access WHERE worker=$1 AND project=$2`,
 		workerId, projectId)
 	handleErr(err)

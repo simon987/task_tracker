@@ -115,7 +115,7 @@
         "subtitle": "Real-time data for all projects",
         "paused": "(paused)",
         "pause": "Pause",
-        "manage": "Manager workers"
+        "manage": "Manage workers"
     },
     "perms": {
         "title": "Project permissions",

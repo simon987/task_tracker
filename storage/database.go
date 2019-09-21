@@ -14,7 +14,13 @@ type Database struct {
 	db           *sql.DB
 	saveTaskStmt *sql.Stmt
 
-	workerCache map[int64]*Worker
+	workerCache  map[int64]*Worker
+	projectCache map[int64]*Project
+
+	// [worker][project]
+	submitAccessCache map[int64]map[int64]bool
+	assignAccessCache map[int64]map[int64]bool
+
 	assignMutex *sync.Mutex
 }
 
@@ -22,6 +28,9 @@ func New() *Database {
 
 	d := Database{}
 	d.workerCache = make(map[int64]*Worker)
+	d.projectCache = make(map[int64]*Project)
+	d.assignAccessCache = make(map[int64]map[int64]bool)
+	d.submitAccessCache = make(map[int64]map[int64]bool)
 	d.assignMutex = &sync.Mutex{}
 
 	d.init()
@@ -68,10 +77,12 @@ func (database *Database) getDB() *sql.DB {
 		db.SetMaxOpenConns(50)
 
 		database.db = db
-	} else {
-		err := database.db.Ping()
-		handleErr(err)
 	}
 
 	return database.db
+}
+
+func (database *Database) invalidateAccessCache(worker int64) {
+	delete(database.submitAccessCache, worker)
+	delete(database.assignAccessCache, worker)
 }

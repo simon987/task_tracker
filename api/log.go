@@ -5,7 +5,6 @@ import (
 	"errors"
 	"github.com/simon987/task_tracker/config"
 	"github.com/sirupsen/logrus"
-	"github.com/valyala/fasthttp"
 	"os"
 	"time"
 )
@@ -14,22 +13,6 @@ func (e *LogRequest) Time() time.Time {
 
 	t := time.Unix(e.TimeStamp, 0)
 	return t
-}
-
-func LogRequestMiddleware(h RequestHandler) fasthttp.RequestHandler {
-	return fasthttp.RequestHandler(func(ctx *fasthttp.RequestCtx) {
-
-		ctx.Response.Header.Add("Access-Control-Allow-Headers", "Content-Type")
-		ctx.Response.Header.Add("Access-Control-Allow-Methods", "GET, POST, OPTION")
-		ctx.Response.Header.Add("Access-Control-Allow-Origin", "*")
-
-		logrus.WithFields(logrus.Fields{
-			"path":   string(ctx.Path()),
-			"header": ctx.Request.Header.String(),
-		}).Trace(string(ctx.Method()))
-
-		h(&Request{Ctx: ctx})
-	})
 }
 
 func (api *WebAPI) SetupLogger() {
