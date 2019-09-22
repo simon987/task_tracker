@@ -47,9 +47,12 @@
                     <input matInput [(ngModel)]="project.submit_rate" name="submit_rate" type="number">
                 </mat-form-field>
 
-                <mat-checkbox [(ngModel)]="project.public"
+                <mat-checkbox [(ngModel)]="project.public" name="public"
                               style="padding-top: 1em">
                     {{"project.public" | translate}}</mat-checkbox>
+                <mat-checkbox [(ngModel)]="project.hidden" name="hidden"
+                              style="padding-top: 1em">
+                    {{"project.hidden" | translate}}</mat-checkbox>
             </form>
         </mat-card-content>
         <mat-card-actions>
