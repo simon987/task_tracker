@@ -1,0 +1,27 @@
+version: "2.1"
+services:
+  tt:
+    build: .
+    depends_on:
+      tt_db:
+        condition: service_healthy
+  tt_web:
+    build: web/
+    ports:
+    - 8080:80
+    depends_on:
+      tt:
+        condition: service_started
+  tt_db:
+    image: postgres
+#    volumes:
+#      - ./tt_db_data:/var/lib/postgresql/data
+    environment:
+      - "POSTGRES_USER=task_tracker"
+      - "POSTGRES_PASSWORD=task_tracker"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U task_tracker"]
+      interval: 3s
+      timeout: 2s
+      retries: 10
+

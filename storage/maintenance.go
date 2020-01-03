@@ -25,6 +25,9 @@ func (database *Database) ResetTimedOutTasks() {
 		WHERE status=1 AND assignee IS NOT NULL
 		AND extract(epoch from now() at time zone 'utc') > (assign_time + max_assign_time);`)
 	handleErr(err)
+	if err != nil {
+		return
+	}
 
 	rowsAffected, _ := res.RowsAffected()
 

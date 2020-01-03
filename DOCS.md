@@ -2,53 +2,12 @@
 
 ## Installation (Docker)
 
-Prerequisites:
-* You have a postgres container using the network `tt`, listening
-for connections on `172.26.0.2:5432`.
-Example:
-`docker run -d --name tt_pg --network tt postgres:alpine`
-
-
-1. Initialize the database
-
-    ```bash
-    psql -h 172.26.0.2 -U postgres
-    > CREATE USER task_tracker;
-    > CREATE database task_tracker;
-    ```
-1. Write configuration file
-
+1. *(Optional)* Tweak configuration file
     `vim config.yml`
-    ```yaml
-    server:
-      address: "localhost:3010"
-    database:
-      conn_str: "postgres://task_tracker:task_tracker@172.26.0.2/task_tracker?sslmode=disable"
-      log_levels: ["error", "info", "warn"]
-    git:
-      webhook_hash: "sha256"
-      webhook_sig_header: "X-Gogs-Signature"
-    log:
-      level: "trace"
-    session:
-      cookie_name: "tt"
-      expiration: "8h"
-    monitoring:
-      snapshot_interval: "120s"
-      history_length: "400h"
-    maintenance:
-      reset_timed_out_tasks_interval: "5m"
-    ```
 
-1. Create task_tracker container:
+1. 
+    `docker-compose up`
 
-    ```bash
-    docker run --rm\
-    	-v $PWD/config.yml:/root/config.yml\
-    	--network tt\
-    	-p 0.0.0.0:12345:80\
-    	simon987/task_tracker
-    ```
     
 ## Installation (Linux)
 

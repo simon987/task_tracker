@@ -1,8 +1,8 @@
 server:
-  address: "localhost:3010"
+  address: "0.0.0.0:3010"
 
 database:
-  conn_str: "user=task_tracker password=task_tracker dbname=task_tracker sslmode=disable"
+  conn_str: "postgres://task_tracker:task_tracker@tt_db/task_tracker?sslmode=disable"
   #  log_levels: ["debug", "error", "trace", "info", "warn"]
   log_levels: ["error", "info", "warn"]
 
