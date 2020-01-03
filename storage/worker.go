@@ -181,6 +181,9 @@ func (database *Database) GetAllWorkerStats() *[]WorkerStats {
 		FROM worker WHERE closed_task_count>0 LIMIT 50`)
 
 	handleErr(err)
+	if err != nil {
+		return nil
+	}
 
 	stats := make([]WorkerStats, 0)
 	for rows.Next() {

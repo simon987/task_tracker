@@ -185,8 +185,14 @@ func (api *WebAPI) WorkerSetPaused(r *Request) {
 }
 
 func (api *WebAPI) GetAllWorkerStats(r *Request) {
-
 	stats := api.Database.GetAllWorkerStats()
+
+	if stats == nil {
+		r.OkJson(JsonResponse{
+			Ok: false,
+		})
+		return
+	}
 
 	r.OkJson(JsonResponse{
 		Ok: true,
