@@ -20,7 +20,7 @@ func (api *WebAPI) GetProject(r *Request) {
 		return
 	}
 
-	sess := api.Session.StartFasthttp(r.Ctx)
+	sess, _ := api.Session.Get(r.Ctx)
 	manager := sess.Get("manager")
 
 	project := api.Database.GetProject(id)
@@ -51,7 +51,7 @@ func (api *WebAPI) GetProject(r *Request) {
 
 func (api *WebAPI) CreateProject(r *Request) {
 
-	sess := api.Session.StartFasthttp(r.Ctx)
+	sess, _ := api.Session.Get(r.Ctx)
 	manager := sess.Get("manager")
 
 	createReq := &CreateProjectRequest{}
@@ -186,7 +186,7 @@ func (api *WebAPI) UpdateProject(r *Request) {
 		SubmitRate: updateReq.SubmitRate,
 		Version:    updateReq.Version,
 	}
-	sess := api.Session.StartFasthttp(r.Ctx)
+	sess, _ := api.Session.Get(r.Ctx)
 	manager := sess.Get("manager")
 
 	if !isActionOnProjectAuthorized(project.Id, manager, storage.RoleEdit, api.Database) {
@@ -294,7 +294,7 @@ func isProjectReadAuthorized(project *storage.Project, manager interface{}, db *
 
 func (api *WebAPI) GetProjectList(r *Request) {
 
-	sess := api.Session.StartFasthttp(r.Ctx)
+	sess, _ := api.Session.Get(r.Ctx)
 	manager := sess.Get("manager")
 
 	var id int64
@@ -337,7 +337,7 @@ func (api *WebAPI) GetAssigneeStatsForProject(r *Request) {
 
 func (api *WebAPI) GetWorkerAccessListForProject(r *Request) {
 
-	sess := api.Session.StartFasthttp(r.Ctx)
+	sess, _ := api.Session.Get(r.Ctx)
 	manager := sess.Get("manager")
 
 	id, err := strconv.ParseInt(r.Ctx.UserValue("id").(string), 10, 64)
@@ -435,7 +435,7 @@ func (api *WebAPI) AcceptAccessRequest(r *Request) {
 		return
 	}
 
-	sess := api.Session.StartFasthttp(r.Ctx)
+	sess, _ := api.Session.Get(r.Ctx)
 	manager := sess.Get("manager")
 
 	if !isActionOnProjectAuthorized(pid, manager, storage.RoleManageAccess, api.Database) {
@@ -515,7 +515,7 @@ func (api *WebAPI) SetManagerRoleOnProject(r *Request) {
 		return
 	}
 
-	sess := api.Session.StartFasthttp(r.Ctx)
+	sess, _ := api.Session.Get(r.Ctx)
 	manager := sess.Get("manager")
 
 	if !isActionOnProjectAuthorized(pid, manager, storage.RoleManageAccess, api.Database) {
@@ -543,7 +543,7 @@ func (api *WebAPI) SetSecret(r *Request) {
 		return
 	}
 
-	sess := api.Session.StartFasthttp(r.Ctx)
+	sess, _ := api.Session.Get(r.Ctx)
 	manager := sess.Get("manager")
 
 	if !isActionOnProjectAuthorized(pid, manager, storage.RoleSecret, api.Database) {
@@ -603,7 +603,7 @@ func (api *WebAPI) GetSecret(r *Request) {
 		return
 	}
 
-	sess := api.Session.StartFasthttp(r.Ctx)
+	sess, _ := api.Session.Get(r.Ctx)
 	manager := sess.Get("manager")
 
 	if !isActionOnProjectAuthorized(pid, manager, storage.RoleSecret, api.Database) {
@@ -634,7 +634,7 @@ func (api *WebAPI) GetWebhookSecret(r *Request) {
 		return
 	}
 
-	sess := api.Session.StartFasthttp(r.Ctx)
+	sess, _ := api.Session.Get(r.Ctx)
 	manager := sess.Get("manager")
 
 	if !isActionOnProjectAuthorized(pid, manager, storage.RoleSecret, api.Database) {
@@ -675,7 +675,7 @@ func (api *WebAPI) SetWebhookSecret(r *Request) {
 		return
 	}
 
-	sess := api.Session.StartFasthttp(r.Ctx)
+	sess, _ := api.Session.Get(r.Ctx)
 	manager := sess.Get("manager")
 
 	if !isActionOnProjectAuthorized(pid, manager, storage.RoleSecret, api.Database) {
@@ -710,7 +710,7 @@ func (api *WebAPI) ResetFailedTasks(r *Request) {
 		return
 	}
 
-	sess := api.Session.StartFasthttp(r.Ctx)
+	sess, _ := api.Session.Get(r.Ctx)
 	manager := sess.Get("manager")
 
 	if !isActionOnProjectAuthorized(pid, manager, storage.RoleMaintenance, api.Database) {
@@ -742,7 +742,7 @@ func (api *WebAPI) HardReset(r *Request) {
 		return
 	}
 
-	sess := api.Session.StartFasthttp(r.Ctx)
+	sess, _ := api.Session.Get(r.Ctx)
 	manager := sess.Get("manager")
 
 	if !isActionOnProjectAuthorized(pid, manager, storage.RoleMaintenance, api.Database) {
@@ -774,7 +774,7 @@ func (api *WebAPI) ReclaimAssignedTasks(r *Request) {
 		return
 	}
 
-	sess := api.Session.StartFasthttp(r.Ctx)
+	sess, _ := api.Session.Get(r.Ctx)
 	manager := sess.Get("manager")
 
 	if !isActionOnProjectAuthorized(pid, manager, storage.RoleMaintenance, api.Database) {

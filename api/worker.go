@@ -72,7 +72,7 @@ func (api *WebAPI) GetWorker(r *Request) {
 
 	if worker != nil {
 
-		sess := api.Session.StartFasthttp(r.Ctx)
+		sess, _ := api.Session.Get(r.Ctx)
 		manager := sess.Get("manager")
 
 		var secret []byte = nil
@@ -138,7 +138,7 @@ func (api *WebAPI) UpdateWorker(r *Request) {
 
 func (api *WebAPI) WorkerSetPaused(r *Request) {
 
-	sess := api.Session.StartFasthttp(r.Ctx)
+	sess, _ := api.Session.Get(r.Ctx)
 	manager := sess.Get("manager")
 
 	if manager == nil || !manager.(*storage.Manager).WebsiteAdmin {

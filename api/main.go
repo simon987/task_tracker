@@ -3,7 +3,8 @@ package api
 import (
 	"fmt"
 	"github.com/buaazp/fasthttprouter"
-	"github.com/kataras/go-sessions"
+	"github.com/fasthttp/session"
+	"github.com/fasthttp/session/memory"
 	"github.com/robfig/cron"
 	"github.com/simon987/task_tracker/config"
 	"github.com/simon987/task_tracker/storage"
@@ -16,8 +17,8 @@ type WebAPI struct {
 	server         *fasthttp.Server
 	router         *fasthttprouter.Router
 	Database       *storage.Database
-	SessionConfig  sessions.Config
-	Session        *sessions.Sessions
+	SessionConfig  *session.Config
+	Session        *session.Session
 	Cron           *cron.Cron
 	AssignLimiters sync.Map
 	SubmitLimiters sync.Map
@@ -69,14 +70,14 @@ func New() *WebAPI {
 
 	api.router = &fasthttprouter.Router{}
 
-	api.SessionConfig = sessions.Config{
-		Cookie:                      config.Cfg.SessionCookieName,
-		Expires:                     config.Cfg.SessionCookieExpiration,
-		CookieSecureTLS:             false,
-		DisableSubdomainPersistence: false,
+	api.SessionConfig = &session.Config{
+		CookieName: config.Cfg.SessionCookieName,
+		Expires:    config.Cfg.SessionCookieExpiration,
+		Secure:     false,
 	}
 
-	api.Session = sessions.New(api.SessionConfig)
+	api.Session = session.New(api.SessionConfig)
+	_ = api.Session.SetProvider("memory", &memory.Config{})
 
 	api.server = &fasthttp.Server{
 		Handler: api.router.Handler,

@@ -33,8 +33,9 @@ func (api *WebAPI) Login(r *Request) {
 		return
 	}
 
-	sess := api.Session.StartFasthttp(r.Ctx)
+	sess, _ := api.Session.Get(r.Ctx)
 	sess.Set("manager", manager)
+	api.Session.Save(r.Ctx, sess)
 
 	r.OkJson(JsonResponse{
 		Content: LoginResponse{
@@ -50,8 +51,8 @@ func (api *WebAPI) Login(r *Request) {
 
 func (api *WebAPI) Logout(r *Request) {
 
-	sess := api.Session.StartFasthttp(r.Ctx)
-	sess.Clear()
+	sess, _ := api.Session.Get(r.Ctx)
+	sess.Flush()
 	r.Ctx.Response.SetStatusCode(204)
 }
 
@@ -93,8 +94,9 @@ func (api *WebAPI) Register(r *Request) {
 		return
 	}
 
-	sess := api.Session.StartFasthttp(r.Ctx)
+	sess, _ := api.Session.Get(r.Ctx)
 	sess.Set("manager", manager)
+	api.Session.Save(r.Ctx, sess)
 
 	r.OkJson(JsonResponse{
 		Ok: true,
@@ -107,7 +109,7 @@ func (api *WebAPI) Register(r *Request) {
 
 func (api *WebAPI) GetAccountDetails(r *Request) {
 
-	sess := api.Session.StartFasthttp(r.Ctx)
+	sess, _ := api.Session.Get(r.Ctx)
 	manager := sess.Get("manager")
 
 	logrus.WithFields(logrus.Fields{
@@ -134,7 +136,7 @@ func (api *WebAPI) GetAccountDetails(r *Request) {
 
 func (api *WebAPI) GetManagerList(r *Request) {
 
-	sess := api.Session.StartFasthttp(r.Ctx)
+	sess, _ := api.Session.Get(r.Ctx)
 	manager := sess.Get("manager")
 
 	if manager == nil {
@@ -166,7 +168,7 @@ func (api *WebAPI) GetManagerListWithRoleOn(r *Request) {
 		return
 	}
 
-	sess := api.Session.StartFasthttp(r.Ctx)
+	sess, _ := api.Session.Get(r.Ctx)
 	manager := sess.Get("manager")
 
 	if manager == nil {
@@ -198,7 +200,7 @@ func (api *WebAPI) PromoteManager(r *Request) {
 		return
 	}
 
-	sess := api.Session.StartFasthttp(r.Ctx)
+	sess, _ := api.Session.Get(r.Ctx)
 	manager := sess.Get("manager")
 
 	if !manager.(*storage.Manager).WebsiteAdmin || manager.(*storage.Manager).Id == id {
@@ -236,7 +238,7 @@ func (api *WebAPI) DemoteManager(r *Request) {
 		return
 	}
 
-	sess := api.Session.StartFasthttp(r.Ctx)
+	sess, _ := api.Session.Get(r.Ctx)
 	manager := sess.Get("manager")
 
 	if manager == nil {
