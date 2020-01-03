@@ -306,6 +306,13 @@ func (api *WebAPI) GetProjectList(r *Request) {
 
 	projects := api.Database.GetAllProjects(id)
 
+	if projects == nil {
+		r.Json(JsonResponse{
+			Ok: false,
+		}, 500)
+		return
+	}
+
 	r.OkJson(JsonResponse{
 		Ok: true,
 		Content: GetProjectListResponse{

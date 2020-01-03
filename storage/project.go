@@ -168,6 +168,9 @@ func (database Database) GetAllProjects(managerId int64) *[]Project {
 		ORDER BY name`, managerId)
 	}
 	handleErr(err)
+	if err != nil {
+		return nil
+	}
 
 	for rows.Next() {
 		p := Project{}

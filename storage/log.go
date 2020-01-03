@@ -81,6 +81,9 @@ func (database *Database) GetLogs(since int64, level LogLevel) *[]LogEntry {
 	rows, err := db.Query("SELECT * FROM log_entry WHERE timestamp > $1 AND level=$2",
 		since, level)
 	handleErr(err)
+	if err != nil {
+		return nil
+	}
 
 	for rows.Next() {
 

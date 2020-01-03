@@ -36,11 +36,17 @@ func (database *Database) MakeProjectSnapshots() {
 			   extract(epoch from now() at time zone 'utc')
 		FROM project`)
 	handleErr(err)
+	if err != nil {
+		return
+	}
 	inserted, _ := insertRes.RowsAffected()
 
 	res, err := db.Exec(`DELETE FROM project_monitoring_snapshot WHERE timestamp < $1`,
 		int64(time.Now().Unix())-int64(config.Cfg.MonitoringHistory.Seconds()))
 	handleErr(err)
+	if err != nil {
+		return
+	}
 	deleted, _ := res.RowsAffected()
 
 	logrus.WithFields(logrus.Fields{
@@ -60,6 +66,9 @@ func (database *Database) GetMonitoringSnapshotsBetween(pid int64, from int, to 
 		worker_access_count, awaiting_verification_task_count, timestamp FROM project_monitoring_snapshot 
 		WHERE project=$1 AND timestamp BETWEEN $2 AND $3 ORDER BY TIMESTAMP DESC `, pid, from, to)
 	handleErr(err)
+	if err != nil {
+		return
+	}
 
 	for rows.Next() {
 
@@ -91,6 +100,9 @@ func (database *Database) GetNMonitoringSnapshots(pid int64, count int) (ss *[]P
 		worker_access_count, awaiting_verification_task_count, timestamp FROM project_monitoring_snapshot 
 		WHERE project=$1 ORDER BY TIMESTAMP DESC LIMIT $2`, pid, count)
 	handleErr(err)
+	if err != nil {
+		return
+	}
 
 	for rows.Next() {
 		s := ProjectMonitoringSnapshot{}

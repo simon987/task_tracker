@@ -139,8 +139,9 @@ func TestGetLogs(t *testing.T) {
 		t.Error()
 	}
 
-	if len(*r.Content.Logs) <= 0 {
+	if r.Content.Logs == nil || len(*r.Content.Logs) <= 0 {
 		t.Error()
+		return
 	}
 
 	debugFound := false

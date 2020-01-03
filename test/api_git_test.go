@@ -59,7 +59,7 @@ func TestWebHookDontUpdateVersion(t *testing.T) {
 
 	getResp := getProjectAsAdmin(resp.Id).Content
 
-	if getResp.Project.Version != "old" {
+	if getResp.Project == nil || getResp.Project.Version != "old" {
 		t.Error()
 	}
 }
@@ -93,7 +93,7 @@ func TestWebHookUpdateVersion(t *testing.T) {
 
 	getResp := getProjectAsAdmin(resp.Id).Content
 
-	if getResp.Project.Version != "new" {
+	if getResp.Project == nil || getResp.Project.Version != "new" {
 		t.Error()
 	}
 }

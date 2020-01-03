@@ -156,6 +156,9 @@ func getSessionCtx(username string, password string, admin bool) *http.Client {
 
 	if admin {
 		manager, _ := testApi.Database.ValidateCredentials([]byte(username), []byte(password))
+		if manager == nil {
+			return nil
+		}
 		manager.WebsiteAdmin = true
 		testApi.Database.UpdateManager(manager)
 	}

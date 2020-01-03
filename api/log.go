@@ -138,6 +138,13 @@ func (api *WebAPI) GetLog(r *Request) {
 
 		logs := api.Database.GetLogs(req.Since, req.Level)
 
+		if logs == nil {
+			r.Json(JsonResponse{
+				Ok: false,
+			}, 500)
+			return
+		}
+
 		logrus.WithFields(logrus.Fields{
 			"getLogRequest": req,
 			"logCount":      len(*logs),

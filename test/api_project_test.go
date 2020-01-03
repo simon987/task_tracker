@@ -37,12 +37,13 @@ func TestCreateGetProject(t *testing.T) {
 
 	getResp := getProjectAsAdmin(id).Content
 
-	if getResp.Project.Id != id {
+	if getResp.Project == nil || getResp.Project.Id != id {
 		t.Error()
 	}
 
-	if getResp.Project.Name != "Test name" {
+	if getResp.Project == nil || getResp.Project.Name != "Test name" {
 		t.Error()
+		return
 	}
 
 	if getResp.Project.Version != "Test Version" {
@@ -147,8 +148,9 @@ func TestUpdateProjectValid(t *testing.T) {
 
 	proj := getProjectAsAdmin(pid).Content
 
-	if proj.Project.Public != false {
+	if proj.Project == nil || proj.Project.Public != false {
 		t.Error()
+		return
 	}
 	if proj.Project.Motd != "MotdB" {
 		t.Error()
@@ -314,7 +316,8 @@ func TestHiddenProjectsNotShownInList(t *testing.T) {
 	}, testUserCtx)
 
 	if r.Ok != true {
-		t.Error()
+		t.Fail()
+		return
 	}
 
 	list := getProjectList(nil)
@@ -417,6 +420,11 @@ func TestUserWithReadAccessShouldSeeHiddenProjectInList(t *testing.T) {
 
 	list := getProjectList(testUserCtx)
 
+	if list.Content.Projects == nil {
+		t.Fail()
+		return
+	}
+
 	found := false
 	for _, p := range *list.Content.Projects {
 		if p.Id == pHidden.Content.Id {
@@ -440,6 +448,11 @@ func TestAdminShouldSeeHiddenProjectInList(t *testing.T) {
 	}, testUserCtx)
 
 	list := getProjectList(testAdminCtx)
+
+	if list.Content.Projects == nil {
+		t.Fail()
+		return
+	}
 
 	found := false
 	for _, p := range *list.Content.Projects {
