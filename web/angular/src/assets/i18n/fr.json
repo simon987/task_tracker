@@ -102,7 +102,7 @@
     "account": {
         "metadata": "Métadonnés du compte",
         "title": "Détails du compte",
-        "subtitle": "toto: sous-titre",
+        "subtitle": "",
         "username": "Nom d'utilisateur",
         "logout": "Fermer la session",
         "register_time": "Date de création"
