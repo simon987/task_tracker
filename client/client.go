@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"github.com/simon987/task_tracker/api"
 	"github.com/simon987/task_tracker/storage"
 	"io/ioutil"
@@ -75,7 +74,6 @@ func unmarshalResponse(r *http.Response, result interface{}) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(string(data))
 	err = json.Unmarshal(data, result)
 	if err != nil {
 		return err
