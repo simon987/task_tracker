@@ -36,7 +36,7 @@ func (c *taskTrackerClient) SetWorker(worker *Worker) {
 
 func (c *taskTrackerClient) get(path string) *http.Response {
 
-	url := "http://" + c.serverAddress + path
+	url := c.serverAddress + path
 	req, err := http.NewRequest("GET", url, nil)
 
 	if c.worker != nil {
@@ -55,7 +55,7 @@ func (c *taskTrackerClient) post(path string, x interface{}) *http.Response {
 	body, err := json.Marshal(x)
 	buf := bytes.NewBuffer(body)
 
-	req, err := http.NewRequest("POST", "http://"+c.serverAddress+path, buf)
+	req, err := http.NewRequest("POST", c.serverAddress+path, buf)
 	handleErr(err)
 
 	if c.worker != nil {
