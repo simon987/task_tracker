@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/simon987/task_tracker/api"
+	"github.com/simon987/task_tracker/storage"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -140,6 +141,15 @@ func (c taskTrackerClient) GetProjectSecret(projectId int) (string, error) {
 	err := unmarshalResponse(httpResp, &jsonResp)
 
 	return jsonResp.Content.Secret, err
+}
+
+func (c taskTrackerClient) GetProjectList() ([]storage.Project, error) {
+
+	httpResp := c.get("/project/list")
+	var jsonResp ProjectListResponse
+	err := unmarshalResponse(httpResp, &jsonResp)
+
+	return jsonResp.Content.Projects, err
 }
 
 func (c taskTrackerClient) RequestAccess(req api.CreateWorkerAccessRequest) (api.JsonResponse, error) {

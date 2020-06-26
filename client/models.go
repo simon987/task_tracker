@@ -52,3 +52,11 @@ type ProjectSecretResponse struct {
 		Secret string `json:"secret"`
 	} `json:"content"`
 }
+
+type ProjectListResponse struct {
+	Ok      bool   `json:"ok"`
+	Message string `json:"message"`
+	Content struct {
+		Projects []storage.Project `json:"projects,omitempty"`
+	} `json:"content"`
+}
