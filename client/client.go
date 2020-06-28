@@ -4,11 +4,13 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"github.com/simon987/task_tracker/api"
 	"github.com/simon987/task_tracker/storage"
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 type TaskTrackerClient struct {
@@ -157,6 +159,42 @@ func (c TaskTrackerClient) RequestAccess(req api.CreateWorkerAccessRequest) (api
 	err := unmarshalResponse(httpResp, &jsonResp)
 
 	return jsonResp, err
+}
+
+func (c TaskTrackerClient) Log(level storage.LogLevel, message string) error {
+
+	var levelString string
+	req := api.LogRequest{
+		Scope:     "task_tracker go client",
+		Message:   message,
+		TimeStamp: time.Now().Unix(),
+	}
+
+	switch level {
+	case storage.ERROR:
+		levelString = "error"
+	case storage.WARN:
+		levelString = "warn"
+	case storage.INFO:
+		levelString = "panic"
+	case storage.TRACE:
+		levelString = "trace"
+	default:
+		return errors.New("this log level is not implemented")
+	}
+
+	httpResp := c.post("/log/"+levelString, req)
+	var jsonResp api.JsonResponse
+	err := unmarshalResponse(httpResp, &jsonResp)
+
+	if err != nil {
+		return err
+	}
+
+	if !jsonResp.Ok {
+		return errors.New(jsonResp.Message)
+	}
+	return nil
 }
 
 func handleErr(err error) {
