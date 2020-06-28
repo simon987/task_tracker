@@ -11,7 +11,7 @@ import (
 	"strconv"
 )
 
-type taskTrackerClient struct {
+type TaskTrackerClient struct {
 	worker        *Worker
 	httpClient    http.Client
 	serverAddress string
@@ -20,21 +20,21 @@ type taskTrackerClient struct {
 	workerIdStr string
 }
 
-func New(serverAddress string) *taskTrackerClient {
+func New(serverAddress string) *TaskTrackerClient {
 
-	client := new(taskTrackerClient)
+	client := new(TaskTrackerClient)
 	client.serverAddress = serverAddress
 
 	return client
 }
 
-func (c *taskTrackerClient) SetWorker(worker *Worker) {
+func (c *TaskTrackerClient) SetWorker(worker *Worker) {
 	c.worker = worker
 	c.secretB64 = base64.StdEncoding.EncodeToString(worker.Secret)
 	c.workerIdStr = strconv.FormatInt(worker.Id, 10)
 }
 
-func (c *taskTrackerClient) get(path string) *http.Response {
+func (c *TaskTrackerClient) get(path string) *http.Response {
 
 	url := c.serverAddress + path
 	req, err := http.NewRequest("GET", url, nil)
@@ -50,7 +50,7 @@ func (c *taskTrackerClient) get(path string) *http.Response {
 	return r
 }
 
-func (c *taskTrackerClient) post(path string, x interface{}) *http.Response {
+func (c *TaskTrackerClient) post(path string, x interface{}) *http.Response {
 
 	body, err := json.Marshal(x)
 	buf := bytes.NewBuffer(body)
@@ -81,7 +81,7 @@ func unmarshalResponse(r *http.Response, result interface{}) error {
 	return nil
 }
 
-func (c taskTrackerClient) MakeWorker(alias string) (*Worker, error) {
+func (c TaskTrackerClient) MakeWorker(alias string) (*Worker, error) {
 
 	httpResp := c.post("/worker/create", api.CreateWorkerRequest{
 		Alias: alias,
@@ -101,7 +101,7 @@ func (c taskTrackerClient) MakeWorker(alias string) (*Worker, error) {
 	return nil, err
 }
 
-func (c taskTrackerClient) FetchTask(projectId int) (*AssignTaskResponse, error) {
+func (c TaskTrackerClient) FetchTask(projectId int) (*AssignTaskResponse, error) {
 
 	httpResp := c.get("/task/get/" + strconv.Itoa(projectId))
 	var jsonResp AssignTaskResponse
@@ -112,7 +112,7 @@ func (c taskTrackerClient) FetchTask(projectId int) (*AssignTaskResponse, error)
 	return &jsonResp, err
 }
 
-func (c taskTrackerClient) ReleaseTask(req api.ReleaseTaskRequest) (*ReleaseTaskResponse, error) {
+func (c TaskTrackerClient) ReleaseTask(req api.ReleaseTaskRequest) (*ReleaseTaskResponse, error) {
 
 	httpResp := c.post("/task/release", req)
 	var jsonResp ReleaseTaskResponse
@@ -121,7 +121,7 @@ func (c taskTrackerClient) ReleaseTask(req api.ReleaseTaskRequest) (*ReleaseTask
 	return &jsonResp, err
 }
 
-func (c taskTrackerClient) SubmitTask(req api.SubmitTaskRequest) (AssignTaskResponse, error) {
+func (c TaskTrackerClient) SubmitTask(req api.SubmitTaskRequest) (AssignTaskResponse, error) {
 
 	httpResp := c.post("/task/submit", req)
 	var jsonResp AssignTaskResponse
@@ -132,7 +132,7 @@ func (c taskTrackerClient) SubmitTask(req api.SubmitTaskRequest) (AssignTaskResp
 	return jsonResp, err
 }
 
-func (c taskTrackerClient) GetProjectSecret(projectId int) (string, error) {
+func (c TaskTrackerClient) GetProjectSecret(projectId int) (string, error) {
 
 	httpResp := c.get("/project/secret/" + strconv.Itoa(projectId))
 	var jsonResp ProjectSecretResponse
@@ -141,7 +141,7 @@ func (c taskTrackerClient) GetProjectSecret(projectId int) (string, error) {
 	return jsonResp.Content.Secret, err
 }
 
-func (c taskTrackerClient) GetProjectList() ([]storage.Project, error) {
+func (c TaskTrackerClient) GetProjectList() ([]storage.Project, error) {
 
 	httpResp := c.get("/project/list")
 	var jsonResp ProjectListResponse
@@ -150,7 +150,7 @@ func (c taskTrackerClient) GetProjectList() ([]storage.Project, error) {
 	return jsonResp.Content.Projects, err
 }
 
-func (c taskTrackerClient) RequestAccess(req api.CreateWorkerAccessRequest) (api.JsonResponse, error) {
+func (c TaskTrackerClient) RequestAccess(req api.CreateWorkerAccessRequest) (api.JsonResponse, error) {
 
 	httpResp := c.post("/project/request_access", req)
 	var jsonResp api.JsonResponse
