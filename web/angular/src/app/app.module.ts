@@ -58,6 +58,9 @@ import {IndexComponent} from './index/index.component';
 import {ProjectSecretComponent} from './project-secret/project-secret.component';
 import {AdminPanelComponent} from './admin-panel/admin-panel.component';
 import {AreYouSureComponent} from './are-you-sure/are-you-sure.component';
+import {WorkerSelectComponent} from "./worker-select/worker-select.component";
+import { ConsoleComponent } from './console/console.component';
+import { ConsoleTaskSubmitComponent } from './console-task-submit/console-task-submit.component';
 
 
 export function createTranslateLoader(http: HttpClient) {
@@ -86,6 +89,9 @@ export function createTranslateLoader(http: HttpClient) {
         ProjectSecretComponent,
         AdminPanelComponent,
         AreYouSureComponent,
+        WorkerSelectComponent,
+        ConsoleComponent,
+        ConsoleTaskSubmitComponent
     ],
     imports: [
         BrowserModule,

@@ -9,7 +9,8 @@
         "worker_dashboard": "Workers",
         "account": "Account",
         "manager_list": "Managers",
-        "back": "Back"
+        "back": "Back",
+        "console": "Console"
     },
     "logs": {
         "title": "Logs",
@@ -48,7 +49,8 @@
         "new_account": "Create account",
         "account": "Account details",
         "workers": "Workers",
-        "manager_list": "Managers"
+        "manager_list": "Managers",
+        "console": "Console"
     },
     "project": {
         "name": "Project name",
@@ -156,8 +158,11 @@
         "register_time": "Register date"
     },
     "project_select": {
-        "list_loading": "Loading project list...",
+        "loading": "Loading project list...",
         "none": "None"
+    },
+    "worker_select": {
+        "loading": "Loading worker list..."
     },
     "index": {
         "version": "Latest commit hash here",
@@ -178,5 +183,19 @@
         "are_you_sure": "Are you sure?",
         "no": "No",
         "ok": "Ok"
+    },
+    "console": {
+        "title": "Console",
+        "subtitle": "Misc debugging operations",
+        "submit": "Manual task submit",
+        "worker_select": "Select worker",
+        "max_assign_time": "Maximum assign time (in seconds)",
+        "recipe": "Task recipe",
+        "unique_str": "Unique string (optionnal)",
+        "task_submit": "Submit task",
+        "verification_count": "Verification count",
+        "max_retries": "Maximum retries",
+        "priority": "Priority",
+        "submit_ok": "Task submitted"
     }
 }

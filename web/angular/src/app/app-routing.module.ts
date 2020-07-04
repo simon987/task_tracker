@@ -15,6 +15,7 @@ import {ProjectPermsComponent} from './project-perms/project-perms.component';
 import {ManagerListComponent} from './manager-list/manager-list.component';
 import {IndexComponent} from './index/index.component';
 import {ProjectSecretComponent} from './project-secret/project-secret.component';
+import {ConsoleComponent} from './console/console.component';
 
 const routes: Routes = [
     {path: '', component: IndexComponent},
@@ -22,6 +23,7 @@ const routes: Routes = [
     {path: 'login', component: LoginComponent},
     {path: 'account', component: AccountDetailsComponent},
     {path: 'projects', component: ProjectListComponent},
+    {path: 'console', component: ConsoleComponent},
     {path: 'project/:id', component: ProjectDashboardComponent},
     {path: 'project/:id/update', component: UpdateProjectComponent},
     {path: 'project/:id/perms', component: ProjectPermsComponent},

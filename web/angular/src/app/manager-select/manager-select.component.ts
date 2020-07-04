@@ -25,6 +25,4 @@ export class ManagerSelectComponent implements OnInit {
         this.apiService.getManagerList()
             .subscribe(data => this.managerList = data['content']['managers']);
     }
-
-
 }

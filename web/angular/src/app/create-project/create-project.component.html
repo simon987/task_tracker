@@ -29,7 +29,7 @@
                     {{"project.git_repo_hint" | translate}}
                 </mat-hint>
             </mat-form-field>
-            <project-select [(project)]="selectedProject"></project-select>
+            <project-select [(project)]="selectedProject" [placeholder]="'project.chain' | translate"></project-select>
 
             <mat-checkbox [(ngModel)]="project.public"
                           [disabled]="!authService.logged || !authService.account.tracker_admin"

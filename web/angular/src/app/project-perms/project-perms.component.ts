@@ -28,7 +28,7 @@ export class ProjectPermsComponent implements OnInit {
     project: Project;
     private projectId: number;
     accesses: WorkerAccess[];
-    managerRoles: ManagerRoleOnProject;
+    managerRoles: ManagerRoleOnProject[];
     unauthorized = false;
     moment = moment;
 

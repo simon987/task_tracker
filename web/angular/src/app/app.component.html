@@ -15,6 +15,9 @@
                 [routerLink]="'manager_list'"
                 *ngIf="authService.logged && authService.account.tracker_admin"
         >{{"nav.manager_list" | translate}}</button>
+        <button mat-button [class.mat-accent]="router.url === '/console'" class="nav-link"
+                [routerLink]="'console'"
+                *ngIf="authService.logged">{{"nav.console" | translate}}</button>
     </div>
     <div class="small-nav">
         <button mat-button [matMenuTriggerFor]="smallNav">
@@ -36,6 +39,10 @@
                     [routerLink]="'manager_list'"
                     *ngIf="authService.logged && authService.account.tracker_admin"
             >{{"nav.manager_list" | translate}}</button>
+            <button mat-button [class.mat-accent]="router.url === '/console'" class="nav-link"
+                    [routerLink]="'console'"
+                    *ngIf="authService.logged && authService.account.tracker_admin"
+            >{{"nav.console" | translate}}</button>
         </mat-menu>
     </div>
     <span class="spacer"></span>

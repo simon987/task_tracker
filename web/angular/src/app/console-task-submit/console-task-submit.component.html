@@ -1,0 +1,46 @@
+<form (ngSubmit)="onSubmit()" id="console_task_submit">
+
+    <project-select [(project)]="submitOptions.project" [placeholder]="'test'"></project-select>
+
+    <worker-select [(worker)]="submitOptions.worker"></worker-select>
+
+    <mat-form-field appearance="outline">
+        <mat-label>{{"console.max_assign_time"|translate}}</mat-label>
+        <input matInput [(ngModel)]="submitOptions.maxAssignTime" name="max_assign_time" type="number">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+        <mat-label>{{"console.verification_count"|translate}}</mat-label>
+        <input matInput [(ngModel)]="submitOptions.verificationCount" name="verification_count" type="number">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+        <mat-label>{{"console.max_retries"|translate}}</mat-label>
+        <input matInput [(ngModel)]="submitOptions.maxRetries" name="max_retries" type="number">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+        <mat-label>{{"console.priority"|translate}}</mat-label>
+        <input matInput [(ngModel)]="submitOptions.priority" name="priority" type="number">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+        <mat-label>{{"console.recipe" | translate}}</mat-label>
+        <textarea matInput [(ngModel)]="submitOptions.recipe"
+                  [placeholder]="'console.recipe'|translate"
+                  name="recipe"></textarea>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+        <mat-label>{{"console.unique_str" | translate}}</mat-label>
+        <input type="text" matInput [(ngModel)]="submitOptions.uniqueStr" name="unique_str"
+               [placeholder]="'console.unique_str'|translate"
+        >
+    </mat-form-field>
+
+    <mat-card-actions>
+        <button type="submit" form="console_task_submit" mat-raised-button
+                [disabled]="buttonDisabled()"
+                color="primary">{{"console.task_submit" | translate}}</button>
+    </mat-card-actions>
+</form>

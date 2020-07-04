@@ -12,6 +12,7 @@ export class ProjectSelectComponent implements OnInit {
     projectList: Project[];
 
     @Input() project: Project;
+    @Input() placeholder: string;
     @Output() projectChange = new EventEmitter<Project>();
 
     constructor(private apiService: ApiService) {

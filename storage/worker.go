@@ -178,7 +178,7 @@ func (database *Database) GetAllWorkerStats() *[]WorkerStats {
 
 	db := database.getDB()
 	rows, err := db.Query(`SELECT alias, closed_task_count, paused, worker.id 
-		FROM worker WHERE closed_task_count>0 LIMIT 50`)
+		FROM worker`)
 
 	handleErr(err)
 	if err != nil {

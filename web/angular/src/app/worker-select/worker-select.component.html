@@ -1,0 +1,15 @@
+<mat-form-field appearance="outline" style="margin-top: 1em">
+    <mat-label>{{"console.worker_select" | translate}}</mat-label>
+    <mat-select [(ngModel)]="worker" (selectionChange)="workerChange.emit($event.value)"
+                [placeholder]="'console.worker_select' | translate"
+                (opened)="loadWorkerList()">
+        <mat-select-trigger>{{worker?.alias}}</mat-select-trigger>
+        <mat-option disabled *ngIf="workerList === undefined">
+            {{"worker_select.loading" | translate}}
+        </mat-option>
+        <mat-option *ngFor="let w of workerList" [value]="w">
+            <span style="width: 3em; display: inline-block">{{w.id}}</span>
+            {{w.alias}}
+        </mat-option>
+    </mat-select>
+</mat-form-field>

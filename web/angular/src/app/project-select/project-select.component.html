@@ -1,7 +1,7 @@
 <mat-form-field appearance="outline" style="margin-top: 1em">
-    <mat-label>{{"project.chain" | translate}}</mat-label>
+    <mat-label>{{placeholder}}</mat-label>
     <mat-select [(ngModel)]="project" (selectionChange)="projectChange.emit($event.value)"
-                [placeholder]="'project.chain' | translate"
+                [placeholder]="placeholder"
                 (opened)="loadProjectList()">
         <mat-select-trigger>{{project?.name}}</mat-select-trigger>
         <mat-option disabled *ngIf="projectList === undefined">

@@ -1,7 +1,9 @@
 import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {Project} from './models/project';
+import {Worker} from './models/worker';
 import {Credentials} from './models/credentials';
+import {SubmitTaskOptions} from './models/console';
 
 @Injectable()
 export class ApiService {
@@ -15,6 +17,13 @@ export class ApiService {
     constructor(
         private http: HttpClient,
     ) {
+    }
+
+    private static getWorkerHeaders(w: Worker): HttpHeaders {
+        return new HttpHeaders({
+            'X-Worker-ID': w.id.toString(),
+            'X-Secret': w.secret,
+        });
     }
 
     getLogs(level: number) {
@@ -135,4 +144,19 @@ export class ApiService {
         return this.http.get(this.url + `/worker/get/${wid}`, this.options);
     }
 
+    workerSubmitTask(taskOptions: SubmitTaskOptions) {
+        return this.http.post(this.url + `/task/submit`, {
+            project: taskOptions.project.id,
+            max_retries: taskOptions.maxRetries,
+            recipe: taskOptions.recipe,
+            priority: taskOptions.priority,
+            max_assign_time: taskOptions.maxAssignTime,
+            hash64: 0,
+            unique_string: taskOptions.uniqueStr,
+            verification_count: taskOptions.verificationCount
+        }, {
+            headers: ApiService.getWorkerHeaders(taskOptions.worker),
+            responseType: 'json'
+        });
+    }
 }

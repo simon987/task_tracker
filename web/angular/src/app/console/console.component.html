@@ -1,0 +1,18 @@
+<div class="container">
+    <mat-card class="mat-elevation-z8">
+        <mat-card-header>
+            <mat-card-title>{{"console.title" | translate}}</mat-card-title>
+            <mat-card-subtitle>{{"console.subtitle" | translate}}</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+            <mat-expansion-panel style="margin-top: 1em">
+                <mat-expansion-panel-header>
+                    <mat-panel-title>{{"console.submit" | translate}}</mat-panel-title>
+                </mat-expansion-panel-header>
+
+                <app-console-task-submit (submitTask)="onTaskSubmit($event)"></app-console-task-submit>
+            </mat-expansion-panel>
+        </mat-card-content>
+    </mat-card>
+</div>
