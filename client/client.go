@@ -176,7 +176,7 @@ func (c TaskTrackerClient) Log(level storage.LogLevel, message string) error {
 	case storage.WARN:
 		levelString = "warn"
 	case storage.INFO:
-		levelString = "panic"
+		levelString = "info"
 	case storage.TRACE:
 		levelString = "trace"
 	default:
@@ -184,6 +184,10 @@ func (c TaskTrackerClient) Log(level storage.LogLevel, message string) error {
 	}
 
 	httpResp := c.post("/log/"+levelString, req)
+	if httpResp.StatusCode == http.StatusNoContent {
+		return nil
+	}
+
 	var jsonResp api.JsonResponse
 	err := unmarshalResponse(httpResp, &jsonResp)
 

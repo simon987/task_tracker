@@ -70,6 +70,8 @@ func (api *WebAPI) LogTrace(r *Request) {
 		"scope":  entry.Scope,
 		"worker": entry.worker.Id,
 	}).WithTime(entry.Time()).Trace(entry.Message)
+
+	r.Ok()
 }
 
 func (api *WebAPI) LogInfo(r *Request) {
@@ -87,6 +89,8 @@ func (api *WebAPI) LogInfo(r *Request) {
 		"scope":  entry.Scope,
 		"worker": entry.worker.Id,
 	}).WithTime(entry.Time()).Info(entry.Message)
+
+	r.Ok()
 }
 
 func (api *WebAPI) LogWarn(r *Request) {
@@ -104,6 +108,8 @@ func (api *WebAPI) LogWarn(r *Request) {
 		"scope":  entry.Scope,
 		"worker": entry.worker.Id,
 	}).WithTime(entry.Time()).Warn(entry.Message)
+
+	r.Ok()
 }
 
 func (api *WebAPI) LogError(r *Request) {
@@ -121,6 +127,8 @@ func (api *WebAPI) LogError(r *Request) {
 		"scope":  entry.Scope,
 		"worker": entry.worker.Id,
 	}).WithTime(entry.Time()).Error(entry.Message)
+
+	r.Ok()
 }
 
 func (api *WebAPI) GetLog(r *Request) {

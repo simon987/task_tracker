@@ -20,6 +20,10 @@ func (r *Request) OkJson(object JsonResponse) {
 	handleErr(err, r)
 }
 
+func (r *Request) Ok() {
+	r.Ctx.Response.SetStatusCode(204)
+}
+
 func (r *Request) Json(object JsonResponse, code int) {
 
 	resp, err := json.Marshal(object)
